@@ -1,0 +1,49 @@
+<!DOCTYPE html><html><head><title>components-add-remove</title><script src="https://unpkg.com/vue/dist/vue.js"></script><script src="//cloud.tinymce.com/stable/tinymce.min.js"></script><link rel="stylesheet" type="text/css" href="basic.css"></head><body>
+
+<div id="app">
+    <component 
+        v-for="comp in comps"
+        :is="comp.type"
+        :properties="comp.properties">
+    </component>
+</div>
+<button onClick="load()">Load</button>
+<p><strong>Load Components<br></strong>Component data will be saved in objects and listed in an array. When <strong>app.comps</strong> is assigned that array, vue will load all component data.</p>
+
+<script type="text/javascript">
+
+// Components defined by dev
+var cTitle = {
+    props: ['properties'],
+    template: '<h1 :style="properties.css">{{ properties.text }}</h1>'
+}
+
+// Dummy data. Pretend it's saved in a db
+var savedComponents = [
+    {
+        type: 'Content Title',
+        properties: {
+            text: 'Title Saved in Database',
+            css: { 'text-align': 'center' }
+        }
+    }
+]
+
+var app = new Vue({
+    el: '#app',
+    data: {
+        comps: [{type:'Content Title',properties:{text:'Default Title Text'}}]
+    },
+    // Bind human readable name to component objects
+    components: {
+        'Content Title': cTitle
+    }
+})
+
+
+function load() {
+    app.comps = savedComponents;
+}
+
+
+</script></body></html>

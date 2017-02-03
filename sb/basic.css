@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+
+body {
+  box-sizing: border-box;
+  padding: 2em;
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1em;
+}
+
+* { 
+  margin: 0; 
+}
+
+* + * {
+  margin-top: 1.8em;
+}
+
+p {
+  line-height: 1.7;
+}
+
+input, button, textarea {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 0.3em 0.7em;
+  border-radius: 4px;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+.btn {
+  background: #1976D2;
+  color: rgba(255,255,255,0.85);
+  border: 1px solid #0966C2;
+  border-bottom: 2px solid #0055B0;
+  cursor: pointer;
+  padding-left: 1em;
+  padding-right: 1em;
+  outline: none;
+}
+
+.btn:focus,
+.btn:hover {
+  background: #2986E2;
+  color: white;
+}
+
+.btn:active {
+  position: relative;
+  background: #0055B0;
+  top: 1px;
+}
+
+@media (min-width: 50em) {
+  body {
+    font-size: 1.2em;
+  }
+}
+
+/* =============================================== */
+#EditorToolbar {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  opacity: 0.95;
+  z-index: 20;
+  color: rgba(0,0,0,0.5);
+}
+#EditorToolbar:hover {
+  opacity: 1;
+}
+#EditorToolbar .mce-btn button .mce-ico {
+  color: rgba(0,0,0,0.5) !important;
+  font-size: 0.85em;
+}
+#EditorToolbar:hover .mce-btn button .mce-ico {
+  color: rgba(0,0,0,0.65) !important;
+}
+#EditorToolbar * {
+  background: white;
+}
+#EditorToolbar > * {
+  border-radius: 5px;
+  overflow:hidden;
+}
+#EditorToolbar:hover > * {
+  border-color: #999;
+  border-bottom: 2px solid #777 !important;
+}
+#EditorToolbar .mce-btn:hover {
+  border-radius: 3px;
+  border-bottom: 2px solid #555;
+}
+#EditorToolbar .mce-btn:hover button .mce-ico {
+  color: black !important;
+}
+#EditorToolbar .mce-btn:active {
+  position: relative;
+  top: 1px;
+  border-bottom: 1px solid #ccc;
+}
+#EditorToolbar .mce-active {
+  border-color: transparent !important;
+}
+.mce-edit-focus {
+  outline: none !important;
+}
