@@ -13,7 +13,7 @@
         <button class="btn" @click="save()">Save</button>
         <button class="btn" @click="request()">Request</button>
         <div id="Thumbnails">
-            <div class="CompThumbWrap" v-for="(comp, i) in defaultComps">
+            <div class="CompThumbWrap" v-for="(comp, i) in defaultComps" :data-component="comp.type">
                 <p style="color: rgba(0,0,0,0.3); font-size:0.8em; margin-bottom: 5px">{{ comp.type }}</p>
                 <component 
                     class="CompThumbnail"
@@ -58,17 +58,27 @@
 */
 var cTitle = {
     props: ['properties'],
-    template: '<h1 :class="properties.Classes" data-prop="text" v-html="properties.text">{{ properties.text }}</h1>',
-    mounted: initEditing
+    template: '<h1 class="editor-simple" data-prop="text" v-html="properties.text">{{ properties.text }}</h1>',
+    mounted: function() {
+        if (this.$parent.isMounted) {
+            console.log('initiate editing');
+            initEditing(this);
+        }
+    },
 }
 
 var cCopy = {
     props: ['properties'],
     template: '\
-        <div :class="properties.Classes" data-prop="content" v-html="properties.content">\
+        <div class="editor-robust VerticalSpacing" data-prop="content" v-html="properties.content">\
             {{ properties.content }}\
         </div>',
-    mounted: initEditing
+    mounted: function() {
+        if (this.$parent.isMounted) {
+            console.log('initiate editing');
+            initEditing(this);
+        }
+    }
 }
 
 var cHeadingBlock = {
@@ -79,7 +89,12 @@ var cHeadingBlock = {
             <hr>\
             <div :class="properties.Classes.copy" data-prop="copyText" v-html="properties.copyText"></div>\
         </div>',
-    mounted: initEditing
+    mounted: function() {
+        if (this.$parent.isMounted) {
+            console.log('initiate editing');
+            initEditing(this);
+        }
+    }
 }
 
 /*
@@ -108,22 +123,23 @@ var DUMMY_SAVED = [
 var app = new Vue({
     el: '#app',
     data: {
+        isMounted: false,
         comps: [],
         savedComps: [],
-        defaultComps: [
-            {
+        defaultComps: {
+            'Content Title': {
                 type: 'Content Title',
                 properties: {
                     text: 'Lorem Ipsum'
                 }
             },
-            {
+            'Copy': {
                 type: 'Copy',
                 properties: {
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque nisl velit, egestas eu fermentum fermentum, feugiat tincidunt purus. Morbi massa massa, efficitur imperdiet turpis at, tempus eleifend mi. Donec ac mi feugiat, mattis ipsum non, ornare dolor.'
                 }
             },
-            {
+            'Heading Block': {
                 type: 'Heading Block',
                 properties: {
                     Classes: {
@@ -139,7 +155,7 @@ var app = new Vue({
                     copyText: '<p>This is some default copy text for your viewing pleasure.</p>'
                 }
             }
-        ]
+        }
     },
     /*
         This should be abstracted away into an interface for creating components.
@@ -208,6 +224,7 @@ var app = new Vue({
         }
     },
     mounted: function() {
+        this.isMounted = true;
         adjustThumbnailHeight(this.$children);
     }
 })
@@ -219,11 +236,11 @@ var app = new Vue({
 function adjustThumbnailHeight(thumbs) {
     setTimeout(function() {
         thumbs.forEach(function(thumb) {
-        $(thumb.$el).parent().each(function() {
-            var height = $(this).height();
-            $(this).css({ height: (height + 115) / 2 + 'px' })
+            $(thumb.$el).parent().each(function() {
+                var height = $(this).height();
+                $(this).css({ height: (height + 115) / 2 + 'px' })
+            });
         });
-    });
     }, 50)
     
 }
@@ -256,8 +273,8 @@ function editorRobust(id) {
     return config;
 }
 
-function initEditing() {
-    var $comp = $(this.$el),
+function initEditing(comp) {
+    var $comp = $(comp.$el),
         id = genID(12);
     $comp.attr('id', id);
     tinymce.init(editorSimple(id));
@@ -280,6 +297,10 @@ function genID(num) {
         i++;
     }
     return id;
+}
+
+Array.prototype.insert = function(index, item) {
+    this.splice(index, 0, item);
 }
 
 
@@ -305,7 +326,18 @@ dragula([ Thumbnails, Stage ], {
         console.log('Sorted staged components');
     }
     if (source === Thumbnails) {
-        console.log('Add new component to stage');
+        var compName = $(el).attr('data-component');
+        var stageSpot = 0;
+        $(target).children().each(function(i) {
+            if ($(this).hasClass('CompThumbWrap')) {
+                console.log($(this));
+                stageSpot = i;
+            }
+        })
+        $(el).remove();
+        console.log('Place in line: ' + stageSpot);
+        var compData = JSON.stringify(app.defaultComps[compName]);
+        app.comps.insert(stageSpot, JSON.parse(compData));
     }
 }).on('remove', function(el, container, source) {
     if (source === Stage) {
