@@ -14,5 +14,7 @@
     "editor"
   ],
   "author": "jonmcgill",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+  }
 }

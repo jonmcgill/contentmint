@@ -24,6 +24,8 @@
 /* Overwrite */
 .gu-mirror {
   opacity: 0.6;
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
 }
   
 
@@ -33,6 +35,7 @@ body {
   font-family: 'Open Sans', sans-serif;
   font-size: 1em;
   background: #f5f8fa;
+  position: relative;
 }
 
 * { 
@@ -144,8 +147,8 @@ h1 {
   white-space: pre-wrap;
 }
 
-.VerticalSpacing > *:not(:first-child) {
-  margin-top: 1.8em;
+.VerticalSpacing > *:not(:last-child) {
+  margin-bottom: 20px;
 }
 
 .Toolbar-Main {
@@ -192,4 +195,31 @@ h1 {
   padding: 2em;
   background: white;
   border: 1px solid #ccc;
+}
+
+.StageComponent {
+  position: relative;
+}
+.StageComponent:hover:before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  content: '';
+  width: 8px;
+  left: -6px;
+  background: #ccc;
+  cursor: -webkit-grab;
+}
+
+#Trash {
+  position: fixed;
+  right: 18em;
+  bottom: 1em;
+  padding: 0.6em 1em;
+  width: 8em;
+  height: 2.6em;
+  text-align: center;
+  border-radius: 5px;
+  background: darkred;
+  color: rgba(255,255,255,0.5);
 }

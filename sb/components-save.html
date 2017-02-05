@@ -23,22 +23,31 @@
             </div>
         </div>
     </div>
-    <div class="VerticalSpacing" id="Stage">
+    <div id="Stage" class="VerticalSpacing">
         <component 
-            class="VerticalSpacing"
+            class="StageComponent VerticalSpacing"
             v-for="comp in stageComps"
             :is="comp.type"
             :properties="comp.properties"
+            :data-obj="toJson(comp)"
         ></component>
     </div>
     <div>
         <aside class="dataView"><pre>{{ savedComps | prettyJson }}</pre></aside>
     </div>
+    <!-- <div id="Trash">Trash</div> -->
 </div>
 
 <script type="text/javascript">
 
 /*
+    app
+        thumbnails
+            app.thumbnails
+        stage
+            app.stagedComponents
+            app.savedData
+    
     Component names start with lowercase 'c' to avoide Vue's privledged name error.
     Every component needs to take a prop called 'properties'.
 
@@ -61,7 +70,6 @@ var cTitle = {
     template: '<h1 class="editor-simple" data-prop="text" v-html="properties.text">{{ properties.text }}</h1>',
     mounted: function() {
         if (this.$parent.isMounted) {
-            console.log('initiate editing');
             initEditing(this);
         }
     },
@@ -75,7 +83,6 @@ var cCopy = {
         </div>',
     mounted: function() {
         if (this.$parent.isMounted) {
-            console.log('initiate editing');
             initEditing(this);
         }
     }
@@ -91,7 +98,6 @@ var cHeadingBlock = {
         </div>',
     mounted: function() {
         if (this.$parent.isMounted) {
-            console.log('initiate editing');
             initEditing(this);
         }
     }
@@ -122,13 +128,13 @@ var app = new Vue({
             'Content Title': {
                 type: 'Content Title',
                 properties: {
-                    text: 'Lorem Ipsum'
+                    text: 'Heading'
                 }
             },
             'Copy': {
                 type: 'Copy',
                 properties: {
-                    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque nisl velit, egestas eu fermentum fermentum, feugiat tincidunt purus. Morbi massa massa, efficitur imperdiet turpis at, tempus eleifend mi. Donec ac mi feugiat, mattis ipsum non, ornare dolor.'
+                    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
                 }
             },
             'Heading Block': {
@@ -178,27 +184,11 @@ var app = new Vue({
             content.
         */
         save: function() {
+            var saved = this.savedComps = [];
 
-            // Since thumbnails are technically children of the main app, we
-            // want to filter those out and get only children in the stage
-            var stagedChildren = this.$children.filter(function(comp) {
-                return !$(comp.$el).hasClass('CompThumbnail');
+            $('#Stage').children().each(function(comp) {
+                saved.push(JSON.parse($(this).attr('data-obj')));
             })
-
-            // then we cycle through the children and do two things:
-            stagedChildren.forEach(function(child) {
-                // if the child root is editable, we call saveComponent
-                // on the root and pass in the root as 'this'
-                saveComponent.bind(child.$el, child, child.$el)();
-                // then we get any editable areas that may be inside the root
-                // and call saveComponent on all the editor instances
-                $(child.$el).find('[class*=editor-]').each(function() {
-                    saveComponent.bind(this, child, this)();
-                });
-            })
-
-            // Lastly, we give savedComps a copy of stageComps
-            this.savedComps = JSON.parse(JSON.stringify(this.stageComps));
         },
         /*
             Just to mimic requesting data from a databse
@@ -207,6 +197,9 @@ var app = new Vue({
             if (DUMMY_SAVED) {
                 this.savedComps = DUMMY_SAVED;
             }
+        },
+        toJson: function(obj) {
+            return JSON.stringify(obj);
         }
     },
     mounted: function() {
@@ -254,25 +247,26 @@ function editorGlobal() {
     }
 }
 
-function editorSimple(id) {
-    var config = editorGlobal();
-    config.selector = '#'+id +'.editor-simple, #'+id+' .editor-simple';
-    return config;
-}
-
-function editorRobust(id) {
-    var config = editorGlobal();
-    config.selector = '#'+id +'.editor-robust, #'+id+' .editor-robust';
-    config.toolbar += ' bullist numlist';
-    return config;
-}
-
 function initEditing(comp) {
     var $comp = $(comp.$el),
         id = genID(12);
     $comp.attr('id', id);
-    tinymce.init(editorSimple(id));
-    tinymce.init(editorRobust(id));
+    var config = editorGlobal();
+    config.setup = function(editor) {
+        editor.on('NodeChange', function(e) {
+            var edElem = $(editor.getBody());
+            var data = JSON.parse($comp.attr('data-obj'));
+            var prop = edElem.attr('data-prop');
+            data.properties[prop] = editor.getContent();
+            $comp.attr('data-obj', JSON.stringify(data));
+            app.save();
+        })
+    };
+    config.selector = '#'+id +'.editor-simple, #'+id+' .editor-simple';
+    tinymce.init(config);
+    config.selector = '#'+id +'.editor-robust, #'+id+' .editor-robust';
+    config.toolbar += ' bullist numlist';
+    tinymce.init(config);
 }
 
 
@@ -313,6 +307,7 @@ Array.prototype.reindex = function() {
 
 var Thumbnails = $('#Thumbnails')[0],
     Stage = $('#Stage')[0],
+    Trash = $('#Trash')[0],
     StartIndex, EndIndex;
 
 dragula([ Thumbnails, Stage ], {
@@ -351,19 +346,16 @@ dragula([ Thumbnails, Stage ], {
         Rearranging the order of components
     */
     if (source === Stage && target === Stage) {
-        EndIndex = getIndex(Stage, el);
-        var thumbChildren = app.$children.filter(function(comp) {
-            return $(comp.$el).hasClass('CompThumbnail');
-        }).length;
-        var StartChildren = StartIndex + thumbChildren;
-        console.log(StartChildren);
-        var EndChildren = EndIndex + thumbChildren;
-        console.log(EndChildren);
-        var data = JSON.stringify(app.stageComps[StartIndex]);
-        app.stageComps.remove(StartIndex);
-        app.stageComps.insert(EndIndex, JSON.parse(data));
-        app.$children.remove(StartChildren);
-        app.$children.insert(EndChildren, app.$children[StartChildren]);
+        // EndIndex = getIndex(Stage, el);
+        // setTimeout(function() {
+        //     console.log(JSON.stringify(app.stageComps[StartIndex]))
+        // }, 100)
+        
+        app.save();
+        // var data = JSON.stringify(app.stageComps[StartIndex]);
+        // app.stageComps.remove(StartIndex);
+        // app.stageComps.insert(EndIndex, JSON.parse(data));
+        // app.save();
     }
 }).on('remove', function(el, container, source) {
     /*
