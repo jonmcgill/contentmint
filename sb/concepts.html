@@ -1,0 +1,164 @@
+<!DOCTYPE html><html><head><title>components-add-remove</title>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<link rel="stylesheet" type="text/css" href="basic.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+</head><body>
+
+<div id="Stage2" class="VerticalSpacing">
+    <comp-content v-for="comp in components" :props="comp"></comp-content>
+</div>
+
+<div id="Thumbnails">
+    <thumbnail v-for="comp in components" :props="comp"></thumbnail>
+</div>
+
+<div class="overlay"></div>
+<div class="decision">
+    <div>Are you sure you want to delete this content?</div>
+    <button class="yes">Yes, delete</button>
+    <button class="no">Nope, stop</button>
+</div>
+
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
+<script type="text/javascript">
+
+Array.prototype.insert = function(index, item) {
+    this.splice(index, 0, item);
+}
+Array.prototype.remove = function(index) {
+    this.splice(index, 1);
+}
+
+var ID = 0;
+
+// Toolbar is given to every staged component
+Vue.component('comp-toolbar', {
+    props: ['props'],
+    template: '\
+        <div class="comp-toolbar">\
+            <button class="btn-toolbar grab"><i class="fa fa-arrows"></i></button>\
+            <button class="btn-toolbar"><i class="fa fa-clone"></i></button>\
+            <button class="btn-toolbar" @click="remove"><i class="fa fa-trash-o"></i></button>\
+            <button class="btn-toolbar"><i class="fa fa-cog"></i></button>\
+        </div>',
+    methods: {
+        remove: function() {
+            this.$emit('remove');
+        }
+    }
+})
+
+// Meta component - for stage
+Vue.component('comp-content', {
+    props: ['props'],
+    template: '\
+        <div class="comp-content">\
+            <component :is="props.name" :props="props.props"></component>\
+            <comp-toolbar v-on:remove="remove"></comp-toolbar>\
+        </div>',
+    methods: {
+        remove: function() {
+            var compId = this.props.id;
+            var parent = this.$parent;
+            this.$parent.components.forEach(function(comp, i) {
+                if (comp.id === compId) {
+                    decision('Are you sure you want to delete this content?',
+                             'Yes, delete',
+                             'No, stop',
+                             function() {
+                                parent.components.remove(i);
+                             })
+                }
+            })
+        }
+    },
+    mounted: function() {
+        this.props.id = ID++;
+        $(this.$el).attr('data-comp', JSON.stringify(this.props));
+    }
+})
+
+// Meta component - for thumbnails
+Vue.component('thumbnail', {
+    props: ['props'],
+    template: '\
+        <div class="comp-thumbnail">\
+            <span>{{ props.display }}</span>\
+            <component :is="props.name" :props="props.props"></component>\
+        </div>',
+    mounted: function() {
+        $(this.$el).attr('data-comp', JSON.stringify(this.props));
+    }
+})
+
+// Content component
+Vue.component('content-title', {
+    props: ['props'],
+    template: '<div class="editor-simple" v-html="props.content"></div>'
+})
+
+
+var stage = new Vue({
+    el: '#Stage2',
+    data: {
+        components: []
+    }
+})
+
+var Thumbnails = new Vue({
+    el: '#Thumbnails',
+    data: {
+        components: [
+            {
+                name: 'content-title',
+                display: 'Content Title',
+                type: 'content',
+                id: null,
+                props: {
+                    content: '<h2>Lorem Ipsum Titlum</h2>'
+                }
+            }
+        ]
+    }
+})
+
+var Stage = $('#Stage2')[0],
+    Thumbnails = $('#Thumbnails')[0];
+
+dragula([Stage, Thumbnails], {
+    moves: function(el, container, grabber) {
+        return container === Thumbnails || ($(grabber).hasClass('grab') || $(grabber).hasClass('fa-arrows'));
+    },
+    copy: function(el, source) {
+        return source === Thumbnails;
+    },
+    accepts: function(el, target) {
+        return target !== Thumbnails;
+    }
+}).on('drop', function(el, target, source, sibling) {
+    if (source === Thumbnails && target === Stage) {
+        var index = 0;
+        $(Stage).children().each(function(i) {
+            if ($(this).hasClass('comp-thumbnail')) {
+                index = i;
+                $(this).remove();
+                return false;
+            }
+        })
+        stage.components.insert(index, JSON.parse($(el).attr('data-comp')))
+    }
+})
+$('.no, .yes').click(function() {
+    $('.overlay, .decision').css({display: 'none'});
+})
+function decision(decMsg, yesMsg, noMsg, cb) {
+    $('.overlay, .decision').css({display: 'block'});
+    $('.decision div').html(decMsg);
+    $('.yes').html('<i class="fa fa-check"></i> ' + yesMsg);
+    $('.no').html('<i class="fa fa-close"></i> ' + noMsg);
+    $('.yes').click(cb);
+}
+
+</script></body></html>

@@ -24,8 +24,12 @@
 /* Overwrite */
 .gu-mirror {
   opacity: 0.6;
-  background: rgba(0,0,0,0.3);
+  /*background: rgba(0,0,0,0.3);*/
   border-radius: 3px;
+}
+
+.gu-mirror .btn-toolbar:not(:first-child) {
+  display: none;
 }
   
 
@@ -52,6 +56,7 @@ input, button, textarea {
   font-size: 1em;
   padding: 0.3em 0.7em;
   border-radius: 4px;
+  outline: none;
 }
 
 h1 {
@@ -80,11 +85,12 @@ h1 {
   position: relative;
   background: #0055B0;
   top: 1px;
+  border-bottom: 1px solid #0055B0;
 }
 
 @media (min-width: 50em) {
   body {
-    font-size: 1.2em;
+    /*font-size: 1.2em;*/
   }
 }
 
@@ -222,4 +228,82 @@ h1 {
   border-radius: 5px;
   background: darkred;
   color: rgba(255,255,255,0.5);
+}
+
+.comp-toolbar {
+  width: 2em;
+  position: absolute;
+  left: -1.5em;
+  top: 0;
+  display: none;
+}
+*:hover > .comp-toolbar,
+*:active > .comp-toolbar,
+*:focus > .comp-toolbar {
+  display: block;
+}
+
+.btn-toolbar {
+  font-size: 0.65em;
+  font-weight: normal;
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  border: 0;
+  color: white;
+  cursor: pointer;
+  -webkit-font-smoothing: antialiased;
+}
+  .btn-toolbar:nth-child(1) {
+    background-color: #3F51B5;
+  }
+  .btn-toolbar:nth-child(2) {
+    background-color: #689F38;
+  }
+  .btn-toolbar:nth-child(3) {
+    background-color: #F44336;
+  }
+  .btn-toolbar:nth-child(4) {
+    background-color: #37474F;
+  }
+
+.grab {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: -ms-grab;
+  cursor: grab;
+}
+
+.comp-content {
+  position: relative;
+}
+
+#Thumbnails {
+  float: right;
+  width: 12em;
+}
+#Stage2 {
+  padding: 1em;
+  background: #efefef;
+  float: left;
+  width: calc(100% - 14em);
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: none;
+}
+.decision {
+  position: relative;
+  width: 20em;
+  margin: auto;
+  text-align: center;
+  display: none;
+}
+.decision div {
+  margin-bottom: 1em;
 }
