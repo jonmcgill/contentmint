@@ -267,7 +267,7 @@ h1 {
     background-color: #37474F;
   }
 
-.grab {
+.grab, .comp-thumbnail {
   cursor: -webkit-grab;
   cursor: -moz-grab;
   cursor: -ms-grab;
@@ -282,6 +282,7 @@ h1 {
   float: right;
   width: 12em;
 }
+
 #Stage2 {
   padding: 1em;
   background: #efefef;

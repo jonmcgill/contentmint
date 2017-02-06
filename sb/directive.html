@@ -16,7 +16,7 @@
 </div>
 
 <div id="Thumbnails">
-    <thumbnail v-for="comp in components" :props="comp"></thumbnail>
+    <thumbnail v-for="comp in components" :comp_info="comp"></thumbnail>
 </div>
 
 <div class="overlay"></div>
@@ -27,16 +27,6 @@
 </div>
 
 <br><br>
-<!-- Each component staged needs to have data stored on the element
-     for when items are rearranged within the DOM. I cannot figure out
-     a resonable way to update component data placement after dragula
-     has fired its 'drop' hook. On 'save', the data from each DOM node
-     is saved in a new array.
--->
-<!-- <div id="test" :data-comp-info="this.$data | toJson">
-    <div v-editor:content-title></div>
-    <div v-editor:content></div>
-</div> -->
 
 <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -50,7 +40,11 @@ Array.prototype.remove = function(index) {
     this.splice(index, 1);
 }
 Array.prototype.reorder = function(from, to) {
-    this.splice(to, 0, this.splice(from, 1)[0]);
+    var _this = this;
+    var isolated = _this.splice(from, 1)[0];
+    Vue.nextTick(function() {
+        _this.splice(to, 0, isolated);
+    })
 }
 
 var ID = 0;
@@ -65,50 +59,40 @@ var ID = 0;
 */
 Vue.directive('editor', {
     bind: function(el, binding, vnode) {
-        var id = genID(10);
+        Vue.nextTick(function() {
         // On intial binding, load what's in the data
-        // then make unique editor id and init tinymce
-        console.log(vnode.context);
-        $(el).html(vnode.context[binding.arg]);
+        $(el).html(vnode.context.comp_config[binding.arg]);
+
+        // check if element is a thumbnail
+        if ($(vnode.context.$root.$el).attr('id') === 'Thumbnails') {
+            return;
+        }
+        var id = genID(10);
         $(el).attr('data-editor-id', id);
-        tinymce.init({
-            selector: '[data-editor-id='+id+']',
-            plugins: 'link lists paste textpattern autolink',
-            toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist',
-            insert_toolbar: false,
-            fixed_toolbar_container: '#EditorToolbar',
-            menubar: false,
-            inline: true,
-            // attach a handler that will update the specific data
-            // on keyup and any action that can be undone
-            setup: function(ed) {
-                ed.on('Change keyup', function() {
-                    vnode.context[binding.arg] = ed.getContent();
-                })
-            }
+        // Needs nextTick due to async rendering
+
+            tinymce.init({
+                selector: '[data-editor-id="'+id+'"]',
+                plugins: 'link lists paste textpattern autolink',
+                toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist',
+                insert_toolbar: false,
+                fixed_toolbar_container: '#EditorToolbar',
+                menubar: false,
+                inline: true,
+                // attach a handler that will update the specific data
+                // on keyup and any action that can be undone
+                setup: function(ed) {
+                    ed.on('Change keyup', function() {
+                        vnode.context.comp_config[binding.arg] = ed.getContent();
+                    })
+                }
+            })
         })
     }
 })
 
-// var test = new Vue({
-//     el: '#test',
-//     data: {
-//         'content-title': '<h1>Default Content Title</h1>',
-//         'content': '<p>Default content copy paragraph.</p>'
-//     },
-//     filters: {
-//         toJson: function(obj) {
-//             return JSON.stringify(obj);
-//         }
-//     },
-//     mounted: function() {
-//         $(this.$el).attr('data-comp-info', JSON.stringify(this.$data));
-//     }
-// })
-
 // Toolbar is given to every staged component
 Vue.component('comp-toolbar', {
-    props: ['props'],
     template: '\
         <div class="comp-toolbar">\
             <button class="btn-toolbar grab"><i class="fa fa-arrows"></i></button>\
@@ -146,62 +130,19 @@ Vue.component('comp-content', {
                 }
             })
         }
-    },
-    // mounted: function() {
-    //     this.props.id = ID++;
-    //     $(this.$el).attr('data-comp', JSON.stringify(this.props));
-    // }
+    }
 })
 
 // Meta component - for thumbnails
 Vue.component('thumbnail', {
-    props: ['props'],
+    props: ['comp_info'],
     template: '\
         <div class="comp-thumbnail">\
-            <span>{{ props.display }}</span>\
-            <component :is="props.name" :props="props.config"></component>\
-        </div>',
-    mounted: function() {
-        $(this.$el).attr('data-comp', JSON.stringify(this.props));
-    }
+            <span>{{ comp_info.display }}</span>\
+            <component :is="comp_info.name" :comp_config="comp_info.config"></component>\
+        </div>'
 })
 
-// Content component
-Vue.component('content-title', {
-    props: ['props'],
-    template: '<div class="editor-simple" v-html="props.content"></div>'
-})
-
-Vue.component('editor', {
-    props: ['propname'],
-    template: '<div></div>',
-    mounted: function() {
-        var _this = this;
-        var id = genID(10);
-        $(_this.$el).attr('id', id);
-        if ($(_this.$root.$el).attr('id') !== 'Thumbnails') {
-            tinymce.init({
-                selector: '#' + id,
-                plugins: 'link lists paste textpattern autolink',
-                toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist',
-                insert_toolbar: false,
-                fixed_toolbar_container: '#EditorToolbar',
-                menubar: false,
-                inline: true,
-                setup: function(ed) {
-                    setTimeout(function() {
-                        ed.on('NodeChange', function() {
-                            var compElem = $(_this.$parent.$parent.$el);
-                            var data = JSON.parse(compElem.attr('data-comp'));
-                            data[_this.propname] = ed.getContent();
-                            compElem.attr('data-comp', JSON.stringify(data));
-                        }); 
-                    }, 100);
-                }
-            })
-        }
-    }
-})
 
 Vue.component('copy', {
     props: ['comp_config'],
@@ -212,7 +153,8 @@ Vue.component('copy', {
 var stage = new Vue({
     el: '#Stage2',
     data: {
-        components: []
+        components: [
+        ]
     }
 })
 
@@ -224,7 +166,6 @@ var thumbnails = new Vue({
                 name: 'copy',
                 display: 'Copy',
                 type: 'content',
-                id: null,
                 config: {
                     copy: '<p>Lorem ipsum copi textum</p>'
                 }
@@ -249,16 +190,42 @@ dragula([Stage, Thumbnails], {
         return target !== Thumbnails;
     }
 }).on('drop', function(el, target, source, sibling) {
+
+    
+
+    // Add new component to stage
     if (source === Thumbnails && target === Stage) {
         EndIndex = getIndex(Stage, el);
         $(el).remove();
-        var data = JSON.parse(JSON.stringify(thumbnails.components[StartIndex]))
-        stage.components.insert(EndIndex, data);
+        var data = JSON.stringify(thumbnails.components[StartIndex]);
+        stage.components.insert(EndIndex, JSON.parse(data));
     }
+
+    // Rearrange components on stage
+    if (source === Stage && target === Stage) {
+        EndIndex = getIndex(Stage, el);
+        var up = StartIndex > EndIndex;
+        var long = StartIndex - EndIndex !== -1 && StartIndex - EndIndex !== 1;
+        var comps = stage.components;
+        // moving down by one
+        if (!up && !long) {
+            var moveData = copy(comps[StartIndex]),
+                fixData = copy(comps[EndIndex]);
+            Vue.set(comps, StartIndex, fixData);
+            Vue.set(comps, EndIndex, moveData);
+        }
+    }
+
 }).on('drag', function(el, source) {
+
     if (source === Thumbnails) {
         StartIndex = getIndex(Thumbnails, el);
     }
+
+    if (source === Stage) {
+        StartIndex = getIndex(Stage, el);
+    }
+
 })
 
 
@@ -290,6 +257,10 @@ function genID(num) {
         i++;
     }
     return id;
+}
+
+function copy(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }
 
 function getIndex(area, item) {
