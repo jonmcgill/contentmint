@@ -36,7 +36,7 @@
 #Loading {
   position: absolute;
   width: 100%;
-  top: 50%;
+  top: calc(50% - 2em);
   line-height: 2em;
   color: rgba(0,0,0,0.15);
   font-family: sans-serif;
@@ -91,4 +91,55 @@ body {
   width: calc(50% - 8px);
   background: white;
   margin: 4px;
+}
+
+
+
+
+#EditorToolbar {
+  position: fixed;
+  top: 1.5em;
+  left: 1.5em;
+  opacity: 0.95;
+  z-index: 20;
+  color: rgba(0,0,0,0.5);
+}
+#EditorToolbar:hover {
+  opacity: 1;
+}
+#EditorToolbar .mce-btn button .mce-ico {
+  color: rgba(0,0,0,0.5) !important;
+  font-size: 0.85em;
+}
+#EditorToolbar:hover .mce-btn button .mce-ico {
+  color: rgba(0,0,0,0.65) !important;
+}
+#EditorToolbar * {
+  background: white;
+}
+#EditorToolbar > * {
+  border-radius: 5px;
+  overflow:hidden;
+}
+#EditorToolbar:hover > * {
+  border-color: #999;
+  border-bottom: 1px solid #777 !important;
+}
+#EditorToolbar .mce-btn:hover {
+  border-radius: 3px;
+  border-bottom: 2px solid #555;
+}
+#EditorToolbar .mce-btn:hover button .mce-ico {
+  color: black !important;
+}
+#EditorToolbar .mce-btn:active {
+  position: relative;
+  top: 1px;
+  border-bottom: 1px solid #ccc;
+}
+#EditorToolbar .mce-active {
+  border-color: transparent !important;
+}
+.mce-edit-focus {
+  outline: none !important;
 }

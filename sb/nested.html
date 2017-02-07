@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<div id="EditorToolbar"></div>
 <div id="Loading">LOADING</div>
 <div id="App" v-cloak>
     <context id="Stage" :components="stage" data-context-name="stage"></context>
@@ -53,12 +54,46 @@ Vue.component('wrapper', {
             <component :is="config.name" :props="config"></component>\
         </div>',
     mounted: function() {
+        var _this = this;
+        var compElem = _this.$el;
         // See comments below on the purpose of this
-        console.log('mounting: ' + this._uid);
-        initStageComponent(this);
+        // console.log('mounting: ' + this._uid);
+        initStageComponent(_this);
+        $(compElem).find('.editor-simple').each(function() {
+            var el = this;
+            var hasEditor = $(el).attr('data-editor-id');
+            var isThumbnail = $(compElem).parent().hasClass('thumbnail');
+            if (!hasEditor && !isThumbnail) {
+                var id = genID(10);
+                var el = this;
+                var thisComp = $(el).closest('.Component');
+                $(el).attr('data-editor-id', id);
+                $(compElem).on('mouseover', function() {
+                    tinymce.init({
+                        selector: '[data-editor-id="'+id+'"]',
+                        plugins: 'link lists paste textpattern autolink',
+                        toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist',
+                        insert_toolbar: false,
+                        fixed_toolbar_container: '#EditorToolbar',
+                        menubar: false,
+                        inline: true,
+                        // attach a handler that will update the specific data
+                        // on keyup and any action that can be undone
+                        setup: function(ed) {
+                            ed.on('Change keyup', function() {
+                                var compData = JSON.parse($(thisComp).attr('data-config'));
+                                var prop = $(el).attr('data-prop');
+                                compData[prop] = ed.getContent();
+                                $(thisComp).attr('data-config', JSON.stringify(compData));
+                            })
+                        }
+                    })
+                })
+            }
+        });
     },
     updated: function() {
-        console.log('updating: ' + this._uid);
+        // console.log('updating: ' + this._uid);
         initStageComponent(this);
     }
 })
@@ -89,7 +124,7 @@ Vue.component('two-column', {
 
 Vue.component('copy', {
     props: ['props'],
-    template: '<div class="editor-simple" v-html="props.content"></div>'
+    template: '<div class="editor-simple" v-html="props.content" data-prop="content"></div>'
 })
 
 var app = new Vue({
@@ -191,9 +226,9 @@ function genID(num) {
     var id = 'ID-', i = 1;
     while (i <= num) {
         if (i % 2 === 0) {
-            id += String.fromCharCode(_.random(65, 90));
+            id += String.fromCharCode(random(65, 90));
         } else {
-            id += String.fromCharCode(_.random(48, 57));
+            id += String.fromCharCode(random(48, 57));
         }
         i++;
     }
