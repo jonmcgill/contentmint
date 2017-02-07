@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nested Components</title>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<link rel="stylesheet" type="text/css" href="nested.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="Loading">LOADING</div>
+<div id="App" v-cloak>
+    <context id="Stage" :components="stage" data-context-name="stage"></context>
+    <aside id="Thumbnails">
+        <div class="thumbnail"  v-for="data in thumbnails">
+            <span>{{ data.display }}</span>
+            <wrapper :config="data"></wrapper>
+        </div>
+    </aside>
+</div>
+
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
+<script type="text/javascript">
+/*
+    A note about nesting dragula containers:
+    We want to be able to add environment commponents - components with scaffolding
+    that can house any number of other components. Rather than create a new feature
+    where components have sub components, why not allow any kind of component to be
+    nested inside of the staging area of an environment component?
+    In order to do this with dragula, each container needs to be wrapped. The wrap
+    is what can be dragged around to different environments.
+    http://codepen.io/jonmcgill/pen/JEBJGV?editors=1011
+*/
+var appIsMounted = false;
+var AppCanBeUpdated = false;
+
+var dummy_save = '[{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"},{"name":"two-column","display":"Two Column","left":[{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"two-column","display":"Two Column","left":[],"right":[]},{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]}]},{"name":"two-column","display":"Two Column","left":[{"name":"two-column","display":"Two Column","left":[],"right":[]}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"two-column","display":"Two Column","left":[{"name":"two-column","display":"Two Column","left":[],"right":[]},{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"two-column","display":"Two Column","left":[],"right":[]}]}],"right":[{"name":"two-column","display":"Two Column","left":[],"right":[]},{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"},{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[]},{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"two-column","display":"Two Column","left":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}],"right":[{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]},{"name":"copy","display":"Copy","content":"<p>Some lorem ipsum testum textum</p>"}]';
+/*
+    The component wrapper controls the functionality of all components. This is
+    where all component logic resides. The various types of components should really
+    only have data associated with them. For example, the wrapper handles taking all
+    component data, turning it into json, and adding it to the data-config attribute.
+
+    Wrappers will stay in markup for production use and will not be cleaned up. Take
+    this into consideration when building your components.
+*/
+Vue.component('wrapper', {
+    props: ['config'],
+    template: '\
+        <div class="Component">\
+            <component :is="config.name" :props="config"></component>\
+        </div>',
+    mounted: function() {
+        // See comments below on the purpose of this
+        console.log('mounting: ' + this._uid);
+        initStageComponent(this);
+    },
+    updated: function() {
+        console.log('updating: ' + this._uid);
+        initStageComponent(this);
+    }
+})
+
+Vue.component('context', {
+    props: ['components', 'name'],
+    template: '\
+        <div class="Context">\
+            <wrapper v-for="comp in components" :config="comp"></wrapper>\
+        </div>',
+    /*
+        Whenever a context component is mounted, add it to the dragula instance.
+        This is so loaded components will automatically be enabled for dragula.
+    */
+    mounted: function() {
+        addContainer(this.$el);
+    }
+})
+
+Vue.component('two-column', {
+    props: ['props'],
+    template: '\
+        <div class="ColumnWrap">\
+            <context :components="props.left" data-context-name="left"></context>\
+            <context :components="props.right" data-context-name="right"></content>\
+        </div>'
+})
+
+Vue.component('copy', {
+    props: ['props'],
+    template: '<div class="editor-simple" v-html="props.content"></div>'
+})
+
+var app = new Vue({
+    el: '#App',
+    data: {
+        thumbnails: [
+            {   name: 'two-column',
+                display: 'Two Column',
+                left: [],
+                right: []   },
+            {   name: 'copy',
+                display: 'Copy',
+                content: '<p>Some lorem ipsum testum textum</p>' }
+        ],
+        stage: [],
+        store: dummy_save
+    },
+    methods: {
+        save: function(cb) {
+            this.store = JSON.stringify(collectData());
+            if (cb) cb();
+        },
+        empty: function() {
+            this.stage = [];
+            $('#Stage').empty();
+        },
+        load: function(cb) {
+            var _this = this;
+            this.empty();
+            Vue.nextTick(function() {
+                _this.stage = JSON.parse(_this.store);
+            })
+            if (cb) cb();
+        }
+    },
+    mounted: function() {
+        $('#Loading').remove();
+        var _this = this;
+        if (_this.store) {
+            _this.stage = JSON.parse(_this.store);
+        }
+        appIsMounted = true;
+        checkSync();
+    }
+})
+
+var Stage = $('#Stage')[0],
+    Thumbnails = $('#Thumbnails')[0];
+
+var drake = dragula([Stage, Thumbnails], {
+    copy: function(el, source) {
+        return source === Thumbnails;
+    },
+    // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
+    // Was getting child node error from dragula when moving nested containers
+    accepts: function(el, target) {
+        return target !== Thumbnails && !contains(el, target);
+    },
+    removeOnSpill: function(el, source) {
+        return source === Stage;
+    }
+}).on('drop', function(el, target, source, sibling) {
+    /*
+        So, when a new component is created in the staging area, it starts
+        as a direct copy of the thumbnail. Previously we just removed that element,
+        inserted its data into the Vue instance, and let Vue handle rendering. However,
+        since rearranging components in stage cannot interact with data, neither can
+        adding components, otherwise lots of confusion.
+    */
+    if (source === Thumbnails && $(target).hasClass('Context')) {
+        var compData = JSON.parse($(el).find('.Component').attr('data-config'));
+        var index = getIndex($(el).parent(), el);
+        var dataPath = walkUp(el);
+        $(el).remove();
+        walkDown(dataPath.reverse(), compData);
+        Vue.nextTick(function() {
+            app.save();
+            checkSync();
+        })
+    }
+    if ((source === Stage || $(source).hasClass('Context')) &&
+        (target === Stage || $(target).hasClass('Context'))) {
+        syncStageAndStore();
+        checkSync();
+    }
+})
+
+function addContainer(el) {
+    if (drake) {
+        drake.containers.push(el);
+    }
+}
+
+// UTILITIES
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+function genID(num) {
+    var id = 'ID-', i = 1;
+    while (i <= num) {
+        if (i % 2 === 0) {
+            id += String.fromCharCode(_.random(65, 90));
+        } else {
+            id += String.fromCharCode(_.random(48, 57));
+        }
+        i++;
+    }
+    return id;
+}
+function copy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+function getIndex(area, item) {
+    var index;
+    $(area).children().each(function(i) {
+        if (this === item) {
+            index = i;
+            return false;
+        }
+    })
+    return index;
+}
+function contains(a, b){
+  return a.contains ?
+    a != b && a.contains(b) :
+    !!(a.compareDocumentPosition(b) & 16);
+}
+function log(thing) {
+    console.log(thing);
+}
+
+/*
+    Save component data to json and attach it to the .Component
+    container. There is a good reason for this: if DOM is manually modified
+    (i.e. dragula, tinymce), then it becomes out of sync with Vue instance data.
+    Going from DOM -> data makes little sense, so we're storing json on
+    data attributes so it can be stored on save in the correct form.
+
+    Additionally, we want shallow copies of data on each component since
+    the save feature will assemble all the data from the DOM itself.
+*/
+function initStageComponent(inst) {
+    var _el = inst.$el;
+    // copy the data so you don't mess with render
+    var compData = copy(inst.config);
+    // each context needs a name for components to go inside of it
+    var contextNames = $(_el).find('[data-context-name]');
+    // filter out nested context elements and return context names
+    contextNames = contextNames
+        .toArray()
+        .filter(function(elem) {
+            return $(elem).closest('.Component')[0] === _el;
+        })
+        .map(function(elem) {
+            return $(elem).attr('data-context-name');
+        });
+    // turn those data pieces into empty arrays so they can be filled on save
+    contextNames.forEach(function(key) {
+        compData[key] = [];
+    })
+    // save on data-config attribute
+    compData = JSON.stringify(compData);
+    $(_el).attr('data-config', compData);
+    $(_el).append('<span style="color:red;position:relative;top:-1em;background:#ddd;display:inline-block;width:1.2em;border:1px solid black">'+inst._uid+'</span>');
+}
+
+
+function checkStageStore() {
+    console.log('app.stage == app.store?: ' + (JSON.stringify(app.stage) == app.store));
+}
+function checkSync() {
+    setTimeout(function() {
+        console.log('Synced: ' + (JSON.stringify(collectData()) === JSON.stringify(app.stage)));
+    }, 500);
+    
+}
+function syncStageAndStore() {
+    app.save();
+    Vue.nextTick(function() {
+        app.load();
+    })
+}
+function walkUp(el, selector) {
+    var path = [];
+    function travel(elem) {
+        var nextContext = $(elem).closest('.Context')[0];
+        var index = getIndex(nextContext, elem);
+        var name = $(nextContext).attr('data-context-name');
+        path.push({index: index, name: name});
+        if ($(nextContext).attr('id') !== 'Stage') {
+            travel($(nextContext).closest('.Component')[0])
+        }
+    }
+    travel(el);
+    return path;
+}
+
+function walkDown(path, obj) {
+    var item = app;
+    path.forEach(function(data, i) {
+        if (i === path.length - 1) {
+            item[data.name].splice(data.index, 0, obj);
+        } else {
+            item = item[data.name][data.index];
+        }
+    })
+    return;
+}
+
+function collectData(elem, data) {
+    var data = data || [];
+    var elem = elem || $('#Stage')[0];
+    var children = $(elem).children();
+    if (children.length) {
+        children.each(function() {
+            var child = this;
+            var comp = JSON.parse($(child).attr('data-config'));
+            var contexts = $(child)
+                .find('[data-context-name]')
+                .toArray()
+                .filter(function(l) {
+                    return $(l).closest('.Component')[0] === child;
+                })
+            if (contexts.length) {
+                contexts.forEach(function(context) {
+                    comp[$(context).attr('data-context-name')] = collectData(context);
+                })
+            }
+            data.push(comp);
+        })
+    }
+    // console.log(data);
+    return data;
+}
+
+
+
+</script>
+</body>
+</html>

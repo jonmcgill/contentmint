@@ -27,13 +27,21 @@
 }
 
 * {
-    opacity: 1;
-    transition: opacity 200ms;
     box-sizing: border-box;
 }
 [v-cloak] {
-    opacity: 0;
-    transition: opacity 200ms;
+  display: none;
+}
+
+#Loading {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  line-height: 2em;
+  color: rgba(0,0,0,0.15);
+  font-family: sans-serif;
+  font-size: 5em;
+  text-align: center;
 }
 
 body {
@@ -59,13 +67,20 @@ body {
 
 #Thumbnails {
     width: 30%;
+    background: lightgreen;
+    border: 1px solid black;
 }
 
 .Context {
     padding: 1em;
     border: 1px solid #888;
 }
-
+.ColumnWrap {
+  padding: 4px;
+  background: lightblue;
+  border: 1px solid green;
+  margin: 2px;
+}
 .ColumnWrap:after {
   content: '';
   display: table;
@@ -73,5 +88,7 @@ body {
 }
 .ColumnWrap > div {
   float: left;
-  width: 50%;
+  width: calc(50% - 8px);
+  background: white;
+  margin: 4px;
 }
