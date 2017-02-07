@@ -61,7 +61,17 @@ body {
     width: 30%;
 }
 
-.Environment {
-    padding: 2em;
+.Context {
+    padding: 1em;
     border: 1px solid #888;
+}
+
+.ColumnWrap:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.ColumnWrap > div {
+  float: left;
+  width: 50%;
 }

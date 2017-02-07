@@ -9,9 +9,12 @@
 <body>
 
 <div id="App" v-cloak>
-    <main id="Stage"></main>
+    <context id="Stage" :components="stage" data-context-name="stage"></context>
     <aside id="Thumbnails">
-        <component v-for="thumb in thumbnails" :is="thumb.name"></component>
+        <div class="thumbnail"  v-for="data in thumbnails">
+            <span>{{ data.display }}</span>
+            <wrapper :config="data"></wrapper>
+        </div>
     </aside>
 </div>
 
@@ -19,48 +22,65 @@
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
 <script type="text/javascript">
+/*
+    A note about nesting dragula containers:
+    We want to be able to add environment commponents - components with scaffolding
+    that can house any number of other components. Rather than create a new feature
+    where components have sub components, why not allow any kind of component to be
+    nested inside of the staging area of an environment component?
+    In order to do this with dragula, each container needs to be wrapped. The wrap
+    is what can be dragged around to different environments.
+    http://codepen.io/jonmcgill/pen/JEBJGV?editors=1011
+*/
 
-var Stage = $('#Stage')[0],
-    Thumbnails = $('#Thumbnails')[0];
-
-var drake = dragula([Stage, Thumbnails], {
-    copy: function(el, source) {
-        return $(source).attr('id') === 'Thumbnails';
-    },
-    accepts: function(el, target) {
-        return (target === Stage || $(target).hasClass('Environment')) && $(target).parent().attr('id') !== 'Thumbnails';
-    }
-});
-
-Vue.component('environment', {
-    template: '<div class="Environment"></div>',
+Vue.component('wrapper', {
+    props: ['config'],
+    template: '<div class="Component"><component :is="config.name" :props="config"></component></div>',
     mounted: function() {
-        dragula([this.$el], {
-            accepts: function(el, target) {
-                return $(target).hasClass('Environment') && $(target).parent().attr('id') !== 'Thumbnails';
-            }
-        });
+        // always set config as json on element attribute
+        var compData = JSON.stringify(this.config);
+        $(this.$el).attr('data-config', compData);
     }
+})
+
+Vue.component('context', {
+    props: ['components', 'name'],
+    template: '\
+        <div class="Context">\
+            <wrapper v-for="comp in components" :config="comp"></wrapper>\
+        </div>',
+    mounted: function() {
+        addContainer(this.$el);
+    }
+})
+
+Vue.component('two-column', {
+    props: ['props'],
+    template: '\
+        <div class="ColumnWrap">\
+            <context :components="props.left" data-context-name="left"></context>\
+            <context :components="props.right" data-context-name="right"></content>\
+        </div>'
+})
+
+Vue.component('copy', {
+    props: ['props'],
+    template: '<div class="editor-simple" v-html="props.content"></div>'
 })
 
 var app = new Vue({
     el: '#App',
     data: {
-        thumbnails: [{name: 'environment'}],
+        thumbnails: [
+            {   name: 'two-column',
+                display: 'Two Column',
+                left: [],
+                right: []   },
+            {   name: 'copy',
+                display: 'Copy',
+                content: '<p>Some lorem ipsum testum textum</p>' }
+        ],
         stage: []
-    },
-    methods: {
-        sort: function(data) {
-            var _data = JSON.parse(JSON.stringify(data));
-            var dataSorted = {};
-            Object.keys(_data).sort().forEach(function(key) {
-                dataSorted[key] = _data[key];
-            })
-            return dataSorted;
-        }
-    },
-    mounted: function() {
-        
     }
 })
 
@@ -69,20 +89,35 @@ var Stage = $('#Stage')[0],
 
 var drake = dragula([Stage, Thumbnails], {
     copy: function(el, source) {
-        return $(source).attr('id') === 'Thumbnails';
+        return source === Thumbnails;
     },
     accepts: function(el, target) {
-        return (target === Stage || $(target).hasClass('Environment')) && $(target).parent().attr('id') !== 'Thumbnails';
+        return target !== Thumbnails;
+    },
+    removeOnSpill: function(el, source) {
+        return source === Stage;
     }
-});
+}).on('drop', function(el, target, source, sibling) {
+    if (source === Thumbnails && $(target).hasClass('Context')) {
+        var compData = JSON.parse($(el).find('.Component').attr('data-config'));
+        var index = getIndex($(el).parent(), el);
+        var dataPath = walkUp(el);
+        walkDown(dataPath.reverse(), compData);
+        $(el).remove();
+    }
+})
+
+function addContainer(el) {
+    if (drake) {
+        drake.containers.push(el);
+    }
+}
 
 // UTILITIES
-
-var _ = {};
-_.random = function(min, max) {
+function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
-_.genID = function(num) {
+function genID(num) {
     var id = 'ID-', i = 1;
     while (i <= num) {
         if (i % 2 === 0) {
@@ -94,9 +129,50 @@ _.genID = function(num) {
     }
     return id;
 }
-_.copy = function(obj) {
+function copy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
+function getIndex(area, item) {
+    var index;
+    $(area).children().each(function(i) {
+        if (this === item) {
+            index = i;
+            return false;
+        }
+    })
+    return index;
+}
+function log(thing) {
+    console.log(thing);
+}
+function walkUp(el, selector) {
+    var path = [];
+    function travel(elem) {
+        var nextContext = $(elem).closest('.Context')[0];
+        var index = getIndex(nextContext, elem);
+        var name = $(nextContext).attr('data-context-name');
+        path.push({index: index, name: name});
+        if ($(nextContext).attr('id') !== 'Stage') {
+            travel($(nextContext).closest('.Component')[0])
+        }
+    }
+    travel(el);
+    return path;
+}
+
+function walkDown(path, obj) {
+    var item = app;
+    path.forEach(function(data, i) {
+        if (i === path.length - 1) {
+            item[data.name].splice(data.index, 0, obj);
+        } else {
+            item = item[data.name][data.index];
+        }
+    })
+    return;
+}
+
+
 
 </script>
 </body>
