@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Example</title>
+<link rel="stylesheet" type="text/css" href="dist/Build.css">
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+</head>
+<body>
+
+<div id="EditorToolbar"></div>
+<div id="Loading">LOADING</div>
+
+<div id="App" v-cloak>
+    <context id="Stage" :components="stage" data-context-name="stage"></context>
+    <aside id="Thumbnails">
+        <div class="thumbnail" v-for="config in thumbnails">
+            <span>{{ config.display }}</span>
+            <wrapper :config="config"></wrapper>
+        </div>
+    </aside>
+</div>
+
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
+<script src="dist/Build.js"></script>

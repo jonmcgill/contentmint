@@ -1,0 +1,16 @@
+* {
+    box-sizing: border-box;
+}
+
+[v-cloak] {
+    display: none;
+}
+
+#Stage, #Thumbnails {
+    padding: 1em;
+}
+
+.ColumnWrap {
+    padding: 2em;
+    background: black;
+}

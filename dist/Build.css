@@ -1,0 +1,40 @@
+* {
+  box-sizing: border-box; }
+
+[v-cloak] {
+  display: none; }
+
+#Stage, #Thumbnails {
+  padding: 1em; }
+
+.ColumnWrap {
+  padding: 2em;
+  background: black; }
+
+.gu-mirror {
+  position: fixed !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+  opacity: .8;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+  filter: alpha(opacity=80); }
+
+.gu-hide {
+  display: none !important; }
+
+.gu-unselectable {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important; }
+
+.gu-transit {
+  opacity: .2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20); }
+
+/* Overwrite */
+.gu-mirror {
+  opacity: 0.6;
+  /*background: rgba(0,0,0,0.3);*/
+  border-radius: 3px; }
