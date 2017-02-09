@@ -8,12 +8,14 @@ var app = new Vue({
         stage: [],
         store: '',
         saved: '',
+        shiftdown: false,
         thumbnails: [
+            componentDefaults['heading'],
             componentDefaults['body-copy'],
             componentDefaults['two-column']
         ],
         trash: [],
-        username: 'User Name'
+        username: 'mcgilljo'
     },
     methods: {
         save: function() {
@@ -42,7 +44,9 @@ var app = new Vue({
         }
     },
     mounted: function() {
+        var _this = this;
         $(g.id.loading).remove();
+        fireDocumentHandlers();
         $('.thumbnail').on('mouseenter mouseleave', function() {
             $(this).toggleClass('hovered');
         })

@@ -4,7 +4,11 @@
 var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     copy: function(el, source) {
-        return source === g.node.thumbnails;
+        if (app.shiftdown && source === g.node.stage) {
+            return true;
+        } else {
+            return source === g.node.thumbnails;
+        } 
     },
 
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
@@ -41,6 +45,7 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         syncStageAndStore();
         debug(checkSync);
     }
+
 }).on('over', function(el, container, source) {
 
     if (container === g.node.trash) {

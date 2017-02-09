@@ -15,7 +15,7 @@ body {
     font-family: $font-base;
 }
 
-i {
+#Topbar i, #BottomBar i {
     display: inline-block;
     margin-right: 0.4em;
     margin-left: -0.4em;

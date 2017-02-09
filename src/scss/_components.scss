@@ -6,13 +6,55 @@
     cursor: grab;
     cursor: -webkit-grab;
     cursor: -moz-grab;
+    position: relative;
     *:not(.Component) {
         cursor: auto;
     }
     border: 1px dashed transparent;
-    &.hovered:not(.hovered-nested) {
+    *:not(#Thumbnails) &.hovered:not(.hovered-nested) {
         border-color: rgba(0,0,0,0.5);
     }
+
+    .comp-toolbar {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        display: none;
+        button {
+            background: none;
+            border: none;
+            float: left;
+            font-size: 0.8em;
+            padding: 0;
+            color: white;
+            // padding: 0.3em 0.6em;
+            width: 1.8em;
+            line-height: 1.6em;
+            margin-left: 4px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        button, i {
+            cursor: pointer;
+        }
+        .btn-toolbar:nth-child(1) {
+            background-color: #689F38;
+        }
+        .btn-toolbar:nth-child(2) {
+            background-color: #F44336;
+        }
+        .btn-toolbar:nth-child(3) {
+            background-color: $color-accent;
+        }
+        .btn-toolbar:nth-child(4) {
+            background-color: #37474F;
+        }
+    }
+
+}
+
+.active > .comp-toolbar {
+    display: block;
 }
 
 .ColumnWrap {

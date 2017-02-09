@@ -51,7 +51,28 @@ Vue.component('wrapper', {
     template: '\
         <div class="Component">\
             <component :is="config.name" :config="config"></component>\
+            <div class="comp-toolbar">\
+                <button class="btn-toolbar" @click="copy"><i class="fa fa-clone"></i></button>\
+                <button class="btn-toolbar" @click="trash"><i class="fa fa-trash-o"></i></button>\
+                <button class="btn-toolbar"><i class="fa fa-cog"></i></button>\
+            </div>\
         </div>',
+    methods: {
+
+        trash: function() {
+            $(this.$el).remove();
+            syncStageAndStore();
+            debug(checkSync);
+        },
+
+        copy: function() {
+            var path = walk.up(this.$el);
+            path[0].index++;
+            var data = JSON.parse($(this.$el).attr('data-config'));
+            walk.down(path.reverse(), data);
+        }
+
+    },
     mounted: function() {
         initStageComponent(this);
         initEditor(this.$el);
@@ -81,6 +102,13 @@ Vue.component('context', {
         addContainer(this.$el);
         hoverIndication(this.$el);
     }
+})
+//
+//  src/js/component-heading.js
+//
+Vue.component('heading', {
+    props: ['config'],
+    template: '<div data-editor="basic" data-prop="content" v-html="config.content"></div>'
 })
 //
 //  src/js/component-body-copy.js
@@ -120,6 +148,11 @@ var componentDefaults = {
         name: 'body-copy',
         display: 'Body Copy',
         content: '<p>Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.</p>'
+    },
+    'heading': {
+        name: 'heading',
+        display: 'Title',
+        content: '<h1>Lorem Ipsum Titlum</h1>'
     }
 }
 //
@@ -132,12 +165,14 @@ var app = new Vue({
         stage: [],
         store: '',
         saved: '',
+        shiftdown: false,
         thumbnails: [
+            componentDefaults['heading'],
             componentDefaults['body-copy'],
             componentDefaults['two-column']
         ],
         trash: [],
-        username: 'User Name'
+        username: 'mcgilljo'
     },
     methods: {
         save: function() {
@@ -166,7 +201,9 @@ var app = new Vue({
         }
     },
     mounted: function() {
+        var _this = this;
         $(g.id.loading).remove();
+        fireDocumentHandlers();
         $('.thumbnail').on('mouseenter mouseleave', function() {
             $(this).toggleClass('hovered');
         })
@@ -187,6 +224,26 @@ g.node = {
     stage: g.$.stage[0],
     thumbnails: g.$.thumbnails[0],
     trash: g.$.trash[0]
+}
+//
+//  src/js/documentHandlers.js
+//
+function fireDocumentHandlers() {
+
+    $(document).on({
+        'click': function(e) {
+            var comp = $(e.target).closest('.Component');
+            var stage = $(e.target).closest('#Stage');
+            if (comp.length > 0 && stage.length > 0) {
+                $('.Component.active').removeClass('active');
+                comp.addClass('active');
+                debug('active comp');
+            } else {
+                $('.Component.active').removeClass('active');
+            }
+        }
+    })
+
 }
 //
 //  src/js/util.js
@@ -448,7 +505,11 @@ function initEditor(component) {
 var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     copy: function(el, source) {
-        return source === g.node.thumbnails;
+        if (app.shiftdown && source === g.node.stage) {
+            return true;
+        } else {
+            return source === g.node.thumbnails;
+        } 
     },
 
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
@@ -485,6 +546,7 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         syncStageAndStore();
         debug(checkSync);
     }
+
 }).on('over', function(el, container, source) {
 
     if (container === g.node.trash) {

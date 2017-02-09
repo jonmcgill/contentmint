@@ -12,7 +12,7 @@ body {
 .font-base {
   font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
 
-i {
+#Topbar i, #BottomBar i {
   display: inline-block;
   margin-right: 0.4em;
   margin-left: -0.4em; }
@@ -116,13 +116,16 @@ i {
   transition: padding-left 200ms;
   cursor: grab;
   cursor: -webkit-grab; }
+  .thumbnail .comp-toolbar {
+    display: none; }
   .thumbnail.hovered {
     padding-left: 0.6em; }
   .thumbnail-overlay {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 100%; }
+    width: 100%;
+    z-index: 1; }
   .thumbnail-grab {
     position: absolute;
     top: 0;
@@ -211,11 +214,42 @@ i {
   cursor: grab;
   cursor: -webkit-grab;
   cursor: -moz-grab;
+  position: relative;
   border: 1px dashed transparent; }
   .Component *:not(.Component) {
     cursor: auto; }
-  .Component.hovered:not(.hovered-nested) {
+  *:not(#Thumbnails) .Component.hovered:not(.hovered-nested) {
     border-color: rgba(0, 0, 0, 0.5); }
+  .Component .comp-toolbar {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    display: none; }
+    .Component .comp-toolbar button {
+      background: none;
+      border: none;
+      float: left;
+      font-size: 0.8em;
+      padding: 0;
+      color: white;
+      width: 1.8em;
+      line-height: 1.6em;
+      margin-left: 4px;
+      border-radius: 3px;
+      text-align: center; }
+    .Component .comp-toolbar button, .Component .comp-toolbar i {
+      cursor: pointer; }
+    .Component .comp-toolbar .btn-toolbar:nth-child(1) {
+      background-color: #689F38; }
+    .Component .comp-toolbar .btn-toolbar:nth-child(2) {
+      background-color: #F44336; }
+    .Component .comp-toolbar .btn-toolbar:nth-child(3) {
+      background-color: #2196F3; }
+    .Component .comp-toolbar .btn-toolbar:nth-child(4) {
+      background-color: #37474F; }
+
+.active > .comp-toolbar {
+  display: block; }
 
 .ColumnWrap:after {
   display: table;

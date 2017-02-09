@@ -10,12 +10,16 @@ var js_files = [
 
     './src/js/component-wrapper.js',
     './src/js/component-context.js',
+
+    './src/js/component-heading.js',
     './src/js/component-body-copy.js',
     './src/js/component-two-column.js',
     './src/js/componentDefaults.js',
+    
     './src/js/app.js',
 
     './src/js/nodes.js',
+    './src/js/documentHandlers.js',
     './src/js/util.js',
     './src/js/collectData.js',
     './src/js/walk.js',

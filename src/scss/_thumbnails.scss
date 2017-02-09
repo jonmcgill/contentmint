@@ -16,6 +16,10 @@
     cursor: grab;
     cursor: -webkit-grab;
 
+    .comp-toolbar {
+        display: none;
+    }
+
     &.hovered {
         padding-left: 0.6em;
     }
@@ -25,6 +29,7 @@
         top: 0;
         bottom: 0;
         width: 100%;
+        z-index:1;
     }
 
     &-grab {
