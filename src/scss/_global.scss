@@ -10,11 +10,36 @@
     padding: 1em;
 }
 
+.Context:not(#Stage), .Component {
+    padding: 1em;
+    background: white;
+}
+
+.Component {
+    cursor: grab;
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+    *:not(.Component) {
+        cursor: auto;
+    }
+    border: 1px dashed transparent;
+    &.hovered:not(.hovered-nested) {
+        border-color: rgba(0,0,0,0.5);
+    }
+}
+
 .ColumnWrap {
-    padding: 2em;
-    border: 2px solid black;
-    div {
+    &:after {
+        display: table;
+        content: '';
+        clear: both;
+    }
+    & > div {
         padding: 1em;
-        background: #efefef;
+        margin: 0.2em;
+        border: 1px solid #999;
+        width: calc(50% - 0.4em);
+        float: left;
+        display: inline-block;
     }
 }

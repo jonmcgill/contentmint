@@ -60,3 +60,29 @@ function contains(a, b){
 function log(thing) {
     console.log(thing);
 }
+
+
+function hoverIndication(elem) {
+    $(elem).on('mouseenter', function(e) {
+        var t = $(e.target);
+        if (t.hasClass('Component') || t.hasClass('Context')) {
+            t.addClass(g.name.hovered);
+            var parent = t.parents('.hovered');
+            if (parent[0] && parent[0] !== e.target) {
+                parent.addClass('hovered-nested');
+            }
+        }
+    }).on('mouseleave', function(e) {
+        var t = $(e.target);
+        if (t.hasClass('hovered-nested')) {
+            if (t.parents('.hovered').length === 0) {
+                t.removeClass('hovered hovered-nested')
+            }
+        } else if (t.hasClass('hovered')) {
+            if (t.parents('.hovered').length > 0) {
+                t.parents('.hovered').first().removeClass('hovered-nested');
+            }
+            t.removeClass('hovered');
+        }
+    })
+}

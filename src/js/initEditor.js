@@ -45,7 +45,7 @@ function initEditor(component) {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
                     componentData[componentProp] = editor.getContent();
-                    $component.attr(g.name.config, JSON.parse(componentData));
+                    $component.attr(g.name.config, JSON.stringify(componentData));
                 })
             }
 

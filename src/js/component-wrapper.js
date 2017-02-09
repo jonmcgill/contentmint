@@ -13,6 +13,7 @@ Vue.component('wrapper', {
     mounted: function() {
         initStageComponent(this);
         initEditor(this.$el);
+        hoverIndication(this.$el);
     },
     updated: function() {
         initStageComponent(this);

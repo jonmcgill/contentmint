@@ -8,7 +8,9 @@ var g = {
         editor: '[data-editor]'
     },
     class: {
-        component: '.Component'
+        component: '.Component',
+        context: '.Context',
+        hovered: '.hovered'
     },
     editors: {
         plain: 'undo redo bold italic',
@@ -25,12 +27,14 @@ var g = {
     name: {
         config: 'data-config',
         context: 'Context',
+        contextEmpty: 'Context-Empty',
         contextName: 'data-context-name',
         editor: 'data-editor',
         editorID: 'data-editor-id',
         editorPlain: 'plain',
         editorBasic: 'basic',
         editorRobust: 'robust',
+        hovered: 'hovered',
         prop: 'data-prop',
         thumbnail: 'thumbnail'
     }
@@ -50,6 +54,7 @@ Vue.component('wrapper', {
     mounted: function() {
         initStageComponent(this);
         initEditor(this.$el);
+        hoverIndication(this.$el);
     },
     updated: function() {
         initStageComponent(this);
@@ -73,6 +78,7 @@ Vue.component('context', {
         </div>',
     mounted: function() {
         addContainer(this.$el);
+        hoverIndication(this.$el);
     }
 })
 //
@@ -235,6 +241,32 @@ function contains(a, b){
 function log(thing) {
     console.log(thing);
 }
+
+
+function hoverIndication(elem) {
+    $(elem).on('mouseenter', function(e) {
+        var t = $(e.target);
+        if (t.hasClass('Component') || t.hasClass('Context')) {
+            t.addClass(g.name.hovered);
+            var parent = t.parents('.hovered');
+            if (parent[0] && parent[0] !== e.target) {
+                parent.addClass('hovered-nested');
+            }
+        }
+    }).on('mouseleave', function(e) {
+        var t = $(e.target);
+        if (t.hasClass('hovered-nested')) {
+            if (t.parents('.hovered').length === 0) {
+                t.removeClass('hovered hovered-nested')
+            }
+        } else if (t.hasClass('hovered')) {
+            if (t.parents('.hovered').length > 0) {
+                t.parents('.hovered').first().removeClass('hovered-nested');
+            }
+            t.removeClass('hovered');
+        }
+    })
+}
 //
 //  src/js/collectData.js
 //
@@ -382,7 +414,7 @@ function initEditor(component) {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
                     componentData[componentProp] = editor.getContent();
-                    $component.attr(g.name.config, JSON.parse(componentData));
+                    $component.attr(g.name.config, JSON.stringify(componentData));
                 })
             }
 
@@ -402,8 +434,6 @@ function initEditor(component) {
 //
 //  src/js/initDragula.js
 //
-
-
 var drake = dragula([g.node.thumbnails, g.node.stage], {
 
     copy: function(el, source) {
@@ -444,6 +474,9 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         syncStageAndStore();
         debug(checkSync);
     }
+}).on('remove', function(el, container, source) {
+    syncStageAndStore();
+    debug(checkSync);
 })
 
 function addContainer(el) {

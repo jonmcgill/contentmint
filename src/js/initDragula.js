@@ -1,8 +1,6 @@
 //
 //  src/js/initDragula.js
 //
-
-
 var drake = dragula([g.node.thumbnails, g.node.stage], {
 
     copy: function(el, source) {
@@ -43,6 +41,9 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         syncStageAndStore();
         debug(checkSync);
     }
+}).on('remove', function(el, container, source) {
+    syncStageAndStore();
+    debug(checkSync);
 })
 
 function addContainer(el) {
