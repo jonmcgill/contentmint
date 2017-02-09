@@ -1,0 +1,70 @@
+#Topbar {
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 40px;
+    width: 100%;
+    background: white;
+    border-bottom: 2px solid $color-bd-base;
+    font-family: $font-base;
+
+    .left {
+        width: 66%;
+        float: left;
+        padding-left: 1em;
+        padding-right: 1em;
+        height: 40px;
+    }
+
+    #contentName {
+        line-height: 38px;
+        border: none;
+        font-family: inherit;
+        font-size: 0.9em;
+        outline: none;
+        padding: 0;
+        width: 60%;
+        color: rgba(0,0,0,0.7);
+    }
+
+    .right {
+        width: 34%;
+        float: right;
+        border-left: 2px solid $color-bd-base;
+        height: 40px;
+        background: $color-bg-base;
+        border-bottom: 2px solid $color-bd-base;
+    }
+
+    #SaveButton {
+        background: none;
+        border: none;
+        margin: none;
+        padding: 0 1em;;
+        display: inline-block;
+        font-size: 0.9em;
+        height: 38px;
+        outline: none;
+        cursor: pointer;
+        color: rgba(0,0,0,0.4);
+        width: 6em;
+        &:hover {
+            color: rgba(0,0,0,0.8);
+        }
+    }
+
+    #username {
+        float: right;
+        a {
+            color: $color-font-accent;
+            font-size: 0.9em;
+            line-height: 40px;
+            padding-right: 1em;
+            padding-left: 1em;
+            text-decoration: none;
+            &:hover { text-decoration: underline; }
+        }
+    }
+
+}

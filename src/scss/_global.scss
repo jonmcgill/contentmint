@@ -2,44 +2,21 @@
     box-sizing: border-box;
 }
 
+body {
+    margin: 0;
+    padding: 0;
+}
+
 [v-cloak] {
     display: none;
 }
 
-#Stage, #Thumbnails {
-    padding: 1em;
+.font-base {
+    font-family: $font-base;
 }
 
-.Context:not(#Stage), .Component {
-    padding: 1em;
-    background: white;
-}
-
-.Component {
-    cursor: grab;
-    cursor: -webkit-grab;
-    cursor: -moz-grab;
-    *:not(.Component) {
-        cursor: auto;
-    }
-    border: 1px dashed transparent;
-    &.hovered:not(.hovered-nested) {
-        border-color: rgba(0,0,0,0.5);
-    }
-}
-
-.ColumnWrap {
-    &:after {
-        display: table;
-        content: '';
-        clear: both;
-    }
-    & > div {
-        padding: 1em;
-        margin: 0.2em;
-        border: 1px solid #999;
-        width: calc(50% - 0.4em);
-        float: left;
-        display: inline-block;
-    }
+i {
+    display: inline-block;
+    margin-right: 0.4em;
+    margin-left: -0.4em;
 }

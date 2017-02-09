@@ -1,38 +1,21 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans");
 * {
   box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0; }
 
 [v-cloak] {
   display: none; }
 
-#Stage, #Thumbnails {
-  padding: 1em; }
+.font-base {
+  font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
 
-.Context:not(#Stage), .Component {
-  padding: 1em;
-  background: white; }
-
-.Component {
-  cursor: grab;
-  cursor: -webkit-grab;
-  cursor: -moz-grab;
-  border: 1px dashed transparent; }
-  .Component *:not(.Component) {
-    cursor: auto; }
-  .Component.hovered:not(.hovered-nested) {
-    border-color: rgba(0, 0, 0, 0.5); }
-
-.ColumnWrap:after {
-  display: table;
-  content: '';
-  clear: both; }
-
-.ColumnWrap > div {
-  padding: 1em;
-  margin: 0.2em;
-  border: 1px solid #999;
-  width: calc(50% - 0.4em);
-  float: left;
-  display: inline-block; }
+i {
+  display: inline-block;
+  margin-right: 0.4em;
+  margin-left: -0.4em; }
 
 .gu-mirror {
   position: fixed !important;
@@ -61,3 +44,204 @@
   opacity: 0.6;
   /*background: rgba(0,0,0,0.3);*/
   border-radius: 3px; }
+
+#Topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 40px;
+  width: 100%;
+  background: white;
+  border-bottom: 2px solid rgba(0, 50, 0, 0.1);
+  font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
+  #Topbar .left {
+    width: 66%;
+    float: left;
+    padding-left: 1em;
+    padding-right: 1em;
+    height: 40px; }
+  #Topbar #contentName {
+    line-height: 38px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9em;
+    outline: none;
+    padding: 0;
+    width: 60%;
+    color: rgba(0, 0, 0, 0.7); }
+  #Topbar .right {
+    width: 34%;
+    float: right;
+    border-left: 2px solid rgba(0, 50, 0, 0.1);
+    height: 40px;
+    background: #eff1ef;
+    border-bottom: 2px solid rgba(0, 50, 0, 0.1); }
+  #Topbar #SaveButton {
+    background: none;
+    border: none;
+    margin: none;
+    padding: 0 1em;
+    display: inline-block;
+    font-size: 0.9em;
+    height: 38px;
+    outline: none;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.4);
+    width: 6em; }
+    #Topbar #SaveButton:hover {
+      color: rgba(0, 0, 0, 0.8); }
+  #Topbar #username {
+    float: right; }
+    #Topbar #username a {
+      color: #2196f3;
+      font-size: 0.9em;
+      line-height: 40px;
+      padding-right: 1em;
+      padding-left: 1em;
+      text-decoration: none; }
+      #Topbar #username a:hover {
+        text-decoration: underline; }
+
+#Thumbnails {
+  padding: 0.5em; }
+
+.thumbnail {
+  background: white;
+  border: 1px solid #ddd;
+  position: relative;
+  padding-bottom: 1em;
+  margin-bottom: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  transition: padding-left 200ms;
+  cursor: grab;
+  cursor: -webkit-grab; }
+  .thumbnail.hovered {
+    padding-left: 0.6em; }
+  .thumbnail-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%; }
+  .thumbnail-grab {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    background: #2196F3;
+    transition: width 200ms; }
+    .hovered .thumbnail-grab {
+      width: 0.6em; }
+  .thumbnail > span {
+    position: absolute;
+    font-size: 0.8em;
+    color: rgba(0, 0, 0, 0.5);
+    right: 1em;
+    bottom: 0.8em; }
+
+#Sidebar {
+  background: #eff1ef;
+  position: fixed;
+  top: 40px;
+  bottom: 0;
+  right: 0;
+  width: 34%;
+  overflow-y: auto;
+  border-left: 2px solid rgba(0, 50, 0, 0.1); }
+
+#BottomBar {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  border-top: 2px solid rgba(0, 50, 0, 0.1);
+  height: 40px;
+  width: 34%; }
+  #BottomBar > * {
+    width: 33.33333%;
+    float: left;
+    line-height: 40px;
+    font-size: 0.9em;
+    padding: 0;
+    color: rgba(0, 0, 0, 0.7); }
+  #BottomBar button {
+    border: none;
+    background: none;
+    outline: none;
+    margin: none;
+    cursor: pointer;
+    border-left: 2px solid rgba(0, 50, 0, 0.1); }
+    #BottomBar button:hover {
+      background: rgba(0, 0, 0, 0.05); }
+  #BottomBar .trash-wrap {
+    position: relative; }
+    #BottomBar .trash-wrap span {
+      font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+      position: absolute;
+      padding-left: calc(50% - 30px); }
+  #BottomBar #Trash {
+    overflow: hidden;
+    position: relative;
+    height: 40px; }
+    #BottomBar #Trash.trashing {
+      background: #EF9A9A;
+      opacity: 0.8;
+      border-left: 2px solid rgba(0, 0, 0, 0.1); }
+    #BottomBar #Trash * {
+      opacity: 0; }
+    #BottomBar #Trash:after {
+      position: absolute;
+      top: 0px;
+      left: 2px;
+      padding-left: calc(50% - 20px);
+      content: '';
+      line-height: 40px; }
+
+#Template {
+  margin-top: 2.4em;
+  width: 66%; }
+
+#Stage {
+  padding: 1em; }
+
+.Context:not(#Stage):not(#Trash), .Component {
+  padding: 1em; }
+
+.Component {
+  cursor: grab;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  border: 1px dashed transparent; }
+  .Component *:not(.Component) {
+    cursor: auto; }
+  .Component.hovered:not(.hovered-nested) {
+    border-color: rgba(0, 0, 0, 0.5); }
+
+.ColumnWrap:after {
+  display: table;
+  content: '';
+  clear: both; }
+
+.ColumnWrap > div {
+  padding: 1em;
+  margin: 0.2em;
+  border: 1px solid #999;
+  width: calc(50% - 0.4em);
+  float: left;
+  display: inline-block; }
+
+#EditorToolbar {
+  float: right;
+  color: rgba(0, 0, 0, 0.7) !important; }
+  #EditorToolbar > div {
+    border: none; }
+  #EditorToolbar * {
+    background: white; }
+  #EditorToolbar button, #EditorToolbar .mce-ico {
+    font-size: 0.9em;
+    color: rgba(0, 0, 0, 0.6) !important; }
+  #EditorToolbar .mce-container * {
+    text-align: center !important; }
+
+.mce-edit-focus {
+  outline: none !important; }

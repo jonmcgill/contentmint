@@ -1,0 +1,21 @@
+#EditorToolbar {
+    float: right;
+    color: rgba(0,0,0,0.7) !important;
+    & > div {
+        border: none;
+    }
+    * {
+        background: white;
+    }
+    button, .mce-ico {
+        font-size: 0.9em;
+        color: rgba(0,0,0,0.6) !important;
+    }
+    .mce-container * {
+        text-align: center !important;
+    }
+}
+
+.mce-edit-focus {
+    outline: none !important;
+}

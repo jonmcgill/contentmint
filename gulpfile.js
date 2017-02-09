@@ -13,7 +13,7 @@ var js_files = [
     './src/js/component-body-copy.js',
     './src/js/component-two-column.js',
     './src/js/componentDefaults.js',
-    './src/js/main.js',
+    './src/js/app.js',
 
     './src/js/nodes.js',
     './src/js/util.js',

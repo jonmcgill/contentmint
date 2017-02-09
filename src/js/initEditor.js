@@ -53,8 +53,10 @@ function initEditor(component) {
             $editorElement.attr(g.name.editorID, editorID)
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
             $editorElement.on('mouseover', function() {
-                tinymce.init(editorConfig);
-                debug('editor initiated - ' + editorID);
+                if (!$editorElement.hasClass('mce-content-body')) {
+                    tinymce.init(editorConfig);
+                    debug('editor initiated - ' + editorID);
+                }
             })
 
         }

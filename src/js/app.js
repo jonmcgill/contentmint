@@ -4,13 +4,16 @@
 var app = new Vue({
     el: '#App',
     data: {
+        contentName: 'Content Name Goes Here',
+        stage: [],
+        store: '',
+        saved: '',
         thumbnails: [
             componentDefaults['body-copy'],
             componentDefaults['two-column']
         ],
-        stage: [],
-        store: '',
-        saved: ''
+        trash: [],
+        username: 'User Name'
     },
     methods: {
         save: function() {
@@ -40,5 +43,8 @@ var app = new Vue({
     },
     mounted: function() {
         $(g.id.loading).remove();
+        $('.thumbnail').on('mouseenter mouseleave', function() {
+            $(this).toggleClass('hovered');
+        })
     }
 })

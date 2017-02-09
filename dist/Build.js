@@ -19,10 +19,11 @@ var g = {
     },
     id: {
         app: '#App',
-        loading: '#Loading',
-        thumbnails: '#Thumbnails',
         editorToolbar: '#EditorToolbar',
-        stage: '#Stage'
+        loading: '#Loading',
+        stage: '#Stage',
+        thumbnails: '#Thumbnails',
+        trash: '#Trash'
     },
     name: {
         config: 'data-config',
@@ -127,13 +128,16 @@ var componentDefaults = {
 var app = new Vue({
     el: '#App',
     data: {
+        contentName: 'Content Name Goes Here',
+        stage: [],
+        store: '',
+        saved: '',
         thumbnails: [
             componentDefaults['body-copy'],
             componentDefaults['two-column']
         ],
-        stage: [],
-        store: '',
-        saved: ''
+        trash: [],
+        username: 'User Name'
     },
     methods: {
         save: function() {
@@ -163,6 +167,9 @@ var app = new Vue({
     },
     mounted: function() {
         $(g.id.loading).remove();
+        $('.thumbnail').on('mouseenter mouseleave', function() {
+            $(this).toggleClass('hovered');
+        })
     }
 })
 //
@@ -170,14 +177,16 @@ var app = new Vue({
 //
 g['$'] = {
     app: $(g.id.app),
+    stage: $(g.id.stage),
     thumbnails: $(g.id.thumbnails),
-    stage: $(g.id.stage)
+    trash: $(g.id.trash)
 }
 
 g.node = {
     app: g.$.app[0],
+    stage: g.$.stage[0],
     thumbnails: g.$.thumbnails[0],
-    stage: g.$.stage[0]
+    trash: g.$.trash[0]
 }
 //
 //  src/js/util.js
@@ -422,8 +431,10 @@ function initEditor(component) {
             $editorElement.attr(g.name.editorID, editorID)
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
             $editorElement.on('mouseover', function() {
-                tinymce.init(editorConfig);
-                debug('editor initiated - ' + editorID);
+                if (!$editorElement.hasClass('mce-content-body')) {
+                    tinymce.init(editorConfig);
+                    debug('editor initiated - ' + editorID);
+                }
             })
 
         }
@@ -434,7 +445,7 @@ function initEditor(component) {
 //
 //  src/js/initDragula.js
 //
-var drake = dragula([g.node.thumbnails, g.node.stage], {
+var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     copy: function(el, source) {
         return source === g.node.thumbnails;
@@ -446,20 +457,20 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         return target !== g.node.thumbnails && !contains(el, target);
     },
 
-    removeOnSpill: function(el, source) {
-        return source === g.node.Stage;
-    }
-
-
 }).on('drop', function(el, target, source, sibling) {
-    if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+
+    if (target === g.node.trash) {
+        
+        syncStageAndStore();
+        debug('Component trashed');
+        debug(checkSync);
+        g.$.trash.empty();
+
+    } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+
         var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
         var index = getIndex($(el).parent(), el);
         var dataPath = walk.up(el);
-        debug('Component json data on drop');
-        debug(compData);
-        debug('Path to spot in data structure parsed from DOM position');
-        debug(dataPath);
 
         $(el).remove();
         walk.down(dataPath.reverse(), compData);
@@ -474,9 +485,18 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         syncStageAndStore();
         debug(checkSync);
     }
-}).on('remove', function(el, container, source) {
-    syncStageAndStore();
-    debug(checkSync);
+}).on('over', function(el, container, source) {
+
+    if (container === g.node.trash) {
+        g.$.trash.addClass('trashing');
+    } else {
+        g.$.trash.removeClass('trashing');
+    }
+
+}).on('dragend', function(el, container, source) {
+
+    g.$.trash.removeClass('trashing');
+
 })
 
 function addContainer(el) {

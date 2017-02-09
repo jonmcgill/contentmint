@@ -1,7 +1,7 @@
 //
 //  src/js/initDragula.js
 //
-var drake = dragula([g.node.thumbnails, g.node.stage], {
+var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     copy: function(el, source) {
         return source === g.node.thumbnails;
@@ -13,20 +13,20 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         return target !== g.node.thumbnails && !contains(el, target);
     },
 
-    removeOnSpill: function(el, source) {
-        return source === g.node.Stage;
-    }
-
-
 }).on('drop', function(el, target, source, sibling) {
-    if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+
+    if (target === g.node.trash) {
+        
+        syncStageAndStore();
+        debug('Component trashed');
+        debug(checkSync);
+        g.$.trash.empty();
+
+    } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+
         var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
         var index = getIndex($(el).parent(), el);
         var dataPath = walk.up(el);
-        debug('Component json data on drop');
-        debug(compData);
-        debug('Path to spot in data structure parsed from DOM position');
-        debug(dataPath);
 
         $(el).remove();
         walk.down(dataPath.reverse(), compData);
@@ -41,9 +41,18 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
         syncStageAndStore();
         debug(checkSync);
     }
-}).on('remove', function(el, container, source) {
-    syncStageAndStore();
-    debug(checkSync);
+}).on('over', function(el, container, source) {
+
+    if (container === g.node.trash) {
+        g.$.trash.addClass('trashing');
+    } else {
+        g.$.trash.removeClass('trashing');
+    }
+
+}).on('dragend', function(el, container, source) {
+
+    g.$.trash.removeClass('trashing');
+
 })
 
 function addContainer(el) {

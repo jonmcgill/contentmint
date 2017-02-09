@@ -1,0 +1,72 @@
+#Sidebar {
+    background: $color-bg-base;
+    position: fixed;
+    top: 40px;
+    bottom: 0;
+    right: 0;
+    width: 34%;
+    overflow-y: auto;
+    border-left: 2px solid $color-bd-base;
+}
+
+#BottomBar {
+
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    border-top: 2px solid $color-bd-base;
+    height: 40px;
+    width: 34%;
+
+    & > * {
+        width: 33.33333%;
+        float: left;
+        line-height: 40px;
+        font-size: 0.9em;
+        padding: 0;
+        color: rgba(0,0,0,0.7);
+    }
+
+    button {
+        border: none;
+        background: none;
+        outline: none;
+        margin: none;
+        cursor: pointer;
+        border-left: 2px solid $color-bd-base;
+        &:hover {
+            background: $color-bg-accent;
+        }
+    }
+
+    .trash-wrap {
+        position: relative;
+        span {
+            font-family: $font-base;
+            position: absolute;
+            padding-left: calc(50% - 30px);
+        }
+    }
+
+    #Trash {
+        overflow: hidden;
+        position: relative;
+        height: 40px;
+        &.trashing {
+            background: #EF9A9A;
+            opacity: 0.8;
+            border-left: 2px solid darken($color-bd-base, 10%);
+        }
+        & * {
+            opacity: 0;
+        }
+        &:after {
+            position: absolute;
+            top: 0px;
+            left: 2px;
+            padding-left: calc(50% - 20px);
+            content: '';
+            line-height: 40px;
+        }
+    }
+}

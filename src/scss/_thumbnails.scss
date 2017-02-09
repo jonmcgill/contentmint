@@ -1,0 +1,51 @@
+
+#Thumbnails {
+    padding: 0.5em;
+}
+
+.thumbnail {
+
+    background: white;
+    border: 1px solid #ddd;
+    position: relative;
+    padding-bottom: 1em;
+    margin-bottom: 5px;
+    overflow: hidden;
+    border-radius: 3px;
+    transition: padding-left 200ms;
+    cursor: grab;
+    cursor: -webkit-grab;
+
+    &.hovered {
+        padding-left: 0.6em;
+    }
+
+    &-overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+    &-grab {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        background: $color-accent;
+        transition: width 200ms;
+        .hovered & {
+            width: 0.6em;
+        }
+    }
+
+    & > span {
+        position: absolute;
+        font-size: 0.8em;
+        color: rgba(0,0,0,0.5);
+        right: 1em;
+        bottom: 0.8em;
+    }
+
+}

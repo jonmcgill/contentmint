@@ -19,10 +19,11 @@ var g = {
     },
     id: {
         app: '#App',
-        loading: '#Loading',
-        thumbnails: '#Thumbnails',
         editorToolbar: '#EditorToolbar',
-        stage: '#Stage'
+        loading: '#Loading',
+        stage: '#Stage',
+        thumbnails: '#Thumbnails',
+        trash: '#Trash'
     },
     name: {
         config: 'data-config',
