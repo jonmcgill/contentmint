@@ -5,7 +5,7 @@
 //  from the data-config elements and their children.
 function collectData(elem, data) {
     var data = data || [];
-    var elem = elem || g.node.Stage;
+    var elem = elem || g.node.stage;
     var children = $(elem).children();
     if (children.length) {
         children.each(function() {
@@ -25,4 +25,5 @@ function collectData(elem, data) {
             data.push(comp);
         })
     }
+    return data;
 }

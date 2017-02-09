@@ -24,8 +24,6 @@ function initEditor(component) {
             editorType = $editorElement.attr(g.name.editor),
             editorInitiated = $editorElement.attr(g.name.editorID),
             isThumbnail = $component.parent().hasClass(g.name.thumbnail);
-            console.log(!editorInitiated)
-            console.log(isThumbnail)
         if (!editorInitiated && !isThumbnail) {
             switch(editorType) {
                 case g.name.editorPlain:
@@ -56,7 +54,7 @@ function initEditor(component) {
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
             $editorElement.on('mouseover', function() {
                 tinymce.init(editorConfig);
-                console.log('init editing');
+                debug('editor initiated - ' + editorID);
             })
 
         }

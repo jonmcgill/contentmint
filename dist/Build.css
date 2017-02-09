@@ -9,7 +9,10 @@
 
 .ColumnWrap {
   padding: 2em;
-  background: black; }
+  border: 2px solid black; }
+  .ColumnWrap div {
+    padding: 1em;
+    background: #efefef; }
 
 .gu-mirror {
   position: fixed !important;

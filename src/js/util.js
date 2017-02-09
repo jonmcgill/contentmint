@@ -20,6 +20,19 @@ function genID(num) {
 }
 
 
+function debug(output) {
+    if (g.debug) {
+        if (typeof(output) === 'string') {
+            console.log('DEBUG: ' + output);
+        } else if (typeof(output) === 'object') {
+            console.log(output);
+        } else if (typeof(output) === 'function') {
+            output();
+        }
+    }
+}
+
+
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }

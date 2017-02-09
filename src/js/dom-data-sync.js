@@ -8,8 +8,8 @@ function checkSync() {
     
 }
 function syncStageAndStore() {
-    app.save();
+    app.collect();
     Vue.nextTick(function() {
-        app.load();
+        app.refresh();
     })
 }

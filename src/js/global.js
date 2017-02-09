@@ -2,6 +2,7 @@
 //  src/js/global.js
 //
 var g = {
+    debug: true,
     attr: {
         contextName: '[data-context-name]',
         editor: '[data-editor]'

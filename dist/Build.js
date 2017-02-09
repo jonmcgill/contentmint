@@ -2,6 +2,7 @@
 //  src/js/global.js
 //
 var g = {
+    debug: true,
     attr: {
         contextName: '[data-context-name]',
         editor: '[data-editor]'
@@ -132,6 +133,16 @@ var app = new Vue({
         save: function() {
             this.saved = JSON.stringify(collectData());
         },
+        collect: function() {
+            this.store = JSON.stringify(collectData());
+        },
+        refresh: function() {
+            var _this = this;
+            _this.empty();
+            Vue.nextTick(function() {
+                _this.stage = JSON.parse(_this.store);
+            })
+        },
         empty: function() {
             this.stage = [];
             $(g.id.stage).empty();
@@ -140,7 +151,7 @@ var app = new Vue({
             var _this = this;
             _this.empty();
             Vue.nextTick(function() {
-                _this.stage = JSON.parse(_this.store);
+                _this.stage = JSON.parse(_this.saved);
             })
         }
     },
@@ -184,6 +195,19 @@ function genID(num) {
 }
 
 
+function debug(output) {
+    if (g.debug) {
+        if (typeof(output) === 'string') {
+            console.log('DEBUG: ' + output);
+        } else if (typeof(output) === 'object') {
+            console.log(output);
+        } else if (typeof(output) === 'function') {
+            output();
+        }
+    }
+}
+
+
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
@@ -218,7 +242,7 @@ function log(thing) {
 //  from the data-config elements and their children.
 function collectData(elem, data) {
     var data = data || [];
-    var elem = elem || g.node.Stage;
+    var elem = elem || g.node.stage;
     var children = $(elem).children();
     if (children.length) {
         children.each(function() {
@@ -238,6 +262,7 @@ function collectData(elem, data) {
             data.push(comp);
         })
     }
+    return data;
 }
 //
 //  src/js/walk.js
@@ -280,9 +305,9 @@ function checkSync() {
     
 }
 function syncStageAndStore() {
-    app.save();
+    app.collect();
     Vue.nextTick(function() {
-        app.load();
+        app.refresh();
     })
 }
 //
@@ -336,8 +361,6 @@ function initEditor(component) {
             editorType = $editorElement.attr(g.name.editor),
             editorInitiated = $editorElement.attr(g.name.editorID),
             isThumbnail = $component.parent().hasClass(g.name.thumbnail);
-            console.log(!editorInitiated)
-            console.log(isThumbnail)
         if (!editorInitiated && !isThumbnail) {
             switch(editorType) {
                 case g.name.editorPlain:
@@ -368,7 +391,7 @@ function initEditor(component) {
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
             $editorElement.on('mouseover', function() {
                 tinymce.init(editorConfig);
-                console.log('init editing');
+                debug('editor initiated - ' + editorID);
             })
 
         }
@@ -399,31 +422,27 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
 
 
 }).on('drop', function(el, target, source, sibling) {
-    /*
-        So, when a new component is created in the staging area, it starts
-        as a direct copy of the thumbnail. Previously we just removed that element,
-        inserted its data into the Vue instance, and let Vue handle rendering. However,
-        since rearranging components in stage cannot interact with data, neither can
-        adding components, otherwise lots of confusion.
-    */
     if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
-
         var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
         var index = getIndex($(el).parent(), el);
         var dataPath = walk.up(el);
+        debug('Component json data on drop');
+        debug(compData);
+        debug('Path to spot in data structure parsed from DOM position');
+        debug(dataPath);
 
         $(el).remove();
         walk.down(dataPath.reverse(), compData);
 
         Vue.nextTick(function() {
-            app.save();
-            checkSync();
+            app.collect();
+            debug(checkSync);
         })
     }
     if ((source === g.node.Stage || $(source).hasClass(g.name.context)) &&
         (target === g.node.Stage || $(target).hasClass(g.name.context))) {
         syncStageAndStore();
-        checkSync();
+        debug(checkSync);
     }
 })
 

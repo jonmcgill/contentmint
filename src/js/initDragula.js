@@ -21,31 +21,27 @@ var drake = dragula([g.node.thumbnails, g.node.stage], {
 
 
 }).on('drop', function(el, target, source, sibling) {
-    /*
-        So, when a new component is created in the staging area, it starts
-        as a direct copy of the thumbnail. Previously we just removed that element,
-        inserted its data into the Vue instance, and let Vue handle rendering. However,
-        since rearranging components in stage cannot interact with data, neither can
-        adding components, otherwise lots of confusion.
-    */
     if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
-
         var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
         var index = getIndex($(el).parent(), el);
         var dataPath = walk.up(el);
+        debug('Component json data on drop');
+        debug(compData);
+        debug('Path to spot in data structure parsed from DOM position');
+        debug(dataPath);
 
         $(el).remove();
         walk.down(dataPath.reverse(), compData);
 
         Vue.nextTick(function() {
-            app.save();
-            checkSync();
+            app.collect();
+            debug(checkSync);
         })
     }
     if ((source === g.node.Stage || $(source).hasClass(g.name.context)) &&
         (target === g.node.Stage || $(target).hasClass(g.name.context))) {
         syncStageAndStore();
-        checkSync();
+        debug(checkSync);
     }
 })
 

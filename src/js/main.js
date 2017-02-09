@@ -16,6 +16,16 @@ var app = new Vue({
         save: function() {
             this.saved = JSON.stringify(collectData());
         },
+        collect: function() {
+            this.store = JSON.stringify(collectData());
+        },
+        refresh: function() {
+            var _this = this;
+            _this.empty();
+            Vue.nextTick(function() {
+                _this.stage = JSON.parse(_this.store);
+            })
+        },
         empty: function() {
             this.stage = [];
             $(g.id.stage).empty();
@@ -24,7 +34,7 @@ var app = new Vue({
             var _this = this;
             _this.empty();
             Vue.nextTick(function() {
-                _this.stage = JSON.parse(_this.store);
+                _this.stage = JSON.parse(_this.saved);
             })
         }
     },
