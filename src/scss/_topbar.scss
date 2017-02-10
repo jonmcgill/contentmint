@@ -24,8 +24,13 @@
         font-size: 0.9em;
         outline: none;
         padding: 0;
-        width: 60%;
+        width: 50%;
         color: rgba(0,0,0,0.7);
+    }
+
+    #EditToolbar {
+        width: 50%;
+        float: right;
     }
 
     .right {

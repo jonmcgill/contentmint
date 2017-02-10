@@ -1,12 +1,10 @@
-.Context:not(#Stage):not(#Trash), .Component {
-    padding: 1em;
-}
 
 .Component {
     cursor: grab;
     cursor: -webkit-grab;
     cursor: -moz-grab;
     position: relative;
+    padding: 5px;
     *:not(.Component) {
         cursor: auto;
     }
@@ -51,6 +49,11 @@
         }
     }
 
+}
+
+.Context:not(#Stage):not(#Trash),
+#Thumbnails .Component {
+    padding: 1em;
 }
 
 .active > .comp-toolbar {

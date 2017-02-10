@@ -13,6 +13,13 @@
     }
     .mce-container * {
         text-align: center !important;
+        margin: 0;
+    }
+    .mce-tinymce-inline {
+        top: 2px;
+    }
+    .mce-toolbar-grp {
+        padding-top: 4.5px;
     }
 }
 

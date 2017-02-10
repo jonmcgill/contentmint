@@ -11,11 +11,46 @@ var componentDefaults = {
     'body-copy': {
         name: 'body-copy',
         display: 'Body Copy',
-        content: '<p>Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.</p>'
+        content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
     'heading': {
         name: 'heading',
         display: 'Title',
-        content: '<h1>Lorem Ipsum Titlum</h1>'
+        content: '<div style="font-family:Arial,sans-serif;font-size:2.4em;">Lorem Ipsum Titlum</div>'
+    },
+    'banner': {
+        name: 'banner',
+        display: 'Banner Image',
+        settings: {
+            active: false,
+            src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+            alt: 'Default alt text',
+            href: 'https://www.google.com'
+        },
+        fields: [
+            // {   
+            //     label: 'Select an image',
+            //     type: { 
+            //         name: 'dropdown', 
+            //         menu: 'sed-images',
+            //         selected: ''
+            //     },
+            //     result: 'src',
+            // },
+            {
+                label: 'Image alt text',
+                type: { name: 'text' },
+                result: 'alt',
+            },
+            // {
+            //     label: 'Select a link type',
+            //     type: {
+            //         name: 'dropdown',
+            //         menu: 'link-types',
+            //         selected: 'url'
+            //     },
+            //     result: 'href'
+            // }
+        ]
     }
 }

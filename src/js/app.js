@@ -5,14 +5,14 @@ var app = new Vue({
     el: '#App',
     data: {
         contentName: 'Content Name Goes Here',
+        saved: '',
         stage: [],
         store: '',
-        saved: '',
-        shiftdown: false,
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
-            componentDefaults['two-column']
+            componentDefaults['two-column'],
+            componentDefaults['banner']
         ],
         trash: [],
         username: 'mcgilljo'

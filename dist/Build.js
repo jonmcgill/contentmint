@@ -45,7 +45,9 @@ var g = {
 //
 //  wrappers contain any given component. They handle the logic of the components.
 //  wrappers take raw component data, call the component with the name and then
-//  pass that data right on along to the generated component
+//  pass that data right on along to the generated component.
+//  wrappers will also look for the settings property and delegate that off to
+//  the <settings> component.
 Vue.component('wrapper', {
     props: ['config'],
     template: '\
@@ -54,7 +56,7 @@ Vue.component('wrapper', {
             <div class="comp-toolbar">\
                 <button class="btn-toolbar" @click="copy"><i class="fa fa-clone"></i></button>\
                 <button class="btn-toolbar" @click="trash"><i class="fa fa-trash-o"></i></button>\
-                <button class="btn-toolbar"><i class="fa fa-cog"></i></button>\
+                <button class="btn-toolbar" @click="openSettings" v-if="config.settings"><i class="fa fa-cog"></i></button>\
             </div>\
         </div>',
     methods: {
@@ -70,13 +72,20 @@ Vue.component('wrapper', {
             path[0].index++;
             var data = JSON.parse($(this.$el).attr('data-config'));
             walk.down(path.reverse(), data);
+        },
+
+        openSettings: function() {
+            this.$children[0].config.settings.active = true;
         }
 
     },
     mounted: function() {
         initStageComponent(this);
-        initEditor(this.$el);
+        initEditor(this);
         hoverIndication(this.$el);
+        $(this.$el).find('a').click(function(e) {
+            e.preventDefault();
+        })
     },
     updated: function() {
         initStageComponent(this);
@@ -104,6 +113,32 @@ Vue.component('context', {
     }
 })
 //
+//  src/js/component-settings.js
+//
+Vue.component('field', {
+    props: ['field', 'settings'],
+    template: '\
+    <div class="field-instance" v-if="field.type.name === \'text\'">\
+        <label>{{ field.label }}</label>\
+        <input  v-model="settings[field.result]" />\
+    </div>\
+    ',
+    mounted: function() {
+        var _this = this;
+
+        // Handles simple text input
+        $(this.$el).find('input').on('keyup', function() {
+            var $comp = $(this).closest('.Component');
+            data = JSON.parse($comp.attr(g.name.config));
+            data.settings[_this.field.result] = $(this).val();
+            $comp.attr(g.name.config, JSON.stringify(data));
+        })
+
+
+
+    }
+})
+//
 //  src/js/component-heading.js
 //
 Vue.component('heading', {
@@ -117,7 +152,16 @@ Vue.component('heading', {
 //  prop passed from the wrapper.
 Vue.component('body-copy', {
     props: ['config'],
-    template: '<div data-editor="basic" data-prop="content" v-html="config.content"></div>'
+    template: '<div :style="css" data-editor="basic" data-prop="content" v-html="config.content"></div>',
+    data: function() {
+        return {
+            css: {
+                'font-size': '1.2em',
+                'line-height': '1.7',
+                'color': 'rgba(0,0,0,0.78)'
+            }
+        }
+    }
 })
 //
 //  src/js/component-two-column.js
@@ -135,6 +179,32 @@ Vue.component('two-column', {
         </div>'
 });
 //
+//  src/js/component-banner.js
+//
+Vue.component('banner', {
+    props: ['config'],
+    template: '\
+    <div>\
+        <a v-if="config.settings.href" :href="config.settings.href">\
+            <img :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
+        </a>\
+        <img v-else :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
+        <div v-if="config.settings.active" class="field-widget">\
+            <field v-for="field in config.fields"\
+                   :field="field"\
+                   :settings="config.settings"></field>\
+        </div>\
+    </div>\
+    ',
+    data: function() {
+        return {
+            css: {
+                'width': '100%'
+            }
+        }
+    }
+})
+//
 //  src/js/componentDefaults.js
 //
 var componentDefaults = {
@@ -147,12 +217,47 @@ var componentDefaults = {
     'body-copy': {
         name: 'body-copy',
         display: 'Body Copy',
-        content: '<p>Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.</p>'
+        content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
     'heading': {
         name: 'heading',
         display: 'Title',
-        content: '<h1>Lorem Ipsum Titlum</h1>'
+        content: '<div style="font-family:Arial,sans-serif;font-size:2.4em;">Lorem Ipsum Titlum</div>'
+    },
+    'banner': {
+        name: 'banner',
+        display: 'Banner Image',
+        settings: {
+            active: false,
+            src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+            alt: 'Default alt text',
+            href: 'https://www.google.com'
+        },
+        fields: [
+            // {   
+            //     label: 'Select an image',
+            //     type: { 
+            //         name: 'dropdown', 
+            //         menu: 'sed-images',
+            //         selected: ''
+            //     },
+            //     result: 'src',
+            // },
+            {
+                label: 'Image alt text',
+                type: { name: 'text' },
+                result: 'alt',
+            },
+            // {
+            //     label: 'Select a link type',
+            //     type: {
+            //         name: 'dropdown',
+            //         menu: 'link-types',
+            //         selected: 'url'
+            //     },
+            //     result: 'href'
+            // }
+        ]
     }
 }
 //
@@ -162,14 +267,14 @@ var app = new Vue({
     el: '#App',
     data: {
         contentName: 'Content Name Goes Here',
+        saved: '',
         stage: [],
         store: '',
-        saved: '',
-        shiftdown: false,
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
-            componentDefaults['two-column']
+            componentDefaults['two-column'],
+            componentDefaults['banner']
         ],
         trash: [],
         username: 'mcgilljo'
@@ -443,6 +548,10 @@ function globalEditorConfig() {
         insert_toolbar: false,
         fixed_toolbar_container: g.id.editorToolbar,
         plugins: 'link lists paste textpattern autolink',
+        forced_root_block: 'div',
+        forced_root_block_attrs: {
+            'style': 'margin-bottom: 1.2em;'
+        }
     }
 }
 
@@ -450,7 +559,7 @@ function globalEditorConfig() {
 function initEditor(component) {
 
     var editorConfig = globalEditorConfig(),
-        $component = $(component);
+        $component = $(component.$el);
 
     $component.find(g.attr.editor).each(function() {
 
@@ -480,6 +589,7 @@ function initEditor(component) {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
                     componentData[componentProp] = editor.getContent();
+                    // component.config['_' + componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
                 })
             }

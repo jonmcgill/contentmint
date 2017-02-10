@@ -8,6 +8,10 @@ function globalEditorConfig() {
         insert_toolbar: false,
         fixed_toolbar_container: g.id.editorToolbar,
         plugins: 'link lists paste textpattern autolink',
+        forced_root_block: 'div',
+        forced_root_block_attrs: {
+            'style': 'margin-bottom: 1.2em;'
+        }
     }
 }
 
@@ -15,7 +19,7 @@ function globalEditorConfig() {
 function initEditor(component) {
 
     var editorConfig = globalEditorConfig(),
-        $component = $(component);
+        $component = $(component.$el);
 
     $component.find(g.attr.editor).each(function() {
 
@@ -45,6 +49,7 @@ function initEditor(component) {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
                     componentData[componentProp] = editor.getContent();
+                    // component.config['_' + componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
                 })
             }

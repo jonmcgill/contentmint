@@ -67,8 +67,11 @@ body {
     font-size: 0.9em;
     outline: none;
     padding: 0;
-    width: 60%;
+    width: 50%;
     color: rgba(0, 0, 0, 0.7); }
+  #Topbar #EditToolbar {
+    width: 50%;
+    float: right; }
   #Topbar .right {
     width: 34%;
     float: right;
@@ -112,7 +115,6 @@ body {
   padding-bottom: 1em;
   margin-bottom: 5px;
   overflow: hidden;
-  border-radius: 3px;
   transition: padding-left 200ms;
   cursor: grab;
   cursor: -webkit-grab; }
@@ -207,14 +209,12 @@ body {
 #Stage {
   padding: 1em; }
 
-.Context:not(#Stage):not(#Trash), .Component {
-  padding: 1em; }
-
 .Component {
   cursor: grab;
   cursor: -webkit-grab;
   cursor: -moz-grab;
   position: relative;
+  padding: 5px;
   border: 1px dashed transparent; }
   .Component *:not(.Component) {
     cursor: auto; }
@@ -248,6 +248,10 @@ body {
     .Component .comp-toolbar .btn-toolbar:nth-child(4) {
       background-color: #37474F; }
 
+.Context:not(#Stage):not(#Trash),
+#Thumbnails .Component {
+  padding: 1em; }
+
 .active > .comp-toolbar {
   display: block; }
 
@@ -275,7 +279,12 @@ body {
     font-size: 0.9em;
     color: rgba(0, 0, 0, 0.6) !important; }
   #EditorToolbar .mce-container * {
-    text-align: center !important; }
+    text-align: center !important;
+    margin: 0; }
+  #EditorToolbar .mce-tinymce-inline {
+    top: 2px; }
+  #EditorToolbar .mce-toolbar-grp {
+    padding-top: 4.5px; }
 
 .mce-edit-focus {
   outline: none !important; }
