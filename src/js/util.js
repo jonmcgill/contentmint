@@ -62,6 +62,15 @@ function log(thing) {
 }
 
 
+
+function setComponentJSON(elem, value, result) {
+    var $comp = $(elem).closest('.Component');
+    data = JSON.parse($comp.attr(g.name.config));
+    data.settings[result] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+
 function hoverIndication(elem) {
     $(elem).on('mouseenter', function(e) {
         var t = $(e.target);

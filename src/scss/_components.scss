@@ -1,4 +1,9 @@
 
+#Stage .Component:hover,
+#Stage .Context:hover {
+    border-color: rgba(0,0,0,0.5);
+}
+
 .Component {
     cursor: grab;
     cursor: -webkit-grab;
@@ -9,8 +14,8 @@
         cursor: auto;
     }
     border: 1px dashed transparent;
-    *:not(#Thumbnails) &.hovered:not(.hovered-nested) {
-        border-color: rgba(0,0,0,0.5);
+    *:not(#Thumbnails):hover {
+        // border-color: rgba(0,0,0,0.5);
     }
 
     .comp-toolbar {
@@ -25,7 +30,6 @@
             font-size: 0.8em;
             padding: 0;
             color: white;
-            // padding: 0.3em 0.6em;
             width: 1.8em;
             line-height: 1.6em;
             margin-left: 4px;
@@ -69,7 +73,7 @@
     & > div {
         padding: 1em;
         margin: 0.2em;
-        border: 1px solid #999;
+        // border: 1px solid #999;
         width: calc(50% - 0.4em);
         float: left;
         display: inline-block;

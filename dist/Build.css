@@ -209,6 +209,10 @@ body {
 #Stage {
   padding: 1em; }
 
+#Stage .Component:hover,
+#Stage .Context:hover {
+  border-color: rgba(0, 0, 0, 0.5); }
+
 .Component {
   cursor: grab;
   cursor: -webkit-grab;
@@ -218,8 +222,6 @@ body {
   border: 1px dashed transparent; }
   .Component *:not(.Component) {
     cursor: auto; }
-  *:not(#Thumbnails) .Component.hovered:not(.hovered-nested) {
-    border-color: rgba(0, 0, 0, 0.5); }
   .Component .comp-toolbar {
     position: absolute;
     top: -3px;
@@ -263,10 +265,96 @@ body {
 .ColumnWrap > div {
   padding: 1em;
   margin: 0.2em;
-  border: 1px solid #999;
   width: calc(50% - 0.4em);
   float: left;
   display: inline-block; }
+
+.field-widget {
+  background: #eff1ef;
+  position: fixed;
+  top: 40px;
+  bottom: 0;
+  right: -35%;
+  width: 34%;
+  overflow-y: auto;
+  border-left: 2px solid rgba(0, 50, 0, 0.1);
+  z-index: 100;
+  transition: right 200ms;
+  font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+  font-size: 0.9em;
+  padding: 1em; }
+  .field-widget.active {
+    right: 0; }
+  .field-widget .field-instance {
+    margin-bottom: 1.5em; }
+  .field-widget label {
+    display: block;
+    padding-bottom: 0.5em;
+    color: rgba(0, 0, 0, 0.5); }
+  .field-widget input {
+    font-size: 1em;
+    padding: 0.6em 0.8em;
+    width: 100%;
+    outline: none;
+    border: 1px solid #ccc;
+    font-family: "Open Sans", "Helvetica", "Arial", sans-serif !important; }
+  .field-widget .menu-dropdown {
+    position: relative; }
+    .field-widget .menu-dropdown * {
+      cursor: pointer; }
+    .field-widget .menu-dropdown .menu-selected {
+      padding: 0.6em 0.8em;
+      background: white;
+      line-height: 1.2em;
+      border: 1px solid #ccc; }
+      .field-widget .menu-dropdown .menu-selected i {
+        position: relative;
+        top: 4px;
+        float: right;
+        font-size: 0.8em;
+        color: rgba(0, 0, 0, 0.3); }
+        .field-widget .menu-dropdown .menu-selected i.active {
+          color: #2196F3; }
+    .field-widget .menu-dropdown ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      width: 100%; }
+    .field-widget .menu-dropdown li {
+      padding: 0.6em 0.8em;
+      margin: 0;
+      background: white;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc; }
+      .field-widget .menu-dropdown li:last-child {
+        border-bottom: 1px solid #ccc; }
+      .field-widget .menu-dropdown li:hover {
+        background: #51adf6;
+        color: white; }
+
+.field-btn-back {
+  background: none;
+  border: none;
+  font-size: 0.9em;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer !important;
+  position: relative;
+  outline: none;
+  padding-left: 1.5em;
+  transition: color 200ms; }
+  .field-btn-back i {
+    position: absolute;
+    color: #2196F3;
+    font-size: 0.9em;
+    left: 4px;
+    top: 6px;
+    transition: left 200ms;
+    cursor: pointer !important; }
+  .field-btn-back:hover {
+    color: rgba(0, 0, 0, 0.7); }
+    .field-btn-back:hover i {
+      left: 0px; }
 
 #EditorToolbar {
   float: right;

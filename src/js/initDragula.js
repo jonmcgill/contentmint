@@ -11,6 +11,11 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         } 
     },
 
+    // Disable rearranging components on stage when field widget is open
+    moves: function(el, source, handle, sibling) {
+        return !app.fieldsOpen;
+    },
+
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
     // Was getting child node error from dragula when moving nested containers
     accepts: function(el, target) {

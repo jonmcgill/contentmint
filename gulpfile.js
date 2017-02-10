@@ -10,7 +10,9 @@ var js_files = [
 
     './src/js/component-wrapper.js',
     './src/js/component-context.js',
+    './src/js/component-dropdown.js',
     './src/js/component-field.js',
+    './src/js/component-field-widget.js',
 
     './src/js/component-heading.js',
     './src/js/component-body-copy.js',

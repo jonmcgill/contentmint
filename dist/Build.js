@@ -71,24 +71,37 @@ Vue.component('wrapper', {
             var path = walk.up(this.$el);
             path[0].index++;
             var data = JSON.parse($(this.$el).attr('data-config'));
+            console.log(collectData(this.$el));
             walk.down(path.reverse(), data);
         },
 
         openSettings: function() {
-            this.$children[0].config.settings.active = true;
+            var _this = this;
+            _this.$children[0].config.settings.active = true;
+            Vue.nextTick(function() {
+                setTimeout(function() {
+                    $('.field-widget').addClass('active');
+                    _this.$root.fieldsOpen = true;
+                }, 100);
+            })
         }
 
     },
     mounted: function() {
         initStageComponent(this);
         initEditor(this);
-        hoverIndication(this.$el);
+        // hoverIndication(this.$el);
         $(this.$el).find('a').click(function(e) {
+            debug('prevent link clicks');
             e.preventDefault();
         })
     },
     updated: function() {
         initStageComponent(this);
+        $(this.$el).find('a').click(function(e) {
+            debug('prevent link clicks');
+            e.preventDefault();
+        })
     }
 })
 //
@@ -109,34 +122,133 @@ Vue.component('context', {
         </div>',
     mounted: function() {
         addContainer(this.$el);
-        hoverIndication(this.$el);
+        // hoverIndication(this.$el);
     }
+})
+//
+//  src/js/component-dropdown.js
+//
+
+var menus = {
+
+    'images': {
+        'DEFAULT': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+        'Keyboard': 'http://www.imakenews.com/rbm/sed_keyboard.jpg',
+    }
+
+}
+
+Vue.component('dropdown', {
+
+    props: ['config', 'field'],
+
+    data: function() { return { 
+        menus: menus,
+        down: false
+    } },
+
+    template: '\
+        <div class="menu-dropdown">\
+            <div class="menu-selected" @click="toggle">\
+                <span v-html="field.type.selected"></span><i :class="iconClasses"></i>\
+            </div>\
+            <ul v-show="down">\
+                <li v-for="(value, key) in menus[field.type.menu]" \
+                    v-html="checkDefault(key)" \
+                    @click="selected(key)"></li>\
+            </ul>\
+        </div>\
+    ',
+
+    computed: {
+        iconClasses: function() {
+            return { 
+                'fa': true, 
+                'fa-chevron-down': this.down, 
+                'fa-chevron-left': !this.down,
+                'active': this.down
+            }
+        }
+    },
+
+    methods: {
+        checkDefault: function(txt) {
+            return txt === 'DEFAULT' ? '&nbsp;' : txt;
+        },
+        selected: function(item) {
+            var menu = this.menus[this.field.type.menu];
+            var prop = this.field.result;
+            this.field.type.selected = item === 'DEFAULT' ? '&nbsp;' : item;
+            this.config.settings[prop] = menu[item];
+            this.toggle();
+            setComponentJSON(this.$el, menu[item], this.field.result);
+        },
+        toggle: function() {
+            return this.down = !this.down;
+        }
+    }
+
+
 })
 //
 //  src/js/component-settings.js
 //
 Vue.component('field', {
-    props: ['field', 'settings'],
+    props: ['field', 'config'],
     template: '\
-    <div class="field-instance" v-if="field.type.name === \'text\'">\
-        <label>{{ field.label }}</label>\
-        <input  v-model="settings[field.result]" />\
-    </div>\
-    ',
+    <div class="field-instance">\
+        <div class="field-wrap" v-if="field.type.name === \'text\'">\
+            <label>{{ field.label }}</label>\
+            <input  v-model="config.settings[field.result]" />\
+        </div>\
+        <div class="field-wrap" v-if="field.type.name == \'dropdown\'">\
+            <label>{{ field.label }}</label>\
+            <dropdown v-if="field.type.name == \'dropdown\'"\
+                      :field="field"\
+                      :config="config">\
+            </dropdown>\
+        </div>\
+    </div>',
     mounted: function() {
         var _this = this;
-
         // Handles simple text input
+        // Updates Vue data and json model on component
         $(this.$el).find('input').on('keyup', function() {
-            var $comp = $(this).closest('.Component');
-            data = JSON.parse($comp.attr(g.name.config));
-            data.settings[_this.field.result] = $(this).val();
-            $comp.attr(g.name.config, JSON.stringify(data));
+            setComponentJSON(this, $(this).val(), _this.field.result);
         })
+    }
+})
+//
+//  src/js/field-widget.js
+//
+Vue.component('field-widget', {
 
+    props: ['config'],
 
+    template: '\
+    <div v-if="config.settings.active" class="field-widget">\
+        <button class="field-btn-back" @click="closeSettings">\
+            <i class="fa fa-chevron-left"></i>Components\
+        </button>\
+        <h2>Settings: {{ config.display }}</h2>\
+        <field v-for="field in config.fields"\
+                :field="field"\
+                :config="config"></field>\
+    </div>',
+
+    methods: {
+
+        closeSettings: function() {
+            var _this = this;
+            $(_this.$el).removeClass('active');
+            setTimeout(function() {
+                _this.config.settings.active = false;
+                _this.$root.fieldsOpen = false;
+            }, 250)
+        }
 
     }
+
 })
 //
 //  src/js/component-heading.js
@@ -152,11 +264,12 @@ Vue.component('heading', {
 //  prop passed from the wrapper.
 Vue.component('body-copy', {
     props: ['config'],
-    template: '<div :style="css" data-editor="basic" data-prop="content" v-html="config.content"></div>',
+    template: '<div :style="css" data-editor="robust" data-prop="content" v-html="config.content"></div>',
     data: function() {
         return {
             css: {
                 'font-size': '1.2em',
+                'font-family': 'Arial, sans-serif',
                 'line-height': '1.7',
                 'color': 'rgba(0,0,0,0.78)'
             }
@@ -189,11 +302,7 @@ Vue.component('banner', {
             <img :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
         </a>\
         <img v-else :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
-        <div v-if="config.settings.active" class="field-widget">\
-            <field v-for="field in config.fields"\
-                   :field="field"\
-                   :settings="config.settings"></field>\
-        </div>\
+        <field-widget :config="config"></field-widget>\
     </div>\
     ',
     data: function() {
@@ -211,8 +320,20 @@ var componentDefaults = {
     'two-column': {
         name: 'two-column',
         display: 'Two Columns',
-        left: [],
-        right: []
+        left: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Left'
+            }
+        ],
+        right: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Right'
+            }
+        ]
     },
     'body-copy': {
         name: 'body-copy',
@@ -234,15 +355,15 @@ var componentDefaults = {
             href: 'https://www.google.com'
         },
         fields: [
-            // {   
-            //     label: 'Select an image',
-            //     type: { 
-            //         name: 'dropdown', 
-            //         menu: 'sed-images',
-            //         selected: ''
-            //     },
-            //     result: 'src',
-            // },
+            {   
+                label: 'Select an image',
+                type: { 
+                    name: 'dropdown', 
+                    menu: 'images',
+                    selected: '&nbsp;'
+                },
+                result: 'src',
+            },
             {
                 label: 'Image alt text',
                 type: { name: 'text' },
@@ -267,6 +388,7 @@ var app = new Vue({
     el: '#App',
     data: {
         contentName: 'Content Name Goes Here',
+        fieldsOpen: false,
         saved: '',
         stage: [],
         store: '',
@@ -337,12 +459,15 @@ function fireDocumentHandlers() {
 
     $(document).on({
         'click': function(e) {
+
             var comp = $(e.target).closest('.Component');
             var stage = $(e.target).closest('#Stage');
-            if (comp.length > 0 && stage.length > 0) {
+
+            if (comp.length > 0 && stage.length > 0 && !app.fieldsOpen) {
                 $('.Component.active').removeClass('active');
                 comp.addClass('active');
                 debug('active comp');
+
             } else {
                 $('.Component.active').removeClass('active');
             }
@@ -411,6 +536,15 @@ function contains(a, b){
 
 function log(thing) {
     console.log(thing);
+}
+
+
+
+function setComponentJSON(elem, value, result) {
+    var $comp = $(elem).closest('.Component');
+    data = JSON.parse($comp.attr(g.name.config));
+    data.settings[result] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
 }
 
 
@@ -620,6 +754,11 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         } else {
             return source === g.node.thumbnails;
         } 
+    },
+
+    // Disable rearranging components on stage when field widget is open
+    moves: function(el, source, handle, sibling) {
+        return !app.fieldsOpen;
     },
 
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)

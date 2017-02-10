@@ -9,11 +9,7 @@ Vue.component('banner', {
             <img :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
         </a>\
         <img v-else :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
-        <div v-if="config.settings.active" class="field-widget">\
-            <field v-for="field in config.fields"\
-                   :field="field"\
-                   :settings="config.settings"></field>\
-        </div>\
+        <field-widget :config="config"></field-widget>\
     </div>\
     ',
     data: function() {

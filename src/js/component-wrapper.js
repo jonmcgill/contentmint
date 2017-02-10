@@ -29,23 +29,36 @@ Vue.component('wrapper', {
             var path = walk.up(this.$el);
             path[0].index++;
             var data = JSON.parse($(this.$el).attr('data-config'));
+            console.log(collectData(this.$el));
             walk.down(path.reverse(), data);
         },
 
         openSettings: function() {
-            this.$children[0].config.settings.active = true;
+            var _this = this;
+            _this.$children[0].config.settings.active = true;
+            Vue.nextTick(function() {
+                setTimeout(function() {
+                    $('.field-widget').addClass('active');
+                    _this.$root.fieldsOpen = true;
+                }, 100);
+            })
         }
 
     },
     mounted: function() {
         initStageComponent(this);
         initEditor(this);
-        hoverIndication(this.$el);
+        // hoverIndication(this.$el);
         $(this.$el).find('a').click(function(e) {
+            debug('prevent link clicks');
             e.preventDefault();
         })
     },
     updated: function() {
         initStageComponent(this);
+        $(this.$el).find('a').click(function(e) {
+            debug('prevent link clicks');
+            e.preventDefault();
+        })
     }
 })

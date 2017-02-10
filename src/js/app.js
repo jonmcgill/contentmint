@@ -5,6 +5,7 @@ var app = new Vue({
     el: '#App',
     data: {
         contentName: 'Content Name Goes Here',
+        fieldsOpen: false,
         saved: '',
         stage: [],
         store: '',

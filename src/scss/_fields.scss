@@ -1,0 +1,110 @@
+.field-widget {
+
+    background: $color-bg-base;
+    position: fixed;
+    top: 40px;
+    bottom: 0;
+    right: -35%;
+    width: 34%;
+    overflow-y: auto;
+    border-left: 2px solid $color-bd-base;
+    z-index: 100;
+    transition: right 200ms;
+    font-family: $font-base;
+    font-size: 0.9em;
+    padding: 1em;
+
+    &.active {
+        right: 0;
+    }
+
+    .field-instance {
+        margin-bottom: 1.5em;
+    }
+
+    label {
+        display: block;
+        padding-bottom: 0.5em;
+        color: rgba(0,0,0,0.5);
+    }
+
+    input {
+        font-size: 1em;
+        padding: 0.6em 0.8em;
+        width: 100%;
+        outline: none;
+        border: 1px solid #ccc;
+        font-family: $font-base !important;
+    }
+
+    // Dropdown menu
+    .menu-dropdown {
+        position: relative;
+        * { cursor: pointer; }
+        .menu-selected {
+            padding: 0.6em 0.8em;
+            background: white;
+            line-height: 1.2em;
+            border: 1px solid #ccc;
+            i {
+                position: relative;
+                top: 4px;
+                float: right;
+                font-size: 0.8em;
+                color: rgba(0,0,0,0.3);
+                &.active {
+                    color: $color-accent;
+                }
+            }
+        }
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            width: 100%;
+        }
+        li {
+            padding: 0.6em 0.8em;
+            margin: 0;
+            background: white;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            &:last-child {
+                border-bottom: 1px solid #ccc;
+            }
+            &:hover {
+                background: lighten($color-accent, 10%);
+                color: white;
+            }
+        }
+    }
+
+}
+
+.field-btn-back {
+    background: none;
+    border: none;
+    font-size: 0.9em;
+    color: rgba(0,0,0,0.4);
+    cursor: pointer !important;
+    position: relative;
+    outline: none;
+    padding-left: 1.5em;
+    transition: color 200ms;
+    i {
+        position: absolute;
+        color: $color-accent;
+        font-size: 0.9em;
+        left: 4px;
+        top: 6px;
+        transition: left 200ms;
+        cursor: pointer !important;
+    }
+    &:hover {
+        color: rgba(0,0,0,0.7);
+        i {
+            left: 0px;
+        }
+    }
+}

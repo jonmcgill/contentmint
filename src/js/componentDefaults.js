@@ -5,8 +5,20 @@ var componentDefaults = {
     'two-column': {
         name: 'two-column',
         display: 'Two Columns',
-        left: [],
-        right: []
+        left: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Left'
+            }
+        ],
+        right: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Right'
+            }
+        ]
     },
     'body-copy': {
         name: 'body-copy',
@@ -28,15 +40,15 @@ var componentDefaults = {
             href: 'https://www.google.com'
         },
         fields: [
-            // {   
-            //     label: 'Select an image',
-            //     type: { 
-            //         name: 'dropdown', 
-            //         menu: 'sed-images',
-            //         selected: ''
-            //     },
-            //     result: 'src',
-            // },
+            {   
+                label: 'Select an image',
+                type: { 
+                    name: 'dropdown', 
+                    menu: 'images',
+                    selected: '&nbsp;'
+                },
+                result: 'src',
+            },
             {
                 label: 'Image alt text',
                 type: { name: 'text' },
