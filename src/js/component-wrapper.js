@@ -28,8 +28,7 @@ Vue.component('wrapper', {
         copy: function() {
             var path = walk.up(this.$el);
             path[0].index++;
-            var data = JSON.parse($(this.$el).attr('data-config'));
-            console.log(collectData(this.$el));
+            var data = getComponentData(this.$el);
             walk.down(path.reverse(), data);
         },
 
@@ -48,7 +47,6 @@ Vue.component('wrapper', {
     mounted: function() {
         initStageComponent(this);
         initEditor(this);
-        // hoverIndication(this.$el);
         $(this.$el).find('a').click(function(e) {
             debug('prevent link clicks');
             e.preventDefault();

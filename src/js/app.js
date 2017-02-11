@@ -20,10 +20,10 @@ var app = new Vue({
     },
     methods: {
         save: function() {
-            this.saved = JSON.stringify(collectData());
+            this.saved = JSON.stringify(getStageData());
         },
         collect: function() {
-            this.store = JSON.stringify(collectData());
+            this.store = JSON.stringify(getStageData());
         },
         refresh: function() {
             var _this = this;

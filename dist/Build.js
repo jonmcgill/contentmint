@@ -70,8 +70,7 @@ Vue.component('wrapper', {
         copy: function() {
             var path = walk.up(this.$el);
             path[0].index++;
-            var data = JSON.parse($(this.$el).attr('data-config'));
-            console.log(collectData(this.$el));
+            var data = getComponentData(this.$el);
             walk.down(path.reverse(), data);
         },
 
@@ -90,7 +89,6 @@ Vue.component('wrapper', {
     mounted: function() {
         initStageComponent(this);
         initEditor(this);
-        // hoverIndication(this.$el);
         $(this.$el).find('a').click(function(e) {
             debug('prevent link clicks');
             e.preventDefault();
@@ -403,10 +401,10 @@ var app = new Vue({
     },
     methods: {
         save: function() {
-            this.saved = JSON.stringify(collectData());
+            this.saved = JSON.stringify(getStageData());
         },
         collect: function() {
-            this.store = JSON.stringify(collectData());
+            this.store = JSON.stringify(getStageData());
         },
         refresh: function() {
             var _this = this;
@@ -600,6 +598,30 @@ function collectData(elem, data) {
         })
     }
     return data;
+}
+
+function getComponentData(elem) {
+    var $elem = $(elem);
+    var data = JSON.parse($elem.attr('data-config'));
+    var contextAreas = $elem.find('.Context')
+        .toArray()
+        .filter(function(context) {
+            return $(context).closest('.Component')[0] === elem;
+        })
+    contextAreas.forEach(function(context) {
+        var contextName = $(context).attr('data-context-name');
+        $(context).children().each(function() {
+            data[contextName].push(getComponentData(this));
+        })
+    })
+    return data;
+}
+
+function getStageData() {
+    return $('#Stage')
+        .children()
+        .toArray()
+        .map(getComponentData);
 }
 //
 //  src/js/walk.js
