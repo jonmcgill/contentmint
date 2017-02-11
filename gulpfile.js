@@ -12,6 +12,7 @@ var js_files = [
     './src/js/component-context.js',
     './src/js/component-dropdown.js',
     './src/js/component-field.js',
+    './src/js/component-fieldgroup.js',
     './src/js/component-field-widget.js',
 
     './src/js/component-heading.js',

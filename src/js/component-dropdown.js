@@ -5,7 +5,7 @@
 var menus = {
 
     'images': {
-        'DEFAULT': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+        'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
         'Keyboard': 'http://www.imakenews.com/rbm/sed_keyboard.jpg',
     }
 
@@ -27,7 +27,7 @@ Vue.component('dropdown', {
             </div>\
             <ul v-show="down">\
                 <li v-for="(value, key) in menus[field.type.menu]" \
-                    v-html="checkDefault(key)" \
+                    v-html="key" \
                     @click="selected(key)"></li>\
             </ul>\
         </div>\
@@ -51,7 +51,7 @@ Vue.component('dropdown', {
         selected: function(item) {
             var menu = this.menus[this.field.type.menu];
             var prop = this.field.result;
-            this.field.type.selected = item === 'DEFAULT' ? '&nbsp;' : item;
+            this.field.type.selected = item;
             this.config.settings[prop] = menu[item];
             this.toggle();
             setComponentJSON(this.$el, menu[item], this.field.result);

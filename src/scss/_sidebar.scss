@@ -4,7 +4,7 @@
     top: 40px;
     bottom: 0;
     right: 0;
-    width: 34%;
+    width: 400px;
     overflow-y: auto;
     border-left: 2px solid $color-bd-base;
 }
@@ -16,7 +16,8 @@
     right: 0;
     border-top: 2px solid $color-bd-base;
     height: 40px;
-    width: 34%;
+    width: 400px;
+    background: #ededed;
 
     & > * {
         width: 33.33333%;

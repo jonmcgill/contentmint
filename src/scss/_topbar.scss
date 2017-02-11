@@ -10,7 +10,7 @@
     font-family: $font-base;
 
     .left {
-        width: 66%;
+        width: calc(100% - 400px);
         float: left;
         padding-left: 1em;
         padding-right: 1em;
@@ -34,7 +34,7 @@
     }
 
     .right {
-        width: 34%;
+        width: 400px;
         float: right;
         border-left: 2px solid $color-bd-base;
         height: 40px;

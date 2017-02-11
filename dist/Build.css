@@ -55,7 +55,7 @@ body {
   border-bottom: 2px solid rgba(0, 50, 0, 0.1);
   font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
   #Topbar .left {
-    width: 66%;
+    width: calc(100% - 400px);
     float: left;
     padding-left: 1em;
     padding-right: 1em;
@@ -73,7 +73,7 @@ body {
     width: 50%;
     float: right; }
   #Topbar .right {
-    width: 34%;
+    width: 400px;
     float: right;
     border-left: 2px solid rgba(0, 50, 0, 0.1);
     height: 40px;
@@ -106,7 +106,7 @@ body {
         text-decoration: underline; }
 
 #Thumbnails {
-  padding: 0.5em; }
+  padding: 0.5em 0.5em 3em; }
 
 .thumbnail {
   background: white;
@@ -118,6 +118,17 @@ body {
   transition: padding-left 200ms;
   cursor: grab;
   cursor: -webkit-grab; }
+  .thumbnail-component {
+    transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+    transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    -webkit-transform-origin: 0 0;
+    width: 200%;
+    overflow: hidden; }
   .thumbnail .comp-toolbar {
     display: none; }
   .thumbnail.hovered {
@@ -151,7 +162,7 @@ body {
   top: 40px;
   bottom: 0;
   right: 0;
-  width: 34%;
+  width: 400px;
   overflow-y: auto;
   border-left: 2px solid rgba(0, 50, 0, 0.1); }
 
@@ -161,7 +172,8 @@ body {
   right: 0;
   border-top: 2px solid rgba(0, 50, 0, 0.1);
   height: 40px;
-  width: 34%; }
+  width: 400px;
+  background: #ededed; }
   #BottomBar > * {
     width: 33.33333%;
     float: left;
@@ -204,7 +216,7 @@ body {
 
 #Template {
   margin-top: 2.4em;
-  width: 66%; }
+  width: calc(100% - 400px); }
 
 #Stage {
   padding: 1em; }
@@ -274,8 +286,8 @@ body {
   position: fixed;
   top: 40px;
   bottom: 0;
-  right: -35%;
-  width: 34%;
+  right: -500px;
+  width: 400px;
   overflow-y: auto;
   border-left: 2px solid rgba(0, 50, 0, 0.1);
   z-index: 100;
@@ -286,18 +298,21 @@ body {
   .field-widget.active {
     right: 0; }
   .field-widget .field-instance {
-    margin-bottom: 1.5em; }
+    margin-bottom: 1em; }
   .field-widget label {
     display: block;
-    padding-bottom: 0.5em;
+    padding-bottom: 0.2em;
     color: rgba(0, 0, 0, 0.5); }
-  .field-widget input {
+  .field-widget input, .field-widget textarea {
     font-size: 1em;
     padding: 0.6em 0.8em;
     width: 100%;
     outline: none;
     border: 1px solid #ccc;
     font-family: "Open Sans", "Helvetica", "Arial", sans-serif !important; }
+  .field-widget textarea {
+    min-height: 200px;
+    resize: none; }
   .field-widget .menu-dropdown {
     position: relative; }
     .field-widget .menu-dropdown * {

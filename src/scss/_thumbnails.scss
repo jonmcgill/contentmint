@@ -1,6 +1,6 @@
 
 #Thumbnails {
-    padding: 0.5em;
+    padding: 0.5em 0.5em 3em;
 }
 
 .thumbnail {
@@ -14,6 +14,19 @@
     transition: padding-left 200ms;
     cursor: grab;
     cursor: -webkit-grab;
+
+    &-component {
+        transform: scale(0.5);
+        -moz-transform: scale(0.5);
+        -ms-transform: scale(0.5);
+        -webkit-transform: scale(0.5);
+        transform-origin: 0 0;
+        -moz-transform-origin: 0 0;
+        -ms-transform-origin: 0 0;
+        -webkit-transform-origin: 0 0;
+        width: 200%;
+        overflow: hidden;                                 
+    }
 
     .comp-toolbar {
         display: none;

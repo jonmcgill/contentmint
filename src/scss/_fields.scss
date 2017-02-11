@@ -4,8 +4,8 @@
     position: fixed;
     top: 40px;
     bottom: 0;
-    right: -35%;
-    width: 34%;
+    right: -500px;
+    width: 400px;
     overflow-y: auto;
     border-left: 2px solid $color-bd-base;
     z-index: 100;
@@ -19,22 +19,27 @@
     }
 
     .field-instance {
-        margin-bottom: 1.5em;
+        margin-bottom: 1em;
     }
 
     label {
         display: block;
-        padding-bottom: 0.5em;
+        padding-bottom: 0.2em;
         color: rgba(0,0,0,0.5);
     }
 
-    input {
+    input, textarea {
         font-size: 1em;
         padding: 0.6em 0.8em;
         width: 100%;
         outline: none;
         border: 1px solid #ccc;
         font-family: $font-base !important;
+    }
+
+    textarea {
+        min-height: 200px;
+        resize: none;
     }
 
     // Dropdown menu

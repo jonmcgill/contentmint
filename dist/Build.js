@@ -130,7 +130,7 @@ Vue.component('context', {
 var menus = {
 
     'images': {
-        'DEFAULT': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+        'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
         'Keyboard': 'http://www.imakenews.com/rbm/sed_keyboard.jpg',
     }
 
@@ -152,7 +152,7 @@ Vue.component('dropdown', {
             </div>\
             <ul v-show="down">\
                 <li v-for="(value, key) in menus[field.type.menu]" \
-                    v-html="checkDefault(key)" \
+                    v-html="key" \
                     @click="selected(key)"></li>\
             </ul>\
         </div>\
@@ -176,7 +176,7 @@ Vue.component('dropdown', {
         selected: function(item) {
             var menu = this.menus[this.field.type.menu];
             var prop = this.field.result;
-            this.field.type.selected = item === 'DEFAULT' ? '&nbsp;' : item;
+            this.field.type.selected = item;
             this.config.settings[prop] = menu[item];
             this.toggle();
             setComponentJSON(this.$el, menu[item], this.field.result);
@@ -195,26 +195,69 @@ Vue.component('field', {
     props: ['field', 'config'],
     template: '\
     <div class="field-instance">\
+    \
         <div class="field-wrap" v-if="field.type.name === \'text\'">\
             <label>{{ field.label }}</label>\
             <input  v-model="config.settings[field.result]" />\
         </div>\
-        <div class="field-wrap" v-if="field.type.name == \'dropdown\'">\
+    \
+        <div class="field-wrap" v-if="field.type.name === \'textarea\'">\
             <label>{{ field.label }}</label>\
-            <dropdown v-if="field.type.name == \'dropdown\'"\
-                      :field="field"\
-                      :config="config">\
-            </dropdown>\
+            <textarea v-model="config.settings[field.result]"></textarea>\
         </div>\
+    \
+        <div class="field-wrap" v-if="field.type.name === \'dropdown\'">\
+            <label>{{ field.label }}</label>\
+            <dropdown :field="field" :config="config"></dropdown>\
+        </div>\
+    \
+        <div class="field-wrap" v-if="field.type.name === \'fieldgroup\'">\
+            <fieldgroup :field="field" :fields="field.type.fields" :config="config"></fieldgroup>\
+        </div>\
+    \
     </div>',
     mounted: function() {
         var _this = this;
         // Handles simple text input
         // Updates Vue data and json model on component
-        $(this.$el).find('input').on('keyup', function() {
+        $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
             setComponentJSON(this, $(this).val(), _this.field.result);
         })
     }
+})
+//
+//  src/js/component-fieldgroup.js
+//
+Vue.component('fieldgroup', {
+
+    props: ['field', 'fields', 'config'],
+
+    template: '\
+    <div class="field-group-field">\
+        <field v-for="fld in fields" :field="fld" :config="config"></field>\
+    </div>',
+
+    methods: {
+        mailto: function() {
+            var s = this.config.settings;
+            var linkText = 'mailto:';
+            linkText += s.to + '?';
+            linkText += 'Subject='+encodeURIComponent(s.subject)+'&';
+            linkText += 'Body='+encodeURIComponent(s.body)+'&';
+            s[this.field.result] = linkText;
+        }
+    },
+
+    mounted: function() {
+        var _this = this;
+        _this[_this.field.type.effect]();
+        $(this.$el)
+            .find('input, textarea, .menu-selected')
+            .on('keyup click', function() {
+                _this[_this.field.type.effect]();
+            })
+    }
+
 })
 //
 //  src/js/field-widget.js
@@ -224,15 +267,15 @@ Vue.component('field-widget', {
     props: ['config'],
 
     template: '\
-    <div v-if="config.settings.active" class="field-widget">\
-        <button class="field-btn-back" @click="closeSettings">\
-            <i class="fa fa-chevron-left"></i>Components\
-        </button>\
-        <h2>Settings: {{ config.display }}</h2>\
-        <field v-for="field in config.fields"\
-                :field="field"\
-                :config="config"></field>\
-    </div>',
+        <div v-if="config.settings.active" class="field-widget">\
+            <button class="field-btn-back" @click="closeSettings">\
+                <i class="fa fa-chevron-left"></i>Components\
+            </button>\
+            <h2>Settings: {{ config.display }}</h2>\
+            <field v-for="field in config.fields"\
+                    :field="field"\
+                    :config="config"></field>\
+        </div>',
 
     methods: {
 
@@ -322,14 +365,14 @@ var componentDefaults = {
             {
                 name: 'body-copy',
                 display: 'Body Copy',
-                content: 'Left'
+                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis feugiat aliquet tristique.'
             }
         ],
         right: [
             {
                 name: 'body-copy',
                 display: 'Body Copy',
-                content: 'Right'
+                content: 'Fusce vitae eros metus. In mollis scelerisque lorem, at placerat sem porttitor a.'
             }
         ]
     },
@@ -350,32 +393,50 @@ var componentDefaults = {
             active: false,
             src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
             alt: 'Default alt text',
-            href: 'https://www.google.com'
+            href: '',
+            to: 'jon_mcgill@reyrey.com',
+            subject: 'Subject lines are the gateway to your heart',
+            body: 'This body copy is default and could be better but I don\'t really care at the moment.'
         },
+        tokens: ['alt', 'src'],
         fields: [
             {   
                 label: 'Select an image',
                 type: { 
                     name: 'dropdown', 
                     menu: 'images',
-                    selected: '&nbsp;'
+                    selected: 'Default'
                 },
                 result: 'src',
+            },
+            {
+                label: 'Write in an image URL',
+                result: 'src',
+                type: { name: 'text' }
             },
             {
                 label: 'Image alt text',
                 type: { name: 'text' },
                 result: 'alt',
             },
-            // {
-            //     label: 'Select a link type',
-            //     type: {
-            //         name: 'dropdown',
-            //         menu: 'link-types',
-            //         selected: 'url'
-            //     },
-            //     result: 'href'
-            // }
+            {
+                result: 'href',
+                type: {
+                    name: 'fieldgroup',
+                    effect: 'mailto',
+                    fields: [
+                        {   type: { name: 'text' },
+                            result: 'to',
+                            label: 'Email address(s) to send to' },
+                        {   type: { name: 'text' },
+                            result: 'subject',
+                            label: 'Subject line' },
+                        {   type: { name: 'textarea' },
+                            result: 'body',
+                            label: 'Email body text' }
+                    ]
+                }
+            }
         ]
     }
 }
@@ -389,7 +450,7 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field-choice for conditional fields</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
@@ -432,6 +493,7 @@ var app = new Vue({
         $('.thumbnail').on('mouseenter mouseleave', function() {
             $(this).toggleClass('hovered');
         })
+        if (this.store) this.refresh();
     }
 })
 //
@@ -570,6 +632,16 @@ function hoverIndication(elem) {
         }
     })
 }
+
+function setThumbnailHeight() {
+    $('.thumbnail').each(function() {
+        var compHeight = $(this).find('.thumbnail-component').height();
+        $(this).css({ height: $(this).height() / 2 + 30 });
+    })
+}
+$(window).on('load', function() {
+    setThumbnailHeight();
+})
 //
 //  src/js/collectData.js
 //
@@ -799,13 +871,13 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         g.$.trash.empty();
 
     } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
-
-        var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
-        var index = getIndex($(el).parent(), el);
+        var $el = $(el);
+        var component = $el.find(g.class.component)[0];
+        var index = getIndex($el.parent(), el);
         var dataPath = walk.up(el);
 
-        $(el).remove();
-        walk.down(dataPath.reverse(), compData);
+        $el.remove();
+        walk.down(dataPath.reverse(), getComponentData(component));
 
         Vue.nextTick(function() {
             app.collect();

@@ -6,15 +6,15 @@ Vue.component('field-widget', {
     props: ['config'],
 
     template: '\
-    <div v-if="config.settings.active" class="field-widget">\
-        <button class="field-btn-back" @click="closeSettings">\
-            <i class="fa fa-chevron-left"></i>Components\
-        </button>\
-        <h2>Settings: {{ config.display }}</h2>\
-        <field v-for="field in config.fields"\
-                :field="field"\
-                :config="config"></field>\
-    </div>',
+        <div v-if="config.settings.active" class="field-widget">\
+            <button class="field-btn-back" @click="closeSettings">\
+                <i class="fa fa-chevron-left"></i>Components\
+            </button>\
+            <h2>Settings: {{ config.display }}</h2>\
+            <field v-for="field in config.fields"\
+                    :field="field"\
+                    :config="config"></field>\
+        </div>',
 
     methods: {
 

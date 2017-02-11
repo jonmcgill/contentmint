@@ -32,13 +32,13 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         g.$.trash.empty();
 
     } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
-
-        var compData = JSON.parse($(el).find(g.class.component).attr(g.name.config));
-        var index = getIndex($(el).parent(), el);
+        var $el = $(el);
+        var component = $el.find(g.class.component)[0];
+        var index = getIndex($el.parent(), el);
         var dataPath = walk.up(el);
 
-        $(el).remove();
-        walk.down(dataPath.reverse(), compData);
+        $el.remove();
+        walk.down(dataPath.reverse(), getComponentData(component));
 
         Vue.nextTick(function() {
             app.collect();

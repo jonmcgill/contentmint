@@ -95,3 +95,13 @@ function hoverIndication(elem) {
         }
     })
 }
+
+function setThumbnailHeight() {
+    $('.thumbnail').each(function() {
+        var compHeight = $(this).find('.thumbnail-component').height();
+        $(this).css({ height: $(this).height() / 2 + 30 });
+    })
+}
+$(window).on('load', function() {
+    setThumbnailHeight();
+})
