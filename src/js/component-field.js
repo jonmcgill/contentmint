@@ -8,7 +8,7 @@ Vue.component('field', {
     \
         <div class="field-wrap" v-if="field.type.name === \'text\'">\
             <label>{{ field.label }}</label>\
-            <input  v-model="config.settings[field.result]" />\
+            <input v-model="config.settings[field.result]" />\
         </div>\
     \
         <div class="field-wrap" v-if="field.type.name === \'textarea\'">\
@@ -28,10 +28,18 @@ Vue.component('field', {
     </div>',
     mounted: function() {
         var _this = this;
+        var data = _this.config.settings;
+        var result = _this.field.result;
+        var effect = _this.field.effect;
         // Handles simple text input
         // Updates Vue data and json model on component
-        $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
-            setComponentJSON(this, $(this).val(), _this.field.result);
-        })
+        if (this.field.type.name !== 'fieldgroup') {
+            $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
+                var value = $(this).val();
+                if (result) {
+                    setComponentJSON(this, value, result);
+                }
+            })
+        }
     }
 })

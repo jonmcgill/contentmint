@@ -37,50 +37,9 @@ var componentDefaults = {
             active: false,
             src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
             alt: 'Default alt text',
-            href: '',
-            to: 'jon_mcgill@reyrey.com',
-            subject: 'Subject lines are the gateway to your heart',
-            body: 'This body copy is default and could be better but I don\'t really care at the moment.'
+            href: ''
         },
         tokens: ['alt', 'src'],
-        fields: [
-            {   
-                label: 'Select an image',
-                type: { 
-                    name: 'dropdown', 
-                    menu: 'images',
-                    selected: 'Default'
-                },
-                result: 'src',
-            },
-            {
-                label: 'Write in an image URL',
-                result: 'src',
-                type: { name: 'text' }
-            },
-            {
-                label: 'Image alt text',
-                type: { name: 'text' },
-                result: 'alt',
-            },
-            {
-                result: 'href',
-                type: {
-                    name: 'fieldgroup',
-                    effect: 'mailto',
-                    fields: [
-                        {   type: { name: 'text' },
-                            result: 'to',
-                            label: 'Email address(s) to send to' },
-                        {   type: { name: 'text' },
-                            result: 'subject',
-                            label: 'Subject line' },
-                        {   type: { name: 'textarea' },
-                            result: 'body',
-                            label: 'Email body text' }
-                    ]
-                }
-            }
-        ]
+        fields: ['image-dropdown', 'image-url', 'alt-text', 'link-choice']
     }
 }

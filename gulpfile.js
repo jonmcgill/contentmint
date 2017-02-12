@@ -7,9 +7,12 @@ var gulp = require('gulp'),
 var js_files = [
     
     './src/js/global.js',
+    './src/js/fieldData.js',
+    './src/js/componentDefaults.js',
 
     './src/js/component-wrapper.js',
     './src/js/component-context.js',
+    
     './src/js/component-dropdown.js',
     './src/js/component-field.js',
     './src/js/component-fieldgroup.js',
@@ -19,8 +22,7 @@ var js_files = [
     './src/js/component-body-copy.js',
     './src/js/component-two-column.js',
     './src/js/component-banner.js',
-    './src/js/componentDefaults.js',
-    
+
     './src/js/app.js',
 
     './src/js/nodes.js',

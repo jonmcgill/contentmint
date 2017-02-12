@@ -41,6 +41,122 @@ var g = {
     }
 }
 //
+//  src/js/fieldData.js
+//
+var fieldData = {
+    'image-dropdown': {
+        label: 'Select a preset image',
+        result: 'src',
+        type: {
+            name: 'dropdown',
+            menu: 'images',
+            selected: 'Default'
+        }
+    },
+    'image-url': {
+        label: 'Write in an image URL',
+        result: 'src',
+        type: { name: 'text' }
+    },
+    'alt-text': {
+        label: 'Add image alt text',
+        result: 'alt',
+        type: { name: 'text' }
+    },
+    'link-mailto': {
+        result: 'href',
+        type: {
+            name: 'fieldgroup',
+            effect: 'mailto',
+            fields: [
+                {   type: { name: 'text' },
+                    result: 'to',
+                    label: 'Email address(s) to send to' },
+                {   type: { name: 'text' },
+                    result: 'subject',
+                    label: 'Subject line' },
+                {   type: { name: 'textarea' },
+                    result: 'body',
+                    label: 'Email body text' }
+            ]
+        }
+    },
+    'link-url': {
+        label: 'Link URL',
+        result: 'href',
+        type: { name: 'text' }
+    },
+    'link-tel': {
+        result: 'href',
+        type: {
+            name: 'fieldgroup',
+            effect: 'telLink',
+            fields: [
+                {   type: { name: 'text' },
+                    result: 'number',
+                    label: 'Enter telephone number'
+                }
+            ]
+        }
+    },
+    'link-choice': {
+        label: 'Select a link type',
+        fieldchoice: true,
+        result: 'href',
+        type: {
+            name: 'dropdown',
+            menu: 'link-types',
+            selected: 'None'
+        }
+    }
+
+}
+//
+//  src/js/componentDefaults.js
+//
+var componentDefaults = {
+    'two-column': {
+        name: 'two-column',
+        display: 'Two Columns',
+        left: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis feugiat aliquet tristique.'
+            }
+        ],
+        right: [
+            {
+                name: 'body-copy',
+                display: 'Body Copy',
+                content: 'Fusce vitae eros metus. In mollis scelerisque lorem, at placerat sem porttitor a.'
+            }
+        ]
+    },
+    'body-copy': {
+        name: 'body-copy',
+        display: 'Body Copy',
+        content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
+    },
+    'heading': {
+        name: 'heading',
+        display: 'Title',
+        content: '<div style="font-family:Arial,sans-serif;font-size:2.4em;">Lorem Ipsum Titlum</div>'
+    },
+    'banner': {
+        name: 'banner',
+        display: 'Banner Image',
+        settings: {
+            active: false,
+            src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+            alt: 'Default alt text',
+            href: ''
+        },
+        tokens: ['alt', 'src'],
+        fields: ['image-dropdown', 'image-url', 'alt-text', 'link-choice']
+    }
+}
+//
 //  src/js/component-wrapper.js
 //
 //  wrappers contain any given component. They handle the logic of the components.
@@ -81,6 +197,7 @@ Vue.component('wrapper', {
                 setTimeout(function() {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
+                    dataToDOMJSON(_this.config, _this.$el);
                 }, 100);
             })
         }
@@ -132,6 +249,13 @@ var menus = {
     'images': {
         'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
         'Keyboard': 'http://www.imakenews.com/rbm/sed_keyboard.jpg',
+    },
+
+    'link-types': {
+        'None': '',
+        'URL': 'link-url',
+        'Email Link': 'link-mailto',
+        'Telephone': 'link-tel'
     }
 
 }
@@ -142,7 +266,8 @@ Vue.component('dropdown', {
 
     data: function() { return { 
         menus: menus,
-        down: false
+        down: false,
+        up: false
     } },
 
     template: '\
@@ -150,7 +275,7 @@ Vue.component('dropdown', {
             <div class="menu-selected" @click="toggle">\
                 <span v-html="field.type.selected"></span><i :class="iconClasses"></i>\
             </div>\
-            <ul v-show="down">\
+            <ul v-show="down || up">\
                 <li v-for="(value, key) in menus[field.type.menu]" \
                     v-html="key" \
                     @click="selected(key)"></li>\
@@ -162,30 +287,83 @@ Vue.component('dropdown', {
         iconClasses: function() {
             return { 
                 'fa': true, 
-                'fa-chevron-down': this.down, 
-                'fa-chevron-left': !this.down,
-                'active': this.down
+                'fa-chevron-down': this.down,
+                'fa-chevron-up': this.up,
+                'fa-chevron-left': (!this.down && !this.up),
+                'active': (this.down || this.up)
             }
         }
     },
 
     methods: {
+
+        listPos: function() {
+            var offset = $(this.$el).offset().top;
+            var windowHeight = $(window).height();
+            var docScroll = $(document).scrollTop();
+            var expandUp = (offset - docScroll) > windowHeight / 2;
+            if (expandUp) {
+                $(this.$el).addClass('expand-up');
+            } else {
+                $(this.$el).removeClass('expand-up');
+            }
+        },
+
         checkDefault: function(txt) {
             return txt === 'DEFAULT' ? '&nbsp;' : txt;
         },
+
         selected: function(item) {
+            this.toggle();
             var menu = this.menus[this.field.type.menu];
             var prop = this.field.result;
+            var prevItem = this.field.type.selected;
+            var component = getParentDOMComponent(this.$el);
             this.field.type.selected = item;
-            this.config.settings[prop] = menu[item];
-            this.toggle();
-            setComponentJSON(this.$el, menu[item], this.field.result);
+
+            if (this.field.fieldchoice) {
+                var fieldPos = this.getFieldPosition() + 1;
+                if (prevItem !== 'None' && prevItem !== item) {
+                    this.config.fields.splice(fieldPos, 1);
+                }
+                if (prevItem !== item) {
+                    this.config.settings[prop] = '';
+                    this.addFieldChoice();
+                }
+            } else {
+                this.config.settings[prop] = menu[item];
+                setComponentJSON(this.$el, menu[item], this.field.result);
+            }
         },
+
+        addFieldChoice: function() {
+            var component = getParentDOMComponent(this.$el);
+            var fieldList = this.config.fields;
+            var fieldPos = this.getFieldPosition() + 1;
+            var menu = this.menus[this.field.type.menu];
+            if (this.field.type.selected !== 'None') {
+                fieldList.splice(fieldPos, 0, menu[this.field.type.selected]);
+            }
+            dataToDOMJSON(this.config, component);
+        },
+
+        getFieldPosition: function() {
+            return $('.field-instance')
+                .toArray()
+                .indexOf(this.$parent.$el);
+        },
+
         toggle: function() {
-            return this.down = !this.down;
+            this.down = !this.down;
+            this.listPos();
+        }
+    },
+
+    mounted: function() {
+        if (this.field.fieldchoice) {
+            this.addFieldChoice();
         }
     }
-
 
 })
 //
@@ -198,7 +376,7 @@ Vue.component('field', {
     \
         <div class="field-wrap" v-if="field.type.name === \'text\'">\
             <label>{{ field.label }}</label>\
-            <input  v-model="config.settings[field.result]" />\
+            <input v-model="config.settings[field.result]" />\
         </div>\
     \
         <div class="field-wrap" v-if="field.type.name === \'textarea\'">\
@@ -218,11 +396,19 @@ Vue.component('field', {
     </div>',
     mounted: function() {
         var _this = this;
+        var data = _this.config.settings;
+        var result = _this.field.result;
+        var effect = _this.field.effect;
         // Handles simple text input
         // Updates Vue data and json model on component
-        $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
-            setComponentJSON(this, $(this).val(), _this.field.result);
-        })
+        if (this.field.type.name !== 'fieldgroup') {
+            $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
+                var value = $(this).val();
+                if (result) {
+                    setComponentJSON(this, value, result);
+                }
+            })
+        }
     }
 })
 //
@@ -240,21 +426,33 @@ Vue.component('fieldgroup', {
     methods: {
         mailto: function() {
             var s = this.config.settings;
+            s.to = s.to || '';
+            s.subject = s.subject || '';
+            s.body = s.body  || '';
             var linkText = 'mailto:';
             linkText += s.to + '?';
             linkText += 'Subject='+encodeURIComponent(s.subject)+'&';
             linkText += 'Body='+encodeURIComponent(s.body)+'&';
             s[this.field.result] = linkText;
+        },
+        telLink: function() {
+            var s = this.config.settings;
+            s.number = s.number || '';
+            if (s.number) {
+                s[this.field.result] = 'tel:' + s.number;
+            }
         }
     },
 
     mounted: function() {
         var _this = this;
         _this[_this.field.type.effect]();
+        dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
                 _this[_this.field.type.effect]();
+                dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
             })
     }
 
@@ -273,9 +471,15 @@ Vue.component('field-widget', {
             </button>\
             <h2>Settings: {{ config.display }}</h2>\
             <field v-for="field in config.fields"\
-                    :field="field"\
+                    :field="fieldData[field]"\
                     :config="config"></field>\
         </div>',
+
+    data: function() {
+        return {
+            fieldData: fieldData
+        }
+    },
 
     methods: {
 
@@ -355,92 +559,6 @@ Vue.component('banner', {
     }
 })
 //
-//  src/js/componentDefaults.js
-//
-var componentDefaults = {
-    'two-column': {
-        name: 'two-column',
-        display: 'Two Columns',
-        left: [
-            {
-                name: 'body-copy',
-                display: 'Body Copy',
-                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis feugiat aliquet tristique.'
-            }
-        ],
-        right: [
-            {
-                name: 'body-copy',
-                display: 'Body Copy',
-                content: 'Fusce vitae eros metus. In mollis scelerisque lorem, at placerat sem porttitor a.'
-            }
-        ]
-    },
-    'body-copy': {
-        name: 'body-copy',
-        display: 'Body Copy',
-        content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
-    },
-    'heading': {
-        name: 'heading',
-        display: 'Title',
-        content: '<div style="font-family:Arial,sans-serif;font-size:2.4em;">Lorem Ipsum Titlum</div>'
-    },
-    'banner': {
-        name: 'banner',
-        display: 'Banner Image',
-        settings: {
-            active: false,
-            src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-            alt: 'Default alt text',
-            href: '',
-            to: 'jon_mcgill@reyrey.com',
-            subject: 'Subject lines are the gateway to your heart',
-            body: 'This body copy is default and could be better but I don\'t really care at the moment.'
-        },
-        tokens: ['alt', 'src'],
-        fields: [
-            {   
-                label: 'Select an image',
-                type: { 
-                    name: 'dropdown', 
-                    menu: 'images',
-                    selected: 'Default'
-                },
-                result: 'src',
-            },
-            {
-                label: 'Write in an image URL',
-                result: 'src',
-                type: { name: 'text' }
-            },
-            {
-                label: 'Image alt text',
-                type: { name: 'text' },
-                result: 'alt',
-            },
-            {
-                result: 'href',
-                type: {
-                    name: 'fieldgroup',
-                    effect: 'mailto',
-                    fields: [
-                        {   type: { name: 'text' },
-                            result: 'to',
-                            label: 'Email address(s) to send to' },
-                        {   type: { name: 'text' },
-                            result: 'subject',
-                            label: 'Subject line' },
-                        {   type: { name: 'textarea' },
-                            result: 'body',
-                            label: 'Email body text' }
-                    ]
-                }
-            }
-        ]
-    }
-}
-//
 //  src/js/main.js
 //
 var app = new Vue({
@@ -450,7 +568,7 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field-choice for conditional fields</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field-choice for conditional fields</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field token system</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
@@ -605,6 +723,18 @@ function setComponentJSON(elem, value, result) {
     data = JSON.parse($comp.attr(g.name.config));
     data.settings[result] = value;
     $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+
+function dataToDOMJSON(data, elem) {
+    $(elem).attr(g.name.config, JSON.stringify(data));
+}
+
+function getParentDOMComponent(elem) {
+    var found = $(elem).closest(g.class.component);
+    if (found.length) {
+        return found[0];
+    }
 }
 
 

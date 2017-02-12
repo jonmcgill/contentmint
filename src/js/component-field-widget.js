@@ -12,9 +12,15 @@ Vue.component('field-widget', {
             </button>\
             <h2>Settings: {{ config.display }}</h2>\
             <field v-for="field in config.fields"\
-                    :field="field"\
+                    :field="fieldData[field]"\
                     :config="config"></field>\
         </div>',
+
+    data: function() {
+        return {
+            fieldData: fieldData
+        }
+    },
 
     methods: {
 

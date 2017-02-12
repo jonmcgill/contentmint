@@ -39,6 +39,7 @@ Vue.component('wrapper', {
                 setTimeout(function() {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
+                    dataToDOMJSON(_this.config, _this.$el);
                 }, 100);
             })
         }

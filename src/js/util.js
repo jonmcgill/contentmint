@@ -71,6 +71,18 @@ function setComponentJSON(elem, value, result) {
 }
 
 
+function dataToDOMJSON(data, elem) {
+    $(elem).attr(g.name.config, JSON.stringify(data));
+}
+
+function getParentDOMComponent(elem) {
+    var found = $(elem).closest(g.class.component);
+    if (found.length) {
+        return found[0];
+    }
+}
+
+
 function hoverIndication(elem) {
     $(elem).on('mouseenter', function(e) {
         var t = $(e.target);

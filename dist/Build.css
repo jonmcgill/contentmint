@@ -53,7 +53,8 @@ body {
   width: 100%;
   background: white;
   border-bottom: 2px solid rgba(0, 50, 0, 0.1);
-  font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
+  font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+  z-index: 200; }
   #Topbar .left {
     width: calc(100% - 400px);
     float: left;
@@ -67,10 +68,9 @@ body {
     font-size: 0.9em;
     outline: none;
     padding: 0;
-    width: 50%;
+    width: 40%;
     color: rgba(0, 0, 0, 0.7); }
   #Topbar #EditToolbar {
-    width: 50%;
     float: right; }
   #Topbar .right {
     width: 400px;
@@ -347,6 +347,9 @@ body {
       .field-widget .menu-dropdown li:hover {
         background: #51adf6;
         color: white; }
+
+.menu-dropdown.expand-up ul {
+  bottom: 2.4em; }
 
 .field-btn-back {
   background: none;

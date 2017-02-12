@@ -8,6 +8,7 @@
     background: white;
     border-bottom: 2px solid $color-bd-base;
     font-family: $font-base;
+    z-index: 200;
 
     .left {
         width: calc(100% - 400px);
@@ -24,12 +25,12 @@
         font-size: 0.9em;
         outline: none;
         padding: 0;
-        width: 50%;
+        width: 40%;
         color: rgba(0,0,0,0.7);
     }
 
     #EditToolbar {
-        width: 50%;
+        // width: 60%;
         float: right;
     }
 
