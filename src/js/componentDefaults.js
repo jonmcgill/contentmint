@@ -25,11 +25,12 @@ var componentDefaults = {
         display: 'Body Copy',
         content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
-    'table-row': {
-        name: 'table-row',
-        display: 'Table Row Test',
+    'table-data': {
+        name: 'table-data',
+        display: 'Table Test',
         course: 'Course Name Goes Here',
         date: 'MM/DD/YYYY',
+        componentTag: 'main',
         settings: {
             active: false,
             href: ''

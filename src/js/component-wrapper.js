@@ -53,6 +53,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
+        // if (this.config.componentTag) {
+        //     swapContainerTag(this.$el, this.config.componentTag);
+        // }
     },
     updated: function() {
         initStageComponent(this);
@@ -61,5 +64,8 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
+        // if (this.config.componentTag) {
+        //     swapContainerTag(this.$el, this.config.componentTag);
+        // }
     }
 })

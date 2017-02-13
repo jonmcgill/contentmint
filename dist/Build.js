@@ -197,11 +197,12 @@ var componentDefaults = {
         display: 'Body Copy',
         content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
-    'table-row': {
-        name: 'table-row',
-        display: 'Table Row Test',
+    'table-data': {
+        name: 'table-data',
+        display: 'Table Test',
         course: 'Course Name Goes Here',
         date: 'MM/DD/YYYY',
+        componentTag: 'main',
         settings: {
             active: false,
             href: ''
@@ -281,6 +282,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
+        // if (this.config.componentTag) {
+        //     swapContainerTag(this.$el, this.config.componentTag);
+        // }
     },
     updated: function() {
         initStageComponent(this);
@@ -289,6 +293,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
+        // if (this.config.componentTag) {
+        //     swapContainerTag(this.$el, this.config.componentTag);
+        // }
     }
 })
 //
@@ -588,21 +595,25 @@ Vue.component('body-copy', {
     }
 })
 
-Vue.component('table-row', {
+Vue.component('table-data', {
     props: ['config'],
     template: '\
     <div class="Component-Container">\
         <table border="1" cellpadding="5" width="100%">\
-            <tr>\
-                <td width="33%" style="text-align:center;">Course Name</td>\
-                <td width="33%" style="text-align:center;">Date</td>\
-                <td width="33%" style="text-align:center;">Register</td>\
-            </tr>\
-            <tr>\
-                <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
-                <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
-                <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
-            </tr>\
+            <thead>\
+                <tr>\
+                    <th width="33%" style="text-align:center;">Course Name</th>\
+                    <th width="33%" style="text-align:center;">Date</th>\
+                    <th width="33%" style="text-align:center;">Register</th>\
+                </tr>\
+            </thead>\
+            <tbody>\
+                <tr>\
+                    <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
+                    <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
+                    <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
+                </tr>\
+            </tbody>\
         </table>\
         <field-widget :config="config"></field-widget>\
     </div>\
@@ -655,11 +666,11 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field-choice for conditional fields</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field token system</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Add ability to change component and context HTML tags</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
-            componentDefaults['table-row'],
+            componentDefaults['table-data'],
             componentDefaults['two-column'],
             componentDefaults['banner']
         ],
@@ -884,6 +895,17 @@ function setComponentProperty(elem, prop, value) {
 function getComponentProperty(elem, prop) {
     var $comp = $(elem).closest('.Component');
     return JSON.parse($comp.attr(g.name.config))[prop];
+}
+
+function swapContainerTag(container, newTag) {
+    var attributes = $(container)[0].attributes;
+    var newContainer = $('<'+newTag+'></'+newTag+'>');
+    for (var i = 0; i < attributes.length; i++) {
+        $(newContainer).attr(attributes[i].name, $(container).attr(attributes[i].name))
+    }
+    $(container).wrapInner(newContainer);
+    $(container).children().first().unwrap();
+    return newContainer[0];
 }
 
 

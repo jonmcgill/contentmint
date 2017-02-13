@@ -8,11 +8,11 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field-choice for conditional fields</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Create field token system</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Add ability to change component and context HTML tags</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
-            componentDefaults['table-row'],
+            componentDefaults['table-data'],
             componentDefaults['two-column'],
             componentDefaults['banner']
         ],
