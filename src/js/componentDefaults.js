@@ -28,13 +28,13 @@ var componentDefaults = {
     'table-row': {
         name: 'table-row',
         display: 'Table Row Test',
-        col1: 'Column 1',
-        col2: 'Column 2',
+        course: 'Course Name Goes Here',
+        date: 'MM/DD/YYYY',
         settings: {
             active: false,
             href: ''
         },
-        tokens: [['Column 1', 'col1'], ['Column 2', 'col2']],
+        tokens: [['Course', 'course'], ['Date', 'date']],
         fields: ['link-mailto']
     },
     'heading': {

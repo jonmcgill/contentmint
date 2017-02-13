@@ -23,11 +23,15 @@ Vue.component('table-row', {
     template: '\
     <div class="Component-Container">\
         <table border="1" cellpadding="5" width="100%">\
-            <tr><td width="33%">Course Name</td><td width="33%">Date</td><td width="33%">Register</td></tr>\
             <tr>\
-                <td data-editor="basic" data-prop="col1" v-html="config.col1"></td>\
-                <td data-editor="basic" data-prop="col2" v-html="config.col2"></td>\
-                <td><a data-mailto :href="config.settings.href">Register!</a></td>\
+                <td width="33%" style="text-align:center;">Course Name</td>\
+                <td width="33%" style="text-align:center;">Date</td>\
+                <td width="33%" style="text-align:center;">Register</td>\
+            </tr>\
+            <tr>\
+                <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
+                <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
+                <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
             </tr>\
         </table>\
         <field-widget :config="config"></field-widget>\

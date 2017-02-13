@@ -32,6 +32,7 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         g.$.trash.empty();
 
     } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+        
         var $el = $(el);
         var component = $el.find(g.class.component)[0];
         var index = getIndex($el.parent(), el);

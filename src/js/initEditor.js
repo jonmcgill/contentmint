@@ -50,11 +50,16 @@ function initEditor(component) {
                     componentData[componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
 
+                    // If component has fields and component has an effect, run that effect
+                    // using the data stored in the component's data-config attribute
+                    // when the editor instance is updated. We use the stored json here so that
+                    // we don't fire Vue's rerendering on each update.
                     if (component.config.fields) {
                         component.config.fields.forEach(function(field) {
                             var fld = fieldData[field];
                             if (fld.type.effect) {
                                 var output = effects[fld.type.effect](component, fld.result, true);
+                                setSettingsProperty(editorElement, fld.result, output);
                                 $component
                                     .find('[data-'+fld.type.effect+']')
                                     .attr(fld.result, output);

@@ -374,6 +374,18 @@ body {
     .field-btn-back:hover i {
       left: 0px; }
 
+.field-tokens {
+  background: #ddd;
+  padding: 0.3em 0.6em;
+  margin-bottom: 1em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: rgba(0, 0, 0, 0.7); }
+  .field-tokens p {
+    margin: 0; }
+  .field-tokens span {
+    font-style: italic; }
+
 #EditorToolbar {
   float: right;
   color: rgba(0, 0, 0, 0.7) !important; }

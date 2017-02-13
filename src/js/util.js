@@ -74,7 +74,7 @@ function setComponentJSON(elem, value, result) {
 function updateComponentData(elem) {
     var path = walk.up(elem);
     var data = getComponentJSON(elem);
-    walk.down(path, getComponentJSON(elem), 1);
+    walk.down(path.reverse(), getComponentJSON(elem), 1);
 }
 
 function getComponentJSON(elem) {

@@ -66,6 +66,24 @@ var effects = {
 
     },
 
+    telLink: function(component, result, json) {
+
+        var config = json ? getComponentJSON(component.$el) : component.config;
+        var settings = config.settings;
+        var output;
+
+        settings.number = settings.number || '';
+
+        if (settings.number) {
+            output = 'tel:' + effects.tokenize(component, settings.number, json);
+        }
+
+        settings[result] = output;
+
+        return output;
+
+    },
+
     tokenize: function(component, value, json) {
 
         if (component.config.tokens) {
@@ -182,13 +200,13 @@ var componentDefaults = {
     'table-row': {
         name: 'table-row',
         display: 'Table Row Test',
-        col1: 'Column 1',
-        col2: 'Column 2',
+        course: 'Course Name Goes Here',
+        date: 'MM/DD/YYYY',
         settings: {
             active: false,
             href: ''
         },
-        tokens: [['Column 1', 'col1'], ['Column 2', 'col2']],
+        tokens: [['Course', 'course'], ['Date', 'date']],
         fields: ['link-mailto']
     },
     'heading': {
@@ -474,50 +492,30 @@ Vue.component('fieldgroup', {
     template: '\
     <div class="field-group-field">\
         <field v-for="fld in fields" :field="fld" :config="config"></field>\
+        <div class="field-tokens" v-if="config.tokens">\
+            <p>\
+                <strong>Available tokens: </strong><span v-html="displayTokens()"></span>\
+            </p>\
+        </div>\
     </div>',
 
     methods: {
-        mailto: function() {
-            var s = this.config.settings;
-            s.to = s.to || '';
-            s.subject = s.subject || '';
-            s.body = s.body  || '';
-            var linkText = 'mailto:';
-            linkText += s.to + '?';
-            linkText += 'Subject='+encodeURIComponent(this.tokenize(s.subject))+'&';
-            linkText += 'Body='+encodeURIComponent(this.tokenize(s.body))+'&';
-            s[this.field.result] = this.tokenize(linkText);
-        },
-        telLink: function() {
-            var s = this.config.settings;
-            s.number = s.number || '';
-            if (s.number) {
-                s[this.field.result] = 'tel:' + s.number;
-            }
-        },
-        tokenize: function(value) {
-            var _this = this;
+        displayTokens: function() {
             if (this.config.tokens) {
-                this.config.tokens.forEach(function(token) {
-                    var data = _this.config[token[1]] || _this.config.settings[token[1]];
-                    var clean = data.replace(/<.+?>/g, '');
-                    var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
-                    value = value.replace(exp, clean);
-                })
+                return this.config.tokens.map(function(token) {
+                    return token[0]
+                }).join(', ');
             }
-            return value;
         }
     },
 
     mounted: function() {
         var _this = this;
-        // _this[_this.field.type.effect]();
         effects[_this.field.type.effect](this, this.field.result);
         dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
-                // _this[_this.field.type.effect]();
                 effects[_this.field.type.effect](_this, _this.field.result);
                 dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
             })
@@ -556,6 +554,7 @@ Vue.component('field-widget', {
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
+                setSettingsProperty(_this.$el, 'active', false);
             }, 250)
         }
 
@@ -594,11 +593,15 @@ Vue.component('table-row', {
     template: '\
     <div class="Component-Container">\
         <table border="1" cellpadding="5" width="100%">\
-            <tr><td width="33%">Course Name</td><td width="33%">Date</td><td width="33%">Register</td></tr>\
             <tr>\
-                <td data-editor="basic" data-prop="col1" v-html="config.col1"></td>\
-                <td data-editor="basic" data-prop="col2" v-html="config.col2"></td>\
-                <td><a data-mailto :href="config.settings.href">Register!</a></td>\
+                <td width="33%" style="text-align:center;">Course Name</td>\
+                <td width="33%" style="text-align:center;">Date</td>\
+                <td width="33%" style="text-align:center;">Register</td>\
+            </tr>\
+            <tr>\
+                <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
+                <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
+                <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
             </tr>\
         </table>\
         <field-widget :config="config"></field-widget>\
@@ -846,7 +849,7 @@ function setComponentJSON(elem, value, result) {
 function updateComponentData(elem) {
     var path = walk.up(elem);
     var data = getComponentJSON(elem);
-    walk.down(path, getComponentJSON(elem), 1);
+    walk.down(path.reverse(), getComponentJSON(elem), 1);
 }
 
 function getComponentJSON(elem) {
@@ -1063,11 +1066,16 @@ function initEditor(component) {
                     componentData[componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
 
+                    // If component has fields and component has an effect, run that effect
+                    // using the data stored in the component's data-config attribute
+                    // when the editor instance is updated. We use the stored json here so that
+                    // we don't fire Vue's rerendering on each update.
                     if (component.config.fields) {
                         component.config.fields.forEach(function(field) {
                             var fld = fieldData[field];
                             if (fld.type.effect) {
                                 var output = effects[fld.type.effect](component, fld.result, true);
+                                setSettingsProperty(editorElement, fld.result, output);
                                 $component
                                     .find('[data-'+fld.type.effect+']')
                                     .attr(fld.result, output);
@@ -1121,6 +1129,7 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
         g.$.trash.empty();
 
     } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
+        
         var $el = $(el);
         var component = $el.find(g.class.component)[0];
         var index = getIndex($el.parent(), el);

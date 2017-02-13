@@ -30,6 +30,7 @@ Vue.component('field-widget', {
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
+                setSettingsProperty(_this.$el, 'active', false);
             }, 250)
         }
 

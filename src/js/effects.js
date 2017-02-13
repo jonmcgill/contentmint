@@ -24,6 +24,24 @@ var effects = {
 
     },
 
+    telLink: function(component, result, json) {
+
+        var config = json ? getComponentJSON(component.$el) : component.config;
+        var settings = config.settings;
+        var output;
+
+        settings.number = settings.number || '';
+
+        if (settings.number) {
+            output = 'tel:' + effects.tokenize(component, settings.number, json);
+        }
+
+        settings[result] = output;
+
+        return output;
+
+    },
+
     tokenize: function(component, value, json) {
 
         if (component.config.tokens) {

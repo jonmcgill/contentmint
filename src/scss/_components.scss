@@ -14,9 +14,6 @@
         cursor: auto;
     }
     border: 1px dashed transparent;
-    *:not(#Thumbnails):hover {
-        // border-color: rgba(0,0,0,0.5);
-    }
 
     .comp-toolbar {
         position: absolute;
@@ -73,7 +70,6 @@
     & > div {
         padding: 1em;
         margin: 0.2em;
-        // border: 1px solid #999;
         width: calc(50% - 0.4em);
         float: left;
         display: inline-block;
