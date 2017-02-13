@@ -7,6 +7,7 @@ var gulp = require('gulp'),
 var js_files = [
     
     './src/js/global.js',
+    './src/js/effects.js',
     './src/js/fieldData.js',
     './src/js/componentDefaults.js',
 
@@ -27,11 +28,10 @@ var js_files = [
 
     './src/js/nodes.js',
     './src/js/documentHandlers.js',
+    './src/js/walk.js',
     './src/js/util.js',
     './src/js/collectData.js',
-    './src/js/walk.js',
     './src/js/dom-data-sync.js',
-
     './src/js/initStageComponent.js',
     './src/js/initEditor.js',
     './src/js/initDragula.js',

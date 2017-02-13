@@ -71,6 +71,16 @@ function setComponentJSON(elem, value, result) {
 }
 
 
+function updateComponentData(elem) {
+    var path = walk.up(elem);
+    var data = getComponentJSON(elem);
+    walk.down(path, getComponentJSON(elem), 1);
+}
+
+function getComponentJSON(elem) {
+    return JSON.parse($(getParentDOMComponent(elem)).attr('data-config'));
+}
+
 function dataToDOMJSON(data, elem) {
     $(elem).attr(g.name.config, JSON.stringify(data));
 }
@@ -87,6 +97,18 @@ function setSettingsProperty(elem, prop, value) {
     var data = JSON.parse($comp.attr(g.name.config));
     data.settings[prop] = value;
     $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+function setComponentProperty(elem, prop, value) {
+    var $comp = $(elem).closest('.Component');
+    var data = JSON.parse($comp.attr(g.name.config));
+    data[prop] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+function getComponentProperty(elem, prop) {
+    var $comp = $(elem).closest('.Component');
+    return JSON.parse($comp.attr(g.name.config))[prop];
 }
 
 

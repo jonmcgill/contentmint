@@ -46,9 +46,21 @@ function initEditor(component) {
                 editor.on('Change keyup', function() {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
+                        
                     componentData[componentProp] = editor.getContent();
-                    // component.config['_' + componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
+
+                    if (component.config.fields) {
+                        component.config.fields.forEach(function(field) {
+                            var fld = fieldData[field];
+                            if (fld.type.effect) {
+                                var output = effects[fld.type.effect](component, fld.result, true);
+                                $component
+                                    .find('[data-'+fld.type.effect+']')
+                                    .attr(fld.result, output);
+                            }
+                        })
+                    }
                 })
             }
 

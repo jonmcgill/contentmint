@@ -17,11 +17,12 @@ var walk = {
         return path;
     },
 
-    down: function(path, obj) {
+    down: function(path, obj, remove) {
         var item = app;
+        var remove = remove || 0;
         path.forEach(function(data, i) {
             if (i === path.length - 1) {
-                item[data.name].splice(data.index, 0, obj);
+                item[data.name].splice(data.index, remove, obj);
             } else {
                 item = item[data.name][data.index];
             }

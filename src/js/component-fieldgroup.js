@@ -34,9 +34,9 @@ Vue.component('fieldgroup', {
             if (this.config.tokens) {
                 this.config.tokens.forEach(function(token) {
                     var data = _this.config[token[1]] || _this.config.settings[token[1]];
-                    data = data.replace(/<.+>/g, '');
+                    var clean = data.replace(/<.+?>/g, '');
                     var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
-                    value = value.replace(exp, data);
+                    value = value.replace(exp, clean);
                 })
             }
             return value;
@@ -45,12 +45,14 @@ Vue.component('fieldgroup', {
 
     mounted: function() {
         var _this = this;
-        _this[_this.field.type.effect]();
+        // _this[_this.field.type.effect]();
+        effects[_this.field.type.effect](this, this.field.result);
         dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
-                _this[_this.field.type.effect]();
+                // _this[_this.field.type.effect]();
+                effects[_this.field.type.effect](_this, _this.field.result);
                 dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
             })
     }

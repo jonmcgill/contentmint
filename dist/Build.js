@@ -41,6 +41,47 @@ var g = {
     }
 }
 //
+//  src/js/effects.js
+//
+var effects = {
+
+    mailto: function(component, result, json) {
+
+        var config = json ? getComponentJSON(component.$el) : component.config;
+        var settings = config.settings;
+        var output = 'mailto:';
+
+        settings.to = settings.to || '';
+        settings.subject = settings.subject || '';
+        settings.body = settings.body || '';
+
+        output += settings.to + '?';
+        output += 'Subject=' + encodeURIComponent(effects.tokenize(component, settings.subject, json)) + '&';
+        output += 'Body=' + encodeURIComponent(effects.tokenize(component, settings.body, json));
+        output = effects.tokenize(component, output, json);
+
+        settings[result] = output;
+
+        return output;
+
+    },
+
+    tokenize: function(component, value, json) {
+
+        if (component.config.tokens) {
+            component.config.tokens.forEach(function(token) {
+                var config = json ? getComponentJSON(component.$el) : component.config;
+                var data = config[token[1]] || config.settings[token[1]];
+                var clean = data.replace(/<.+?>/g, '');
+                var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
+                value = value.replace(exp, clean);
+            })
+        }
+        return value;
+    }
+
+}
+//
 //  src/js/fieldData.js
 //
 var fieldData = {
@@ -203,12 +244,12 @@ Vue.component('wrapper', {
 
         openSettings: function() {
             var _this = this;
-            _this.$children[0].config.settings.active = true;
+            setSettingsProperty(this.$el, 'active', true);
+            updateComponentData(this.$el);
             Vue.nextTick(function() {
                 setTimeout(function() {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
-                    dataToDOMJSON(_this.config, _this.$el);
                 }, 100);
             })
         }
@@ -459,9 +500,9 @@ Vue.component('fieldgroup', {
             if (this.config.tokens) {
                 this.config.tokens.forEach(function(token) {
                     var data = _this.config[token[1]] || _this.config.settings[token[1]];
-                    data = data.replace(/<.+>/g, '');
+                    var clean = data.replace(/<.+?>/g, '');
                     var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
-                    value = value.replace(exp, data);
+                    value = value.replace(exp, clean);
                 })
             }
             return value;
@@ -470,12 +511,14 @@ Vue.component('fieldgroup', {
 
     mounted: function() {
         var _this = this;
-        _this[_this.field.type.effect]();
+        // _this[_this.field.type.effect]();
+        effects[_this.field.type.effect](this, this.field.result);
         dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
-                _this[_this.field.type.effect]();
+                // _this[_this.field.type.effect]();
+                effects[_this.field.type.effect](_this, _this.field.result);
                 dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
             })
     }
@@ -513,7 +556,6 @@ Vue.component('field-widget', {
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
-                syncStageAndStore();
             }, 250)
         }
 
@@ -551,11 +593,12 @@ Vue.component('table-row', {
     props: ['config'],
     template: '\
     <div class="Component-Container">\
-        <table>\
+        <table border="1" cellpadding="5" width="100%">\
+            <tr><td width="33%">Course Name</td><td width="33%">Date</td><td width="33%">Register</td></tr>\
             <tr>\
                 <td data-editor="basic" data-prop="col1" v-html="config.col1"></td>\
                 <td data-editor="basic" data-prop="col2" v-html="config.col2"></td>\
-                <td><a :href="config.settings.href">Register!</a></td>\
+                <td><a data-mailto :href="config.settings.href">Register!</a></td>\
             </tr>\
         </table>\
         <field-widget :config="config"></field-widget>\
@@ -696,6 +739,38 @@ function fireDocumentHandlers() {
 
 }
 //
+//  src/js/walk.js
+//
+var walk = {
+    up: function(el, selector) {
+        var path = [];
+        function travel(elem) {
+            var nextContext = $(elem).closest('.Context')[0];
+            var index = getIndex(nextContext, elem);
+            var name = $(nextContext).attr('data-context-name');
+            path.push({index: index, name: name});
+            if ($(nextContext).attr('id') !== 'Stage') {
+                travel($(nextContext).closest('.Component')[0])
+            }
+        }
+        travel(el);
+        return path;
+    },
+
+    down: function(path, obj, remove) {
+        var item = app;
+        var remove = remove || 0;
+        path.forEach(function(data, i) {
+            if (i === path.length - 1) {
+                item[data.name].splice(data.index, remove, obj);
+            } else {
+                item = item[data.name][data.index];
+            }
+        })
+        return;
+    }
+}
+//
 //  src/js/util.js
 //
 function random(min, max) {
@@ -768,6 +843,16 @@ function setComponentJSON(elem, value, result) {
 }
 
 
+function updateComponentData(elem) {
+    var path = walk.up(elem);
+    var data = getComponentJSON(elem);
+    walk.down(path, getComponentJSON(elem), 1);
+}
+
+function getComponentJSON(elem) {
+    return JSON.parse($(getParentDOMComponent(elem)).attr('data-config'));
+}
+
 function dataToDOMJSON(data, elem) {
     $(elem).attr(g.name.config, JSON.stringify(data));
 }
@@ -784,6 +869,18 @@ function setSettingsProperty(elem, prop, value) {
     var data = JSON.parse($comp.attr(g.name.config));
     data.settings[prop] = value;
     $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+function setComponentProperty(elem, prop, value) {
+    var $comp = $(elem).closest('.Component');
+    var data = JSON.parse($comp.attr(g.name.config));
+    data[prop] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
+}
+
+function getComponentProperty(elem, prop) {
+    var $comp = $(elem).closest('.Component');
+    return JSON.parse($comp.attr(g.name.config))[prop];
 }
 
 
@@ -875,37 +972,6 @@ function getStageData() {
         .map(getComponentData);
 }
 //
-//  src/js/walk.js
-//
-var walk = {
-    up: function(el, selector) {
-        var path = [];
-        function travel(elem) {
-            var nextContext = $(elem).closest('.Context')[0];
-            var index = getIndex(nextContext, elem);
-            var name = $(nextContext).attr('data-context-name');
-            path.push({index: index, name: name});
-            if ($(nextContext).attr('id') !== 'Stage') {
-                travel($(nextContext).closest('.Component')[0])
-            }
-        }
-        travel(el);
-        return path;
-    },
-
-    down: function(path, obj) {
-        var item = app;
-        path.forEach(function(data, i) {
-            if (i === path.length - 1) {
-                item[data.name].splice(data.index, 0, obj);
-            } else {
-                item = item[data.name][data.index];
-            }
-        })
-        return;
-    }
-}
-//
 //  src/js/dom-data-sync.js
 //
 function checkSync() {
@@ -993,9 +1059,21 @@ function initEditor(component) {
                 editor.on('Change keyup', function() {
                     var componentData = JSON.parse($component.attr(g.name.config)),
                         componentProp = $editorElement.attr(g.name.prop);
+                        
                     componentData[componentProp] = editor.getContent();
-                    // component.config['_' + componentProp] = editor.getContent();
                     $component.attr(g.name.config, JSON.stringify(componentData));
+
+                    if (component.config.fields) {
+                        component.config.fields.forEach(function(field) {
+                            var fld = fieldData[field];
+                            if (fld.type.effect) {
+                                var output = effects[fld.type.effect](component, fld.result, true);
+                                $component
+                                    .find('[data-'+fld.type.effect+']')
+                                    .attr(fld.result, output);
+                            }
+                        })
+                    }
                 })
             }
 

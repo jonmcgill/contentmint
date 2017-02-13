@@ -34,12 +34,12 @@ Vue.component('wrapper', {
 
         openSettings: function() {
             var _this = this;
-            _this.$children[0].config.settings.active = true;
+            setSettingsProperty(this.$el, 'active', true);
+            updateComponentData(this.$el);
             Vue.nextTick(function() {
                 setTimeout(function() {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
-                    dataToDOMJSON(_this.config, _this.$el);
                 }, 100);
             })
         }
