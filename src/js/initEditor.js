@@ -17,12 +17,10 @@ function globalEditorConfig() {
 
 
 function initEditor(component) {
-
     var editorConfig = globalEditorConfig(),
         $component = $(component.$el);
 
     $component.find(g.attr.editor).each(function() {
-
         var editorElement = this,
             $editorElement = $(this),
             editorType = $editorElement.attr(g.name.editor),
@@ -57,12 +55,7 @@ function initEditor(component) {
             var editorID = genID(10);
             $editorElement.attr(g.name.editorID, editorID)
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
-            $editorElement.on('mouseover', function() {
-                if (!$editorElement.hasClass('mce-content-body')) {
-                    tinymce.init(editorConfig);
-                    debug('editor initiated - ' + editorID);
-                }
-            })
+            tinymce.init(editorConfig);
 
         }
 

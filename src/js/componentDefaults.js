@@ -25,6 +25,18 @@ var componentDefaults = {
         display: 'Body Copy',
         content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
+    'table-row': {
+        name: 'table-row',
+        display: 'Table Row Test',
+        col1: 'Column 1',
+        col2: 'Column 2',
+        settings: {
+            active: false,
+            href: ''
+        },
+        tokens: [['Column 1', 'col1'], ['Column 2', 'col2']],
+        fields: ['link-mailto']
+    },
     'heading': {
         name: 'heading',
         display: 'Title',
@@ -39,7 +51,6 @@ var componentDefaults = {
             alt: 'Default alt text',
             href: ''
         },
-        tokens: ['alt', 'src'],
         fields: ['image-dropdown', 'image-url', 'alt-text', 'link-choice']
     }
 }

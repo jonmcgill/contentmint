@@ -17,3 +17,19 @@ Vue.component('body-copy', {
         }
     }
 })
+
+Vue.component('table-row', {
+    props: ['config'],
+    template: '\
+    <div class="Component-Container">\
+        <table>\
+            <tr>\
+                <td data-editor="basic" data-prop="col1" v-html="config.col1"></td>\
+                <td data-editor="basic" data-prop="col2" v-html="config.col2"></td>\
+                <td><a :href="config.settings.href">Register!</a></td>\
+            </tr>\
+        </table>\
+        <field-widget :config="config"></field-widget>\
+    </div>\
+    '
+})

@@ -12,6 +12,7 @@ var app = new Vue({
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
+            componentDefaults['table-row'],
             componentDefaults['two-column'],
             componentDefaults['banner']
         ],

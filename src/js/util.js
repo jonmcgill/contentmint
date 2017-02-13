@@ -82,6 +82,13 @@ function getParentDOMComponent(elem) {
     }
 }
 
+function setSettingsProperty(elem, prop, value) {
+    var $comp = $(elem).closest('.Component');
+    var data = JSON.parse($comp.attr(g.name.config));
+    data.settings[prop] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
+}
+
 
 function hoverIndication(elem) {
     $(elem).on('mouseenter', function(e) {

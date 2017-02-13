@@ -138,6 +138,18 @@ var componentDefaults = {
         display: 'Body Copy',
         content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
     },
+    'table-row': {
+        name: 'table-row',
+        display: 'Table Row Test',
+        col1: 'Column 1',
+        col2: 'Column 2',
+        settings: {
+            active: false,
+            href: ''
+        },
+        tokens: [['Column 1', 'col1'], ['Column 2', 'col2']],
+        fields: ['link-mailto']
+    },
     'heading': {
         name: 'heading',
         display: 'Title',
@@ -152,7 +164,6 @@ var componentDefaults = {
             alt: 'Default alt text',
             href: ''
         },
-        tokens: ['alt', 'src'],
         fields: ['image-dropdown', 'image-url', 'alt-text', 'link-choice']
     }
 }
@@ -204,6 +215,7 @@ Vue.component('wrapper', {
 
     },
     mounted: function() {
+        var _this = this;
         initStageComponent(this);
         initEditor(this);
         $(this.$el).find('a').click(function(e) {
@@ -213,6 +225,7 @@ Vue.component('wrapper', {
     },
     updated: function() {
         initStageComponent(this);
+        initEditor(this);
         $(this.$el).find('a').click(function(e) {
             debug('prevent link clicks');
             e.preventDefault();
@@ -237,7 +250,6 @@ Vue.component('context', {
         </div>',
     mounted: function() {
         addContainer(this.$el);
-        // hoverIndication(this.$el);
     }
 })
 //
@@ -431,9 +443,9 @@ Vue.component('fieldgroup', {
             s.body = s.body  || '';
             var linkText = 'mailto:';
             linkText += s.to + '?';
-            linkText += 'Subject='+encodeURIComponent(s.subject)+'&';
-            linkText += 'Body='+encodeURIComponent(s.body)+'&';
-            s[this.field.result] = linkText;
+            linkText += 'Subject='+encodeURIComponent(this.tokenize(s.subject))+'&';
+            linkText += 'Body='+encodeURIComponent(this.tokenize(s.body))+'&';
+            s[this.field.result] = this.tokenize(linkText);
         },
         telLink: function() {
             var s = this.config.settings;
@@ -441,6 +453,18 @@ Vue.component('fieldgroup', {
             if (s.number) {
                 s[this.field.result] = 'tel:' + s.number;
             }
+        },
+        tokenize: function(value) {
+            var _this = this;
+            if (this.config.tokens) {
+                this.config.tokens.forEach(function(token) {
+                    var data = _this.config[token[1]] || _this.config.settings[token[1]];
+                    data = data.replace(/<.+>/g, '');
+                    var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
+                    value = value.replace(exp, data);
+                })
+            }
+            return value;
         }
     },
 
@@ -489,6 +513,7 @@ Vue.component('field-widget', {
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
+                syncStageAndStore();
             }, 250)
         }
 
@@ -520,6 +545,22 @@ Vue.component('body-copy', {
             }
         }
     }
+})
+
+Vue.component('table-row', {
+    props: ['config'],
+    template: '\
+    <div class="Component-Container">\
+        <table>\
+            <tr>\
+                <td data-editor="basic" data-prop="col1" v-html="config.col1"></td>\
+                <td data-editor="basic" data-prop="col2" v-html="config.col2"></td>\
+                <td><a :href="config.settings.href">Register!</a></td>\
+            </tr>\
+        </table>\
+        <field-widget :config="config"></field-widget>\
+    </div>\
+    '
 })
 //
 //  src/js/component-two-column.js
@@ -572,6 +613,7 @@ var app = new Vue({
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
+            componentDefaults['table-row'],
             componentDefaults['two-column'],
             componentDefaults['banner']
         ],
@@ -735,6 +777,13 @@ function getParentDOMComponent(elem) {
     if (found.length) {
         return found[0];
     }
+}
+
+function setSettingsProperty(elem, prop, value) {
+    var $comp = $(elem).closest('.Component');
+    var data = JSON.parse($comp.attr(g.name.config));
+    data.settings[prop] = value;
+    $comp.attr(g.name.config, JSON.stringify(data));
 }
 
 
@@ -915,12 +964,10 @@ function globalEditorConfig() {
 
 
 function initEditor(component) {
-
     var editorConfig = globalEditorConfig(),
         $component = $(component.$el);
 
     $component.find(g.attr.editor).each(function() {
-
         var editorElement = this,
             $editorElement = $(this),
             editorType = $editorElement.attr(g.name.editor),
@@ -955,12 +1002,7 @@ function initEditor(component) {
             var editorID = genID(10);
             $editorElement.attr(g.name.editorID, editorID)
             editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
-            $editorElement.on('mouseover', function() {
-                if (!$editorElement.hasClass('mce-content-body')) {
-                    tinymce.init(editorConfig);
-                    debug('editor initiated - ' + editorID);
-                }
-            })
+            tinymce.init(editorConfig);
 
         }
 

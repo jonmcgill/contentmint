@@ -46,6 +46,7 @@ Vue.component('wrapper', {
 
     },
     mounted: function() {
+        var _this = this;
         initStageComponent(this);
         initEditor(this);
         $(this.$el).find('a').click(function(e) {
@@ -55,6 +56,7 @@ Vue.component('wrapper', {
     },
     updated: function() {
         initStageComponent(this);
+        initEditor(this);
         $(this.$el).find('a').click(function(e) {
             debug('prevent link clicks');
             e.preventDefault();

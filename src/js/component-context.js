@@ -16,6 +16,5 @@ Vue.component('context', {
         </div>',
     mounted: function() {
         addContainer(this.$el);
-        // hoverIndication(this.$el);
     }
 })

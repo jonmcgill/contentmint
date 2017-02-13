@@ -18,9 +18,9 @@ Vue.component('fieldgroup', {
             s.body = s.body  || '';
             var linkText = 'mailto:';
             linkText += s.to + '?';
-            linkText += 'Subject='+encodeURIComponent(s.subject)+'&';
-            linkText += 'Body='+encodeURIComponent(s.body)+'&';
-            s[this.field.result] = linkText;
+            linkText += 'Subject='+encodeURIComponent(this.tokenize(s.subject))+'&';
+            linkText += 'Body='+encodeURIComponent(this.tokenize(s.body))+'&';
+            s[this.field.result] = this.tokenize(linkText);
         },
         telLink: function() {
             var s = this.config.settings;
@@ -28,6 +28,18 @@ Vue.component('fieldgroup', {
             if (s.number) {
                 s[this.field.result] = 'tel:' + s.number;
             }
+        },
+        tokenize: function(value) {
+            var _this = this;
+            if (this.config.tokens) {
+                this.config.tokens.forEach(function(token) {
+                    var data = _this.config[token[1]] || _this.config.settings[token[1]];
+                    data = data.replace(/<.+>/g, '');
+                    var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
+                    value = value.replace(exp, data);
+                })
+            }
+            return value;
         }
     },
 
