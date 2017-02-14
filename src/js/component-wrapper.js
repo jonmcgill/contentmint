@@ -8,15 +8,46 @@
 //  the <settings> component.
 Vue.component('wrapper', {
     props: ['config'],
-    template: '\
-        <div class="Component">\
-            <component :is="config.name" :config="config"></component>\
-            <div class="comp-toolbar">\
-                <button class="btn-toolbar" @click="copy"><i class="fa fa-clone"></i></button>\
-                <button class="btn-toolbar" @click="trash"><i class="fa fa-trash-o"></i></button>\
-                <button class="btn-toolbar" @click="openSettings" v-if="config.settings"><i class="fa fa-cog"></i></button>\
-            </div>\
-        </div>',
+
+    render: function(make) {
+        var _this = this;
+        var tag = this.config.componentTag
+            ? this.config.componentTag
+            : 'div';
+
+        var settingsBtn = function() {
+            return _this.config.settings
+                ? make('button', {
+                'class': { 'btn-toolbar': true },
+                on: { click: _this.openSettings }}, 
+                [   make('i', {'class': {'fa': true, 'fa-cog': true }} )])
+                : null;
+        }
+
+        return make(tag, {
+            'class': { Component: true } },
+            [   make(this.config.name, {
+                    props: { config: this.config },
+                }),
+                make('div', {
+                    'class': { 'comp-toolbar': true }},
+                    [   make('button', {
+                            'class': { 'btn-toolbar': true },
+                            on: { click: this.copy }}, 
+                            [   make('i', {'class': { 'fa': true, 'fa-clone': true }} )]
+                        ),
+                        make('button', {
+                            'class': { 'btn-toolbar': true },
+                            on: { click: this.trash }}, 
+                            [   make('i', {'class': { 'fa': true, 'fa-trash-o': true }} )]
+                        ),
+                        settingsBtn()
+                    ]
+                )
+            ]
+        )
+    },
+
     methods: {
 
         trash: function() {
@@ -53,9 +84,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
-        // if (this.config.componentTag) {
-        //     swapContainerTag(this.$el, this.config.componentTag);
-        // }
+        $(this.$el).find('[data-transfer]').each(function() {
+            transferContainer(this);
+        })
     },
     updated: function() {
         initStageComponent(this);
@@ -64,8 +95,8 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
-        // if (this.config.componentTag) {
-        //     swapContainerTag(this.$el, this.config.componentTag);
-        // }
+        $(this.$el).find('[data-transfer]').each(function() {
+            transferContainer(this);
+        })
     }
 })

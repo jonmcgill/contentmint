@@ -1,7 +1,7 @@
 
 #Stage .Component:hover,
 #Stage .Context:hover {
-    border-color: rgba(0,0,0,0.5);
+    // border-color: rgba(0,0,0,0.5);
 }
 
 .Component {
@@ -13,7 +13,7 @@
     *:not(.Component) {
         cursor: auto;
     }
-    border: 1px dashed transparent;
+    // border: 1px dashed transparent;
 
     .comp-toolbar {
         position: absolute;
@@ -67,7 +67,7 @@
         content: '';
         clear: both;
     }
-    & > div {
+    & > * {
         padding: 1em;
         margin: 0.2em;
         width: calc(50% - 0.4em);

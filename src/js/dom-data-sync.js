@@ -3,7 +3,7 @@
 //
 function checkSync() {
     setTimeout(function() {
-        console.log('Synced: ' + (JSON.stringify(collectData()) === JSON.stringify(app.stage)));
+        console.log('Synced: ' + (JSON.stringify(getStageData()) === JSON.stringify(app.stage)));
     }, 500);
     
 }

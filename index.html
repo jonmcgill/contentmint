@@ -24,7 +24,7 @@
     </div>
 
     <div id="Template">
-        <context id="Stage" :components="stage" data-context-name="stage"></context>
+        <context id="Stage" :components="stage" data-context-name="stage" :config="{}"></context>
     </div>
 
     <aside id="Sidebar">
@@ -40,11 +40,12 @@
         <div id="BottomBar">
             <div class="trash-wrap">
                 <span><i class="fa fa-trash-o"></i>TRASH</span>
-                <context class="font-base" id="Trash" :components:="trash" data-context-name="trash">Trash</context>
+                <context class="font-base" id="Trash" :components="trash" data-context-name="trash" :config="{}">Trash</context>
             </div>
             <button id="PreviewButton"><i class="fa fa-eye"></i>PREVIEW</button>
             <button id="CodeButton"><i class="fa fa-code"></i>GET CODE</button>
         </div>
+    </aside>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>

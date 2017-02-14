@@ -18,8 +18,12 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
     // Was getting child node error from dragula when moving nested containers
-    accepts: function(el, target) {
-        return target !== g.node.thumbnails && !contains(el, target);
+    accepts: function(el, target, source, sibling) {
+        var check = true;
+        if (target === g.node.thumbnails) check = false;
+        if (contains(el, target)) check = false;
+        if ($(source)[0].nodeName === 'TBODY' && $(target)[0].nodeName !== 'TBODY') check = false;
+        return check;
     },
 
 }).on('drop', function(el, target, source, sibling) {

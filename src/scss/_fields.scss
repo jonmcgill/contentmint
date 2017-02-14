@@ -119,11 +119,9 @@
 }
 
 .field-tokens {
-    background: #ddd;
+    background: lighten(orange, 30%);
     padding: 0.3em 0.6em;
     margin-bottom: 1em;
-    border: 1px solid #ccc;
-    border-radius: 3px;
     color: rgba(0,0,0,0.7);
     p {
         margin: 0;

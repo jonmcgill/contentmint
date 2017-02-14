@@ -221,17 +221,12 @@ body {
 #Stage {
   padding: 1em; }
 
-#Stage .Component:hover,
-#Stage .Context:hover {
-  border-color: rgba(0, 0, 0, 0.5); }
-
 .Component {
   cursor: grab;
   cursor: -webkit-grab;
   cursor: -moz-grab;
   position: relative;
-  padding: 5px;
-  border: 1px dashed transparent; }
+  padding: 5px; }
   .Component *:not(.Component) {
     cursor: auto; }
   .Component .comp-toolbar {
@@ -274,7 +269,7 @@ body {
   content: '';
   clear: both; }
 
-.ColumnWrap > div {
+.ColumnWrap > * {
   padding: 1em;
   margin: 0.2em;
   width: calc(50% - 0.4em);
@@ -375,11 +370,9 @@ body {
       left: 0px; }
 
 .field-tokens {
-  background: #ddd;
+  background: #ffdb99;
   padding: 0.3em 0.6em;
   margin-bottom: 1em;
-  border: 1px solid #ccc;
-  border-radius: 3px;
   color: rgba(0, 0, 0, 0.7); }
   .field-tokens p {
     margin: 0; }

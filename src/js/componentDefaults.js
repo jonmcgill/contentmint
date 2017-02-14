@@ -5,6 +5,7 @@ var componentDefaults = {
     'two-column': {
         name: 'two-column',
         display: 'Two Columns',
+        contextTag: 'section',
         left: [
             {
                 name: 'body-copy',
@@ -27,10 +28,27 @@ var componentDefaults = {
     },
     'table-data': {
         name: 'table-data',
-        display: 'Table Test',
-        course: 'Course Name Goes Here',
+        display: 'Course Table',
+        componentTag: 'table',
+        contextTag: 'tbody',
+        rows: [{name: 'table-row',
+        display: 'Course Row',
+        course: 'Course name goes here',
         date: 'MM/DD/YYYY',
-        componentTag: 'main',
+        componentTag: 'tr',
+        settings: {
+            active: false,
+            href: ''
+        },
+        tokens: [['Course', 'course'], ['Date', 'date']],
+        fields: ['link-mailto']}]
+    },
+    'table-row': {
+        name: 'table-row',
+        display: 'Course Row',
+        course: 'Course name goes here',
+        date: 'MM/DD/YYYY',
+        componentTag: 'tr',
         settings: {
             active: false,
             href: ''

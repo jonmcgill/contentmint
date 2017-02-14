@@ -9,7 +9,7 @@ Vue.component('two-column', {
     props: ['config'],
     template: '\
         <div class="ColumnWrap">\
-            <context :components="config.left" data-context-name="left"></context>\
-            <context :components="config.right" data-context-name="right"></content>\
+            <context :components="config.left" data-context-name="left" :config="config"></context>\
+            <context :components="config.right" data-context-name="right" :config="config"></content>\
         </div>'
 });

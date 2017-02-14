@@ -111,15 +111,13 @@ function getComponentProperty(elem, prop) {
     return JSON.parse($comp.attr(g.name.config))[prop];
 }
 
-function swapContainerTag(container, newTag) {
+function transferContainer(container) {
     var attributes = $(container)[0].attributes;
-    var newContainer = $('<'+newTag+'></'+newTag+'>');
     for (var i = 0; i < attributes.length; i++) {
-        $(newContainer).attr(attributes[i].name, $(container).attr(attributes[i].name))
+        $(container).parent().attr(attributes[i].name, $(container).attr(attributes[i].name))
     }
-    $(container).wrapInner(newContainer);
-    $(container).children().first().unwrap();
-    return newContainer[0];
+    $(container).parent().removeAttr('data-transfer');
+    $(container).children().unwrap();
 }
 
 

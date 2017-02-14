@@ -177,6 +177,7 @@ var componentDefaults = {
     'two-column': {
         name: 'two-column',
         display: 'Two Columns',
+        contextTag: 'section',
         left: [
             {
                 name: 'body-copy',
@@ -199,10 +200,27 @@ var componentDefaults = {
     },
     'table-data': {
         name: 'table-data',
-        display: 'Table Test',
-        course: 'Course Name Goes Here',
+        display: 'Course Table',
+        componentTag: 'table',
+        contextTag: 'tbody',
+        rows: [{name: 'table-row',
+        display: 'Course Row',
+        course: 'Course name goes here',
         date: 'MM/DD/YYYY',
-        componentTag: 'main',
+        componentTag: 'tr',
+        settings: {
+            active: false,
+            href: ''
+        },
+        tokens: [['Course', 'course'], ['Date', 'date']],
+        fields: ['link-mailto']}]
+    },
+    'table-row': {
+        name: 'table-row',
+        display: 'Course Row',
+        course: 'Course name goes here',
+        date: 'MM/DD/YYYY',
+        componentTag: 'tr',
         settings: {
             active: false,
             href: ''
@@ -237,15 +255,46 @@ var componentDefaults = {
 //  the <settings> component.
 Vue.component('wrapper', {
     props: ['config'],
-    template: '\
-        <div class="Component">\
-            <component :is="config.name" :config="config"></component>\
-            <div class="comp-toolbar">\
-                <button class="btn-toolbar" @click="copy"><i class="fa fa-clone"></i></button>\
-                <button class="btn-toolbar" @click="trash"><i class="fa fa-trash-o"></i></button>\
-                <button class="btn-toolbar" @click="openSettings" v-if="config.settings"><i class="fa fa-cog"></i></button>\
-            </div>\
-        </div>',
+
+    render: function(make) {
+        var _this = this;
+        var tag = this.config.componentTag
+            ? this.config.componentTag
+            : 'div';
+
+        var settingsBtn = function() {
+            return _this.config.settings
+                ? make('button', {
+                'class': { 'btn-toolbar': true },
+                on: { click: _this.openSettings }}, 
+                [   make('i', {'class': {'fa': true, 'fa-cog': true }} )])
+                : null;
+        }
+
+        return make(tag, {
+            'class': { Component: true } },
+            [   make(this.config.name, {
+                    props: { config: this.config },
+                }),
+                make('div', {
+                    'class': { 'comp-toolbar': true }},
+                    [   make('button', {
+                            'class': { 'btn-toolbar': true },
+                            on: { click: this.copy }}, 
+                            [   make('i', {'class': { 'fa': true, 'fa-clone': true }} )]
+                        ),
+                        make('button', {
+                            'class': { 'btn-toolbar': true },
+                            on: { click: this.trash }}, 
+                            [   make('i', {'class': { 'fa': true, 'fa-trash-o': true }} )]
+                        ),
+                        settingsBtn()
+                    ]
+                )
+            ]
+        )
+    },
+
     methods: {
 
         trash: function() {
@@ -282,9 +331,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
-        // if (this.config.componentTag) {
-        //     swapContainerTag(this.$el, this.config.componentTag);
-        // }
+        $(this.$el).find('[data-transfer]').each(function() {
+            transferContainer(this);
+        })
     },
     updated: function() {
         initStageComponent(this);
@@ -293,9 +342,9 @@ Vue.component('wrapper', {
             debug('prevent link clicks');
             e.preventDefault();
         })
-        // if (this.config.componentTag) {
-        //     swapContainerTag(this.$el, this.config.componentTag);
-        // }
+        $(this.$el).find('[data-transfer]').each(function() {
+            transferContainer(this);
+        })
     }
 })
 //
@@ -309,11 +358,21 @@ Vue.component('wrapper', {
 //  Additionally, when mounted, the context component is added to the
 //  dragula instance so it can receive other components
 Vue.component('context', {
-    props: ['components'],
-    template: '\
-        <div class="Context">\
-            <wrapper v-for="config in components" :config="config"></wrapper>\
-        </div>',
+    props: ['components', 'config'],
+    // template: '\
+    //     <div class="Context">\
+    //         <wrapper v-for="config in components" :config="config"></wrapper>\
+    //     </div>',
+    render: function(make) {
+        var tag = this.config.contextTag ? this.config.contextTag : 'div';
+        return make(tag, {'class':{Context: true}}, this.components.map(function(config) {
+            return make('wrapper', {
+                props: {
+                    'config': config
+                }
+            })
+        }))
+    },
     mounted: function() {
         addContainer(this.$el);
     }
@@ -598,26 +657,30 @@ Vue.component('body-copy', {
 Vue.component('table-data', {
     props: ['config'],
     template: '\
-    <div class="Component-Container">\
-        <table border="1" cellpadding="5" width="100%">\
-            <thead>\
-                <tr>\
-                    <th width="33%" style="text-align:center;">Course Name</th>\
-                    <th width="33%" style="text-align:center;">Date</th>\
-                    <th width="33%" style="text-align:center;">Register</th>\
-                </tr>\
-            </thead>\
-            <tbody>\
-                <tr>\
-                    <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
-                    <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
-                    <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
-                </tr>\
-            </tbody>\
-        </table>\
+    <div data-transfer border="1" cellpadding="5" width="100%">\
+        <thead>\
+            <tr>\
+                <th width="33%" style="text-align:center;">Course Name</th>\
+                <th width="33%" style="text-align:center;">Date</th>\
+                <th width="33%" style="text-align:center;">Register</th>\
+            </tr>\
+        </thead>\
+        <context :config="config" :components="config.rows" data-context-name="rows"></context>\
+    </div>'
+})
+
+Vue.component('table-row', {
+    props: ['config'],
+    template: '\
+    <div>\
+        <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
+        <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
+        <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
         <field-widget :config="config"></field-widget>\
-    </div>\
-    '
+    </div>',
+    mounted: function() {
+        $(this.$el).children().unwrap();
+    }
 })
 //
 //  src/js/component-two-column.js
@@ -630,8 +693,8 @@ Vue.component('two-column', {
     props: ['config'],
     template: '\
         <div class="ColumnWrap">\
-            <context :components="config.left" data-context-name="left"></context>\
-            <context :components="config.right" data-context-name="right"></content>\
+            <context :components="config.left" data-context-name="left" :config="config"></context>\
+            <context :components="config.right" data-context-name="right" :config="config"></content>\
         </div>'
 });
 //
@@ -666,7 +729,7 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul>\\n<li style=\\"margin-bottom: 1.2em;\\">Add ability to change component and context HTML tags</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Add field and fieldgroup required indicators</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li>\\n<li style=\\"margin-bottom: 1.2em;\\">Work on template display</li>\\n</ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li><li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li><li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li><li style=\\"margin-bottom: 1.2em;\\">Work on template display</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],
@@ -897,15 +960,13 @@ function getComponentProperty(elem, prop) {
     return JSON.parse($comp.attr(g.name.config))[prop];
 }
 
-function swapContainerTag(container, newTag) {
+function transferContainer(container) {
     var attributes = $(container)[0].attributes;
-    var newContainer = $('<'+newTag+'></'+newTag+'>');
     for (var i = 0; i < attributes.length; i++) {
-        $(newContainer).attr(attributes[i].name, $(container).attr(attributes[i].name))
+        $(container).parent().attr(attributes[i].name, $(container).attr(attributes[i].name))
     }
-    $(container).wrapInner(newContainer);
-    $(container).children().first().unwrap();
-    return newContainer[0];
+    $(container).parent().removeAttr('data-transfer');
+    $(container).children().unwrap();
 }
 
 
@@ -946,33 +1007,6 @@ $(window).on('load', function() {
 //
 //  src/js/collectData.js
 //
-//  Walks the stage DOM elements and assembles json
-//  from the data-config elements and their children.
-function collectData(elem, data) {
-    var data = data || [];
-    var elem = elem || g.node.stage;
-    var children = $(elem).children();
-    if (children.length) {
-        children.each(function() {
-            var child = this;
-            var comp = JSON.parse($(child).attr(g.name.config));
-            var contexts = $(child)
-                .find(g.attr.contextName)
-                .toArray()
-                .filter(function(l) {
-                    return $(l).closest(g.class.component)[0] === child;
-                })
-            if (contexts.length) {
-                contexts.forEach(function(context) {
-                    comp[$(context).attr(g.name.contextName)] = collectData(context);
-                })
-            }
-            data.push(comp);
-        })
-    }
-    return data;
-}
-
 function getComponentData(elem) {
     var $elem = $(elem);
     var data = JSON.parse($elem.attr('data-config'));
@@ -1001,7 +1035,7 @@ function getStageData() {
 //
 function checkSync() {
     setTimeout(function() {
-        console.log('Synced: ' + (JSON.stringify(collectData()) === JSON.stringify(app.stage)));
+        console.log('Synced: ' + (JSON.stringify(getStageData()) === JSON.stringify(app.stage)));
     }, 500);
     
 }
@@ -1137,8 +1171,12 @@ var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
 
     // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
     // Was getting child node error from dragula when moving nested containers
-    accepts: function(el, target) {
-        return target !== g.node.thumbnails && !contains(el, target);
+    accepts: function(el, target, source, sibling) {
+        var check = true;
+        if (target === g.node.thumbnails) check = false;
+        if (contains(el, target)) check = false;
+        if ($(source)[0].nodeName === 'TBODY' && $(target)[0].nodeName !== 'TBODY') check = false;
+        return check;
     },
 
 }).on('drop', function(el, target, source, sibling) {
