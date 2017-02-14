@@ -203,17 +203,20 @@ var componentDefaults = {
         display: 'Course Table',
         componentTag: 'table',
         contextTag: 'tbody',
-        rows: [{name: 'table-row',
-        display: 'Course Row',
-        course: 'Course name goes here',
-        date: 'MM/DD/YYYY',
-        componentTag: 'tr',
-        settings: {
-            active: false,
-            href: ''
-        },
-        tokens: [['Course', 'course'], ['Date', 'date']],
-        fields: ['link-mailto']}]
+        rows: [
+            {   name: 'table-row',
+                display: 'Course Row',
+                course: 'Course name goes here',
+                date: 'MM/DD/YYYY',
+                componentTag: 'tr',
+                settings: {
+                    active: false,
+                    href: ''
+                },
+                tokens: [['Course', 'course'], ['Date', 'date']],
+                fields: ['link-mailto'] 
+            }
+        ]
     },
     'table-row': {
         name: 'table-row',
@@ -729,7 +732,7 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><li style=\\"margin-bottom: 1.2em;\\">Work with tinymce on pasting Word content</li><li style=\\"margin-bottom: 1.2em;\\">Work on preview view</li><li style=\\"margin-bottom: 1.2em;\\">Work on cleaning and prepping markup for emails</li><li style=\\"margin-bottom: 1.2em;\\">Work on template display</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><div style=\\"text-align: center;\\" data-mce-style=\\"text-align: center;\\"><strong>Phase 1</strong><br data-mce-bogus=\\"1\\"></div><li style=\\"margin-bottom: 1.2em;\\">Make single fixed toolbar that moves to active components</li><li style=\\"margin-bottom: 1.2em;\\">Implement auto save</li><li style=\\"margin-bottom: 1.2em;\\">Make overlay on stage area when in field view</li><li style=\\"margin-bottom: 1.2em;\\">Style the loading graphic</li><li style=\\"margin-bottom: 1.2em;\\">Think of a better stage component hover state</li><li style=\\"margin-bottom: 1.2em;\\">Work on content pasted from Word</li><li style=\\"margin-bottom: 1.2em;\\">Create preview view mode</li><li style=\\"margin-bottom: 1.2em;\\">Implement code cleaning</li><li style=\\"margin-bottom: 1.2em;\\">Think through how to display different templates and tie specific components to those templates</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],

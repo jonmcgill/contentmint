@@ -31,17 +31,20 @@ var componentDefaults = {
         display: 'Course Table',
         componentTag: 'table',
         contextTag: 'tbody',
-        rows: [{name: 'table-row',
-        display: 'Course Row',
-        course: 'Course name goes here',
-        date: 'MM/DD/YYYY',
-        componentTag: 'tr',
-        settings: {
-            active: false,
-            href: ''
-        },
-        tokens: [['Course', 'course'], ['Date', 'date']],
-        fields: ['link-mailto']}]
+        rows: [
+            {   name: 'table-row',
+                display: 'Course Row',
+                course: 'Course name goes here',
+                date: 'MM/DD/YYYY',
+                componentTag: 'tr',
+                settings: {
+                    active: false,
+                    href: ''
+                },
+                tokens: [['Course', 'course'], ['Date', 'date']],
+                fields: ['link-mailto'] 
+            }
+        ]
     },
     'table-row': {
         name: 'table-row',
