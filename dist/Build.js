@@ -269,33 +269,20 @@ Vue.component('wrapper', {
             return _this.config.settings
                 ? make('button', {
                 'class': { 'btn-toolbar': true },
-                on: { click: _this.openSettings }}, 
+                on: { click: _this.openSettings }},
                 [   make('i', {'class': {'fa': true, 'fa-cog': true }} )])
                 : null;
         }
 
         return make(tag, {
-            'class': { Component: true } },
-            [   make(this.config.name, {
-                    props: { config: this.config },
-                }),
-                make('div', {
-                    'class': { 'comp-toolbar': true }},
-                    [   make('button', {
-                            'class': { 'btn-toolbar': true },
-                            on: { click: this.copy }}, 
-                            [   make('i', {'class': { 'fa': true, 'fa-clone': true }} )]
-                        ),
-                        make('button', {
-                            'class': { 'btn-toolbar': true },
-                            on: { click: this.trash }}, 
-                            [   make('i', {'class': { 'fa': true, 'fa-trash-o': true }} )]
-                        ),
-                        settingsBtn()
-                    ]
-                )
-            ]
-        )
+            'class': {
+                Component: true
+            }},
+            [
+            make(this.config.name, {
+                props: { config: this.config },
+            }),
+        ])
     },
 
     methods: {
@@ -315,6 +302,7 @@ Vue.component('wrapper', {
 
         openSettings: function() {
             var _this = this;
+            this.$root.activeComponent = this;
             setSettingsProperty(this.$el, 'active', true);
             updateComponentData(this.$el);
             Vue.nextTick(function() {
@@ -322,6 +310,21 @@ Vue.component('wrapper', {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
                 }, 100);
+            })
+        },
+
+        showToolbar: function() {
+            var _this = this;
+            var _el = this.$el;
+            $(_el).click(function(e) {
+                if ($(e.target).closest('.Component')[0] === _el) {
+                    var offset = $(_el).offset();
+                    var top = offset.top + 'px';
+                    _this.$root.toolbar = _this;
+                    $('#Toolbar').css({
+                        top: top
+                    }).addClass('active');
+                }
             })
         }
 
@@ -337,6 +340,7 @@ Vue.component('wrapper', {
         $(this.$el).find('[data-transfer]').each(function() {
             transferContainer(this);
         })
+        this.showToolbar();
     },
     updated: function() {
         initStageComponent(this);
@@ -348,8 +352,10 @@ Vue.component('wrapper', {
         $(this.$el).find('[data-transfer]').each(function() {
             transferContainer(this);
         })
+        this.showToolbar();
     }
 })
+
 //
 //  src/js/component-context.js
 //
@@ -404,7 +410,7 @@ Vue.component('dropdown', {
 
     props: ['config', 'field'],
 
-    data: function() { return { 
+    data: function() { return {
         menus: menus,
         down: false,
         up: false
@@ -425,8 +431,8 @@ Vue.component('dropdown', {
 
     computed: {
         iconClasses: function() {
-            return { 
-                'fa': true, 
+            return {
+                'fa': true,
                 'fa-chevron-down': this.down,
                 'fa-chevron-up': this.up,
                 'fa-chevron-left': (!this.down && !this.up),
@@ -455,10 +461,12 @@ Vue.component('dropdown', {
 
         selected: function(item) {
             this.toggle();
+
+            var component = this.$root.activeComponent.$el;
             var menu = this.menus[this.field.type.menu];
             var prop = this.field.result;
             var prevItem = this.field.type.selected;
-            var component = getParentDOMComponent(this.$el);
+
             this.field.type.selected = item;
 
             if (this.field.fieldchoice) {
@@ -472,12 +480,12 @@ Vue.component('dropdown', {
                 }
             } else {
                 this.config.settings[prop] = menu[item];
-                setComponentJSON(this.$el, menu[item], this.field.result);
+                setComponentJSON(component, menu[item], this.field.result);
             }
         },
 
         addFieldChoice: function() {
-            var component = getParentDOMComponent(this.$el);
+            var component = this.$root.activeComponent.$el;
             var fieldList = this.config.fields;
             var fieldPos = this.getFieldPosition() + 1;
             var menu = this.menus[this.field.type.menu];
@@ -501,11 +509,12 @@ Vue.component('dropdown', {
 
     mounted: function() {
         if (this.field.fieldchoice) {
-            this.addFieldChoice();
+            // this.addFieldChoice();
         }
     }
 
 })
+
 //
 //  src/js/component-settings.js
 //
@@ -539,18 +548,20 @@ Vue.component('field', {
         var data = _this.config.settings;
         var result = _this.field.result;
         var effect = _this.field.effect;
+        var component = this.$root.activeComponent.$el;
         // Handles simple text input
         // Updates Vue data and json model on component
         if (this.field.type.name !== 'fieldgroup') {
-            $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
+            $('#FieldWidget').find('input, textarea, .menu-selected').on('keyup click', function() {
                 var value = $(this).val();
                 if (result) {
-                    setComponentJSON(this, value, result);
+                    setComponentJSON(component, value, result);
                 }
             })
         }
     }
 })
+
 //
 //  src/js/component-fieldgroup.js
 //
@@ -580,17 +591,19 @@ Vue.component('fieldgroup', {
 
     mounted: function() {
         var _this = this;
+        var component = this.$root.activeComponent.$el;
         effects[_this.field.type.effect](this, this.field.result);
-        dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
+        dataToDOMJSON(_this.config, component);
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
                 effects[_this.field.type.effect](_this, _this.field.result);
-                dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
+                dataToDOMJSON(_this.config, component);
             })
     }
 
 })
+
 //
 //  src/js/field-widget.js
 //
@@ -619,17 +632,19 @@ Vue.component('field-widget', {
 
         closeSettings: function() {
             var _this = this;
+            var component = this.$root.activeComponent.$el;
             $(_this.$el).removeClass('active');
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
-                setSettingsProperty(_this.$el, 'active', false);
+                setSettingsProperty(component, 'active', false);
             }, 250)
         }
 
     }
 
 })
+
 //
 //  src/js/component-heading.js
 //
@@ -679,12 +694,12 @@ Vue.component('table-row', {
         <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
         <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
         <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
-        <field-widget :config="config"></field-widget>\
     </div>',
     mounted: function() {
         $(this.$el).children().unwrap();
     }
 })
+
 //
 //  src/js/component-two-column.js
 //
@@ -711,7 +726,6 @@ Vue.component('banner', {
             <img :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
         </a>\
         <img v-else :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
-        <field-widget :config="config"></field-widget>\
     </div>\
     ',
     data: function() {
@@ -722,6 +736,7 @@ Vue.component('banner', {
         }
     }
 })
+
 //
 //  src/js/main.js
 //
@@ -740,6 +755,8 @@ var app = new Vue({
             componentDefaults['two-column'],
             componentDefaults['banner']
         ],
+        toolbar: { config: false },
+        activeComponent: false,
         trash: [],
         username: 'mcgilljo'
     },
@@ -772,13 +789,20 @@ var app = new Vue({
     mounted: function() {
         var _this = this;
         $(g.id.loading).remove();
-        fireDocumentHandlers();
+        fireDocumentHandlers(this);
         $('.thumbnail').on('mouseenter mouseleave', function() {
             $(this).toggleClass('hovered');
+        })
+        $('#Toolbar button').click(function() {
+            var btn = $(this);
+            if (btn.hasClass('btn-clone')) _this.toolbar.copy();
+            if (btn.hasClass('btn-trash')) _this.toolbar.trash();
+            if (btn.hasClass('btn-settings')) _this.toolbar.openSettings();
         })
         if (this.store) this.refresh();
     }
 })
+
 //
 //  src/js/nodes.js
 //
@@ -798,26 +822,23 @@ g.node = {
 //
 //  src/js/documentHandlers.js
 //
-function fireDocumentHandlers() {
+function fireDocumentHandlers(app) {
 
     $(document).on({
         'click': function(e) {
-
-            var comp = $(e.target).closest('.Component');
-            var stage = $(e.target).closest('#Stage');
-
-            if (comp.length > 0 && stage.length > 0 && !app.fieldsOpen) {
-                $('.Component.active').removeClass('active');
-                comp.addClass('active');
-                debug('active comp');
-
-            } else {
-                $('.Component.active').removeClass('active');
+            var target = $(e.target);
+            var comp = target.closest('.Component');
+            var stage = target.closest('#Stage');
+            var toolbar = target.closest('#Toolbar');
+            
+            if (!comp.length && !stage.length && !toolbar.length) {
+                app.toolbar.active = false;
             }
         }
     })
 
 }
+
 //
 //  src/js/walk.js
 //
@@ -1007,6 +1028,7 @@ function setThumbnailHeight() {
 $(window).on('load', function() {
     setThumbnailHeight();
 })
+
 //
 //  src/js/collectData.js
 //
@@ -1052,7 +1074,7 @@ function syncStageAndStore() {
 //  src/js/initStageComponent.js
 //
 function initStageComponent(instance) {
-    
+
     var element = instance.$el,
         componentData = copy(instance.config);
 
@@ -1073,6 +1095,7 @@ function initStageComponent(instance) {
     $(element).attr(g.name.config, JSON.stringify(componentData));
 
 }
+
 //
 //  src/js/initEditor.js
 //

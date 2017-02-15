@@ -27,13 +27,14 @@ Vue.component('fieldgroup', {
 
     mounted: function() {
         var _this = this;
+        var component = this.$root.activeComponent.$el;
         effects[_this.field.type.effect](this, this.field.result);
-        dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
+        dataToDOMJSON(_this.config, component);
         $(this.$el)
             .find('input, textarea, .menu-selected')
             .on('keyup click', function() {
                 effects[_this.field.type.effect](_this, _this.field.result);
-                dataToDOMJSON(_this.config, getParentDOMComponent(_this.$el));
+                dataToDOMJSON(_this.config, component);
             })
     }
 

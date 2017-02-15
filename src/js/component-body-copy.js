@@ -40,7 +40,6 @@ Vue.component('table-row', {
         <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
         <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
         <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
-        <field-widget :config="config"></field-widget>\
     </div>',
     mounted: function() {
         $(this.$el).children().unwrap();

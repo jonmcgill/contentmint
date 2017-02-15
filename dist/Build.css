@@ -214,6 +214,35 @@ body {
       content: '';
       line-height: 40px; }
 
+#Toolbar {
+  position: absolute;
+  z-index: 150;
+  margin-top: -3px;
+  right: 408px; }
+  #Toolbar button {
+    background: none;
+    border: none;
+    float: left;
+    font-size: 0.8em;
+    padding: 0;
+    color: white;
+    width: 1.8em;
+    line-height: 1.6em;
+    margin-left: 4px;
+    border-radius: 3px;
+    text-align: center;
+    outline: none; }
+  #Toolbar button, #Toolbar i {
+    cursor: pointer; }
+  #Toolbar .btn-toolbar:nth-child(1) {
+    background-color: #689F38; }
+  #Toolbar .btn-toolbar:nth-child(2) {
+    background-color: #F44336; }
+  #Toolbar .btn-toolbar:nth-child(3) {
+    background-color: #2196F3; }
+  #Toolbar .btn-toolbar:nth-child(4) {
+    background-color: #37474F; }
+
 #Template {
   margin-top: 2.4em;
   width: calc(100% - 400px); }

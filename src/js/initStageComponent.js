@@ -2,7 +2,7 @@
 //  src/js/initStageComponent.js
 //
 function initStageComponent(instance) {
-    
+
     var element = instance.$el,
         componentData = copy(instance.config);
 

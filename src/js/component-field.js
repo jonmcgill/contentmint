@@ -31,13 +31,14 @@ Vue.component('field', {
         var data = _this.config.settings;
         var result = _this.field.result;
         var effect = _this.field.effect;
+        var component = this.$root.activeComponent.$el;
         // Handles simple text input
         // Updates Vue data and json model on component
         if (this.field.type.name !== 'fieldgroup') {
-            $(this.$el).find('input, textarea, .menu-selected').on('keyup click', function() {
+            $('#FieldWidget').find('input, textarea, .menu-selected').on('keyup click', function() {
                 var value = $(this).val();
                 if (result) {
-                    setComponentJSON(this, value, result);
+                    setComponentJSON(component, value, result);
                 }
             })
         }

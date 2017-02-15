@@ -26,11 +26,12 @@ Vue.component('field-widget', {
 
         closeSettings: function() {
             var _this = this;
+            var component = this.$root.activeComponent.$el;
             $(_this.$el).removeClass('active');
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
-                setSettingsProperty(_this.$el, 'active', false);
+                setSettingsProperty(component, 'active', false);
             }, 250)
         }
 

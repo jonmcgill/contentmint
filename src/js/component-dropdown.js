@@ -22,7 +22,7 @@ Vue.component('dropdown', {
 
     props: ['config', 'field'],
 
-    data: function() { return { 
+    data: function() { return {
         menus: menus,
         down: false,
         up: false
@@ -43,8 +43,8 @@ Vue.component('dropdown', {
 
     computed: {
         iconClasses: function() {
-            return { 
-                'fa': true, 
+            return {
+                'fa': true,
                 'fa-chevron-down': this.down,
                 'fa-chevron-up': this.up,
                 'fa-chevron-left': (!this.down && !this.up),
@@ -73,10 +73,12 @@ Vue.component('dropdown', {
 
         selected: function(item) {
             this.toggle();
+
+            var component = this.$root.activeComponent.$el;
             var menu = this.menus[this.field.type.menu];
             var prop = this.field.result;
             var prevItem = this.field.type.selected;
-            var component = getParentDOMComponent(this.$el);
+
             this.field.type.selected = item;
 
             if (this.field.fieldchoice) {
@@ -90,12 +92,12 @@ Vue.component('dropdown', {
                 }
             } else {
                 this.config.settings[prop] = menu[item];
-                setComponentJSON(this.$el, menu[item], this.field.result);
+                setComponentJSON(component, menu[item], this.field.result);
             }
         },
 
         addFieldChoice: function() {
-            var component = getParentDOMComponent(this.$el);
+            var component = this.$root.activeComponent.$el;
             var fieldList = this.config.fields;
             var fieldPos = this.getFieldPosition() + 1;
             var menu = this.menus[this.field.type.menu];
@@ -119,7 +121,7 @@ Vue.component('dropdown', {
 
     mounted: function() {
         if (this.field.fieldchoice) {
-            this.addFieldChoice();
+            // this.addFieldChoice();
         }
     }
 

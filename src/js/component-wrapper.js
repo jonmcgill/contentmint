@@ -19,33 +19,20 @@ Vue.component('wrapper', {
             return _this.config.settings
                 ? make('button', {
                 'class': { 'btn-toolbar': true },
-                on: { click: _this.openSettings }}, 
+                on: { click: _this.openSettings }},
                 [   make('i', {'class': {'fa': true, 'fa-cog': true }} )])
                 : null;
         }
 
         return make(tag, {
-            'class': { Component: true } },
-            [   make(this.config.name, {
-                    props: { config: this.config },
-                }),
-                make('div', {
-                    'class': { 'comp-toolbar': true }},
-                    [   make('button', {
-                            'class': { 'btn-toolbar': true },
-                            on: { click: this.copy }}, 
-                            [   make('i', {'class': { 'fa': true, 'fa-clone': true }} )]
-                        ),
-                        make('button', {
-                            'class': { 'btn-toolbar': true },
-                            on: { click: this.trash }}, 
-                            [   make('i', {'class': { 'fa': true, 'fa-trash-o': true }} )]
-                        ),
-                        settingsBtn()
-                    ]
-                )
-            ]
-        )
+            'class': {
+                Component: true
+            }},
+            [
+            make(this.config.name, {
+                props: { config: this.config },
+            }),
+        ])
     },
 
     methods: {
@@ -65,6 +52,7 @@ Vue.component('wrapper', {
 
         openSettings: function() {
             var _this = this;
+            this.$root.activeComponent = this;
             setSettingsProperty(this.$el, 'active', true);
             updateComponentData(this.$el);
             Vue.nextTick(function() {
@@ -72,6 +60,21 @@ Vue.component('wrapper', {
                     $('.field-widget').addClass('active');
                     _this.$root.fieldsOpen = true;
                 }, 100);
+            })
+        },
+
+        showToolbar: function() {
+            var _this = this;
+            var _el = this.$el;
+            $(_el).click(function(e) {
+                if ($(e.target).closest('.Component')[0] === _el) {
+                    var offset = $(_el).offset();
+                    var top = offset.top + 'px';
+                    _this.$root.toolbar = _this;
+                    $('#Toolbar').css({
+                        top: top
+                    }).addClass('active');
+                }
             })
         }
 
@@ -87,6 +90,7 @@ Vue.component('wrapper', {
         $(this.$el).find('[data-transfer]').each(function() {
             transferContainer(this);
         })
+        this.showToolbar();
     },
     updated: function() {
         initStageComponent(this);
@@ -98,5 +102,6 @@ Vue.component('wrapper', {
         $(this.$el).find('[data-transfer]').each(function() {
             transferContainer(this);
         })
+        this.showToolbar();
     }
 })
