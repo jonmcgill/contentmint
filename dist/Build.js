@@ -468,7 +468,6 @@ Vue.component('dropdown', {
             var prevItem = this.field.type.selected;
 
             this.field.type.selected = item;
-
             if (this.field.fieldchoice) {
                 var fieldPos = this.getFieldPosition() + 1;
                 if (prevItem !== 'None' && prevItem !== item) {
@@ -552,10 +551,12 @@ Vue.component('field', {
         // Handles simple text input
         // Updates Vue data and json model on component
         if (this.field.type.name !== 'fieldgroup') {
-            $('#FieldWidget').find('input, textarea, .menu-selected').on('keyup click', function() {
-                var value = $(this).val();
-                if (result) {
-                    setComponentJSON(component, value, result);
+            $(_this.$el)
+                .find('input, textarea, .menu-selected')
+                .on('keyup click', function() {
+                    var value = $(this).val();
+                    if (result) {
+                        setComponentJSON(component, value, result);
                 }
             })
         }
@@ -747,7 +748,7 @@ var app = new Vue({
         fieldsOpen: false,
         saved: '',
         stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><div style=\\"text-align: center;\\" data-mce-style=\\"text-align: center;\\"><strong>Phase 1</strong><br data-mce-bogus=\\"1\\"></div><li style=\\"margin-bottom: 1.2em;\\">Make single fixed toolbar that moves to active components</li><li style=\\"margin-bottom: 1.2em;\\">Implement auto save</li><li style=\\"margin-bottom: 1.2em;\\">Make overlay on stage area when in field view</li><li style=\\"margin-bottom: 1.2em;\\">Style the loading graphic</li><li style=\\"margin-bottom: 1.2em;\\">Think of a better stage component hover state</li><li style=\\"margin-bottom: 1.2em;\\">Work on content pasted from Word</li><li style=\\"margin-bottom: 1.2em;\\">Create preview view mode</li><li style=\\"margin-bottom: 1.2em;\\">Implement code cleaning</li><li style=\\"margin-bottom: 1.2em;\\">Think through how to display different templates and tie specific components to those templates</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
+        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><div style=\\"text-align: center;\\" data-mce-style=\\"text-align: center;\\"><strong>Phase 1</strong><br data-mce-bogus=\\"1\\"></div><li style=\\"margin-bottom: 1.2em;\\">Fix the bug with alt input in banner component</li><li style=\\"margin-bottom: 1.2em;\\">Implement auto save</li><li style=\\"margin-bottom: 1.2em;\\">Make overlay on stage area when in field view</li><li style=\\"margin-bottom: 1.2em;\\">Style the loading graphic</li><li style=\\"margin-bottom: 1.2em;\\">Think of a better stage component hover state</li><li style=\\"margin-bottom: 1.2em;\\">Work on content pasted from Word</li><li style=\\"margin-bottom: 1.2em;\\">Create preview view mode</li><li style=\\"margin-bottom: 1.2em;\\">Implement code cleaning</li><li style=\\"margin-bottom: 1.2em;\\">Think through how to display different templates and tie specific components to those templates</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
         thumbnails: [
             componentDefaults['heading'],
             componentDefaults['body-copy'],

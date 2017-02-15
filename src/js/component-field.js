@@ -35,10 +35,12 @@ Vue.component('field', {
         // Handles simple text input
         // Updates Vue data and json model on component
         if (this.field.type.name !== 'fieldgroup') {
-            $('#FieldWidget').find('input, textarea, .menu-selected').on('keyup click', function() {
-                var value = $(this).val();
-                if (result) {
-                    setComponentJSON(component, value, result);
+            $(_this.$el)
+                .find('input, textarea, .menu-selected')
+                .on('keyup click', function() {
+                    var value = $(this).val();
+                    if (result) {
+                        setComponentJSON(component, value, result);
                 }
             })
         }

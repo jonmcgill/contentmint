@@ -80,7 +80,6 @@ Vue.component('dropdown', {
             var prevItem = this.field.type.selected;
 
             this.field.type.selected = item;
-
             if (this.field.fieldchoice) {
                 var fieldPos = this.getFieldPosition() + 1;
                 if (prevItem !== 'None' && prevItem !== item) {
