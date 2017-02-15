@@ -80,7 +80,6 @@ Vue.component('wrapper', {
 
     },
     mounted: function() {
-        var _this = this;
         initStageComponent(this);
         initEditor(this);
         $(this.$el).find('a').click(function(e) {
@@ -92,6 +91,7 @@ Vue.component('wrapper', {
         })
         this.showToolbar();
     },
+
     updated: function() {
         initStageComponent(this);
         initEditor(this);

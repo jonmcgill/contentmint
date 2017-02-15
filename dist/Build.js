@@ -330,7 +330,6 @@ Vue.component('wrapper', {
 
     },
     mounted: function() {
-        var _this = this;
         initStageComponent(this);
         initEditor(this);
         $(this.$el).find('a').click(function(e) {
@@ -342,6 +341,7 @@ Vue.component('wrapper', {
         })
         this.showToolbar();
     },
+
     updated: function() {
         initStageComponent(this);
         initEditor(this);
@@ -638,6 +638,7 @@ Vue.component('field-widget', {
             setTimeout(function() {
                 _this.config.settings.active = false;
                 _this.$root.fieldsOpen = false;
+                _this.$root.activeComponent = false;
                 setSettingsProperty(component, 'active', false);
             }, 250)
         }
