@@ -13,6 +13,9 @@
     button, input[type="submit"] {
         cursor: pointer;
     }
+    button[disabled] {
+        cursor: default;
+    }
     #Model, #Model-Saved {
         background: #555;
         padding: 1em;
@@ -41,7 +44,7 @@
         padding-right: 2em;
         margin-bottom: 1em;
     }
-    .Button-Save, .Button-Load {
+    .Buttons button {
         padding: 0.3em 1em;
         font-size: 1em;
     }
@@ -64,6 +67,11 @@
         padding: 5px 10px;
         border: 1px solid black;
     }
+    .PLACEHOLDER {
+        background: yellow;
+        font-family: Arial;
+        color: red;
+    }
 </style>
 </head>
 <body>
@@ -72,6 +80,7 @@
     <context id="Stage" data-context-name="stage" :children="stage"></context>
     <context id="Components" data-context-name="components" :children="components"></context>
     <div class="Buttons">
+        <button class="Button-Undo" @click="undo" :disabled="!previous">undo</button>
         <button class="Button-Save" @click="save">save</button>
         <button class="Button-Load" @click="load">load</button>
     </div>
@@ -124,7 +133,7 @@
 
     Vue.component('thing', {
         props: ['config'],
-        template: '<h3 class="thing" v-text="config.index" :style="config.css"></h3>'
+        template: '<h3 class="thing" v-text="config.index + \' (\'+_uid+\')\'" :style="config.css"></h3>'
     })
 
 //  This is what the data model should look like
@@ -155,15 +164,53 @@ var drake;
                 {index: '', component: 'thing'},
                 {index: '', component: 'thing', css: {'background': 'lightgreen'}}
             ],
+            changes: 0,
+            previous: null,
             stage: [],
             saved: []
         },
         methods: {
+            snapshot: function() {
+                this.changes++;
+                var shot = copy(this.stage);
+                debug('snapshot taken (current changes: ' + this.changes + ')');
+                if (!this.previous) {
+                    this.previous = {
+                        snapshot: shot,
+                        prior: {
+                            snapshot: [],
+                            prior: null
+                        }
+                    }
+                } else {
+                    this.previous = {
+                        snapshot: shot,
+                        prior: this.previous
+                    }
+                }
+            },
+            undo: function() {
+                if (this.previous) {
+                    this.changes--;
+                    this.stage = this.previous.prior.snapshot;
+                    this.previous = this.previous.prior;
+                    if (!this.previous.prior) {
+                        this.previous = null;
+                    }
+                    debug('state reverted (current changes: ' + this.changes + ')');
+                } else {
+                    debug('nothing to undo');
+                }
+                
+            },
             save: function() {
                 this.saved = copy(this.stage);
+                debug('saved content')
             },
             load: function() {
                 this.stage = copy(this.saved);
+                Vue.nextTick(this.snapshot);
+                debug('loaded content');
             },
             toJson: function(obj) {
                 return JSON.stringify(obj, null, 2);
@@ -171,6 +218,7 @@ var drake;
         },
         mounted: function() {
             initiateDragging();
+            debug('mounted app');
         }
     })
 
@@ -241,10 +289,7 @@ var drake;
         } else {
             newIndex.shift();
             newContext = retrieveVueContext(newIndex, startContext);
-            // console.log(newContext);
-            // console.log(appContext);
             var move = appContext.context.splice(appContext.key, 1)[0];
-            // console.log(move);
             newContext.context.splice(newContext.key, 0, move);
         }
         
@@ -325,8 +370,8 @@ var drake;
                     app.stage = copy(app.stage);
                 });
                 Vue.nextTick(updateDragContainers);
+                Vue.nextTick(app.snapshot);
                 debug('dropped new component in stage at ' + domIndex);
-                return;
 
             }
 
@@ -336,26 +381,52 @@ var drake;
                 //  We need the placeholder element to appear where the dragged item came from
                 //  so that when we grab the location from the DOM it is an accurate data model.
                 //  Once we have the index we can remove it immediately.
-                var placeholder = '<div class="PLACEHOLDER"></div>';
+                var placeholder = '<div class="PLACEHOLDER"><strong>PLACEHOLDER</strong></div>';
+                var debugDelay = 0;
+
                 if (insertType === 'prepend') {
                     $(dragSpot).prepend(placeholder);
                 } else if (insertType === 'after') {
                     $(placeholder).insertAfter(dragSpot);
                 }
                 domIndex = getDomIndex(dropped);
-                $('.PLACEHOLDER').replaceWith(dropped);
 
-                //  Now we use the index from the DOM to retrieve the vm context arrays.
-                //  Once we have those, we splice the dragged data into the drop context array.
-                var dataToDrop = retrieveVueContext(draggedIndex, app);
-                var dataDrop = retrieveVueContext(domIndex, app);
-                dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
+                // These timeouts are here so I can debug easier. It's helpful.
+                setTimeout(function() {
 
-                //  At this point, the data and the DOM should technically match, but we want to
-                //  do a refresh() so that all other DOM components are updated with their new
-                //  location. Lastly, we add any new context components to the dragula instance
-                Vue.nextTick(refresh);
-                Vue.nextTick(updateDragContainers);
+                    $('.PLACEHOLDER').replaceWith(dropped);
+                    debug('removing placeholder')
+
+                    setTimeout(function() {
+                        //  Now we use the index from the DOM to retrieve the vm context arrays.
+                        //  Once we have those, we splice the dragged data into the drop context array.
+                        var dataToDrop = retrieveVueContext(draggedIndex, app);
+                        var dataDrop = retrieveVueContext(domIndex, app);
+                        if (dataDrop.context == dataToDrop.context) {
+                            dataDrop.key--;
+                            debug('reording in the same container');
+                        }
+                        dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
+                        debug('splicing vm data')
+
+                        setTimeout(function() {
+                            //  At this point, the data and the DOM should technically match, but we want to
+                            //  do a refresh() so that all other DOM components are updated with their new
+                            //  location. Lastly, we add any new context components to the dragula instance
+                            Vue.nextTick(refresh);
+                            Vue.nextTick(updateDragContainers);
+                            Vue.nextTick(app.snapshot);
+                            debug('refreshing and updating containers')
+                        }, debugDelay)
+
+                    }, debugDelay)
+
+                }, debugDelay)
+                
+
+                
+
+                
 
             }
                 
