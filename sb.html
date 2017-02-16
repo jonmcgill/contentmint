@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sandbox</title>
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+<style type="text/css">
+.gu-mirror{position:fixed!important;margin:0!important;z-index:9999!important;opacity:.8;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";filter:alpha(opacity=80)}.gu-hide{display:none!important}.gu-unselectable{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}.gu-transit{opacity:.2;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";filter:alpha(opacity=20)}
+
+    * { 
+        box-sizing: border-box;
+        margin: 0;
+    }
+    #Stage, #Components {
+        float: left;
+        width: 48%;
+        background: #efefef;
+        padding: 8px;
+        border: 2px solid #aaa;
+        margin: 5px;
+    }
+    .Context {
+        border: 1px solid black;
+        padding: 8px;
+    }
+    .Container {
+        padding: 8px;
+        border: 1px dashed rgba(0,0,0,0.3);
+    }
+    .Component {
+        cursor: -webkit-grab;
+        cursor: grab;
+    }
+    .thing {
+        background: orange;
+        padding: 5px 10px;
+        border: 1px solid black;
+    }
+</style>
+</head>
+<body>
+
+<div id="App" v-cloak>
+    <context id="Stage" data-context-name="stage" :children="stage"></context>
+    <context id="Components" data-context-name="components" :children="components"></context>
+    <div style="clear:both;"></div>
+</div>
+
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
+<script type="text/javascript">
+    
+    function debug(thing) {
+        console.log('DEBUG: ' + thing);
+    }
+
+    Vue.component('comp', {
+        props: ['config'],
+        template: '\
+            <div class="Component">\
+                <component :is="config.component" :config="config"></component>\
+            </div>',
+        mounted: function() {
+            this.config.index = getDomIndex(this.$el);
+            debug('mounted "' + this.config.component + '" at ' + this.config.index);
+        },
+        updated: function() {
+            this.config.index = getDomIndex(this.$el);
+            debug('updated "' + this.config.component + '" at ' + this.config.index);
+        }
+    })
+
+    Vue.component('context', {
+        props: ['children'],
+        template: '\
+            <div class="Context">\
+                <comp v-for="child in children" :config="child"></comp>\
+            \</div>'
+    })
+
+    Vue.component('container', {
+        props: ['config'],
+        template: '\
+            <div class="Container">\
+                <context :children="config.container" data-context-name="container"></context>\
+            </div>'
+    })
+
+    Vue.component('thing', {
+        props: ['config'],
+        template: '<h3 class="thing" v-text="config.index" :style="config.css"></h3>'
+    })
+/*  [
+        {
+            index: '0',                     <div class="Component">
+            component: 'container',             <div class="Container">
+            children: {                             <div class="Context" data-context-name="container">
+                container: [                            <div class="Component">
+                    {                                       <h3>0, container, 0</h3>
+                        index: '0, container, 0',
+                        component: 'thing',
+                        children: {}
+                    }
+                ]
+            }
+        }
+    ]*/
+var drake;
+
+    var app = new Vue({
+        el: '#App',
+        data: {
+            components: [
+                {
+                    index: '',
+                    component: 'container',
+                    container: []
+                },
+                {index: '', component: 'thing'},
+                {index: '', component: 'thing', css: {'background': 'lightgreen'}}
+            ],
+            stage: []
+        },
+        mounted: function() {
+            initiateDragging();
+        }
+    })
+
+    function getContainerIndex(child, parent) {
+        var index = null;
+        $(parent).children().each(function(i, l) {
+            if (this === child) {
+                index = i;
+            }
+        })
+        return index;
+    }
+
+    function getDomIndex(elem, pathArray) {
+        var name, index, path, context, parent;
+        context = $(elem).closest('.Context');
+        pathArray = pathArray || [];
+        name = context.attr('data-context-name');
+        index = getContainerIndex(elem, context);
+        pathArray.unshift(index);
+        pathArray.unshift(name);  
+        parent = $(context).parent().closest('.Component');
+
+        if (parent.length) {
+            return pathArray = getDomIndex(parent[0], pathArray);
+        } else {
+            return pathArray;
+        }
+    }
+
+    function getVueIndex(index, context) {
+        var data
+        data = copy(app[index.shift()]);
+        index.forEach(function(key) {
+            data = data[key];
+        })
+        debug('got Vue index: ' + jstr(data));
+        return data;
+    }
+
+    function retrieveVueContext(index, startContext) {
+        var context = startContext, output;
+        index.forEach(function(key, i) {
+            if (i === index.length - 1) {
+                output = { context: context, key: key };
+            } else {
+                context = context[key];
+            }
+        })
+        return output;
+    }
+
+    function setVueIndex(index, data, newIndex) {
+        var context, appContext, keyName, cut, newContext;
+        context = app[index.shift()];
+        appContext = retrieveVueContext(index, context);
+        if (!newIndex) {
+            appContext.context.splice(appContext.key, 0, data);
+        } else {
+            newIndex.shift();
+            newContext = retrieveVueContext(newIndex, context);
+            newContext.context.splice(newContext.key, 0, appContext.context.splice(appContext.key, 1)[0])
+        }
+        
+    }
+
+    function initiateDragging() {
+        var Stage, Components, draggedIndex, draggedData;
+
+        Stage = $('#Stage')[0];
+        Components = $('#Components')[0];
+
+        drake = dragula([Stage, Components], {
+            copy: function(theCopy, source) {
+                return source === Components;
+            },
+            accepts: function(element, target, source, sibling) {
+                return target !== Components && !contains(element, target);
+            }
+        }).on('drag', function(element, source) {
+            if (source === Components) {
+                draggedIndex = getDomIndex(element);
+                draggedData = copy(getVueIndex(draggedIndex));
+                debug('dragging from components at ' + draggedIndex);
+            }
+            if (source === Stage) {
+                draggedIndex = getDomIndex(element);
+                debug('dragging from stage at ' + draggedIndex);
+            }
+        }).on('drop', function(element, target, source, sibling) {
+
+            var inContext, fromComponents, reordering, domIndex;
+            
+            toContext = $(target).closest('.Context').length > 0;
+            fromComponents = source === Components;
+            reordering = $(source).closest('#Stage').length > 0;
+
+            if (fromComponents && toContext) {
+                domIndex = getDomIndex(element);
+                $(element).remove();
+                setVueIndex(domIndex, draggedData);
+                Vue.nextTick(function() {
+                    app.stage = copy(app.stage);
+                });
+                Vue.nextTick(updateDragContainers);
+                debug('dropped new component in stage at ' + domIndex);
+                return;
+            }
+
+            if (reordering) {
+                domIndex = getDomIndex(element);
+                // setVueIndex(draggedIndex, null, domIndex);
+                // Vue.nextTick(function() {
+                //     app.stage = copy(app.stage);
+                // });
+            }
+
+        })
+
+    }
+
+    function contains(a, b){
+      return a.contains ?
+        a != b && a.contains(b) :
+        !!(a.compareDocumentPosition(b) & 16);
+    }
+
+    function jstr(obj) {
+        return JSON.stringify(obj);
+    }
+
+    function jprs(str) {
+        return JSON.parse(str);
+    }
+
+    function copy(obj) {
+        return jprs(jstr(obj));
+    }
+
+    function stringToNumber(string) {
+        var convert = string * 1;
+        return isNaN(convert) ? string : convert;
+    }
+
+    function updateDragContainers() {
+        $('#Stage .Context').each(function() {
+            if (drake.containers.indexOf(this) <= -1) {
+                drake.containers.push(this);
+                debug('added new container to drake instance');
+            }
+        })
+    }
+
+</script>

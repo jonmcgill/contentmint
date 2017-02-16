@@ -43,7 +43,7 @@ gulp.task('dev', function() {
     server.start({
         host: 'localhost',
         port: 3000,
-        watch: ['dist/**/*', 'index.html']
+        watch: ['dist/**/*', 'index.html', 'sb.html']
     })
     gulp.watch('src/js/**/*.js', function() {
         return gulp.src(js_files)
