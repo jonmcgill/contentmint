@@ -193,6 +193,7 @@ var drake;
                 if (this.previous) {
                     this.changes--;
                     this.stage = this.previous.prior.snapshot;
+                    Vue.nextTick(updateDragContainers);
                     this.previous = this.previous.prior;
                     if (!this.previous.prior) {
                         this.previous = null;
@@ -209,6 +210,7 @@ var drake;
             },
             load: function() {
                 this.stage = copy(this.saved);
+                Vue.nextTick(updateDragContainers);
                 Vue.nextTick(this.snapshot);
                 debug('loaded content');
             },
@@ -381,7 +383,7 @@ var drake;
                 //  We need the placeholder element to appear where the dragged item came from
                 //  so that when we grab the location from the DOM it is an accurate data model.
                 //  Once we have the index we can remove it immediately.
-                var placeholder = '<div class="PLACEHOLDER"><strong>PLACEHOLDER</strong></div>';
+                var placeholder = '<div class="PLACEHOLDER"><strong></strong></div>';
                 var debugDelay = 0;
 
                 if (insertType === 'prepend') {
@@ -390,6 +392,8 @@ var drake;
                     $(placeholder).insertAfter(dragSpot);
                 }
                 domIndex = getDomIndex(dropped);
+
+                debug('dropped reordered component at ' + domIndex);
 
                 // These timeouts are here so I can debug easier. It's helpful.
                 setTimeout(function() {
@@ -403,7 +407,17 @@ var drake;
                         var dataToDrop = retrieveVueContext(draggedIndex, app);
                         var dataDrop = retrieveVueContext(domIndex, app);
                         if (dataDrop.context == dataToDrop.context) {
-                            dataDrop.key--;
+
+                            var drag_i = draggedIndex[draggedIndex.length - 1];
+                            var drop_i = dataDrop.key;
+
+                            if (drag_i < drop_i) {
+                                dataDrop.key--;
+                            }
+                            // } else {
+                            //     dataDrop.key--;
+                            // }
+
                             debug('reording in the same container');
                         }
                         dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
@@ -418,21 +432,93 @@ var drake;
                             Vue.nextTick(app.snapshot);
                             debug('refreshing and updating containers')
                         }, debugDelay)
-
                     }, debugDelay)
-
                 }, debugDelay)
-                
-
-                
-
-                
-
-            }
-                
-        })
-
+            } // ends reordering
+        }) // ends on.drop()
     }
+
+/*
+    Thinking through the data structures for the field system
+    ---------------------------------------------------------
+
+    Component
+        props: ['config'],
+        template:
+            <div>
+                <a v-if="config._fields.output.link" href="config_.fields.output.link">
+                    <img src="config._fields.output.source" />
+                </a>
+                <img v-else src="config._fields.output.source" />
+                <div data-editor="basic" data-content="text" v-html="config._content.text"></div>
+            </div>
+
+    Component default 'config' prop
+        {
+            _name: 'banner', <-- machine name
+            _display: 'Banner Image' <-- display name
+            _index: [...], <-- path to data from DOM
+            container: [...] <-- if there was a contextual region
+            _content: { <-- holds references to editor content
+                text: '<div>Just some default text you can edit.</div>'
+            },
+            _fields: { <-- tells the field system what fields to generate and how to tie it to component
+                output: { <-- centralized list of outputs tied to the component template above
+                    link: '',
+                    source: '/public/images/default.png'
+                },
+                list: [ <-- list of fields to reference and what output they affect
+                    {
+                        name: 'image-source', <-- name of the field to call
+                        label: 'Write in an image URL', <-- label for the field
+                        result: 'source', <-- name of the output to update,
+                        inputs: { <-- DON'T ADD; the field will supply this information when it's generated
+                            url: ''
+                        }
+                    },
+                    {
+                        name: 'link-choice',
+                        result: 'link',
+                        inputs: {
+                            url: '',
+                            tel: '',
+                            to: '',
+                            subject: '',
+                            body: ''
+                        }
+                    }
+                ]
+            }
+        }
+
+    Field 'image-source' component
+        props: ['field', 'component'] <-- config = field data; component = all component config
+        template:
+            <div class="field-instance">
+                <label>{{ field.label }}</label>
+                <input type="text" v-model="preprocess" /> <-- bound to the preprocess watcher
+            </div>
+        beforeMount: function() {
+            if (!this.fields.input) { <-- create inputs if does not exist (this is for editing)
+                this.fields.input = {
+                    url: 'http://link.to/default/image.png'
+                }
+            }
+        },
+        methods: {
+            process: function(setup) {
+                this.component._fields.output[this.field.result] = setup + ' on ' + this._uid;
+            }
+        },
+        watch: {
+            preprocess: function() { <-- entry point for data manipulation
+                var setup = 'appended: ' + this.url;
+                this.process(setup)
+            }
+        }
+
+
+*/
 
     function contains(a, b){
       return a.contains ?
