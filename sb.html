@@ -61,6 +61,7 @@
     .Component {
         cursor: -webkit-grab;
         cursor: grab;
+        transition: padding-top 300ms, background 300ms;
     }
     .thing {
         background: orange;
@@ -84,12 +85,17 @@
         <button class="Button-Save" @click="save">save</button>
         <button class="Button-Load" @click="load">load</button>
     </div>
+    <aside>
+        <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
+    </aside>
     <div style="clear:both;"></div>
+    <banner-image :config="test" v-on:showfields="showFields"></banner-image>
     <pre id="Model" v-text="toJson(stage)"></pre>
     <pre id="Model-Saved" v-text="toJson(saved)"></pre>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
 <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
@@ -103,15 +109,15 @@
         props: ['config'],
         template: '\
             <div class="Component">\
-                <component :is="config.component" :config="config"></component>\
+                <component :is="config._name" :config="config"></component>\
             </div>',
         mounted: function() {
-            this.config.index = getDomIndex(this.$el);
-            debug('mounted "' + this.config.component + '" at ' + this.config.index);
+            this.config._index = getDomIndex(this.$el);
+            debug('mounted "' + this.config._name + '" at ' + this.config._index);
         },
         updated: function() {
-            this.config.index = getDomIndex(this.$el);
-            debug('updated "' + this.config.component + '" at ' + this.config.index);
+            this.config._index = getDomIndex(this.$el);
+            debug('updated "' + this.config._name + '" at ' + this.config._index);
         }
     })
 
@@ -133,36 +139,134 @@
 
     Vue.component('thing', {
         props: ['config'],
-        template: '<h3 class="thing" v-text="config.index + \' (\'+_uid+\')\'" :style="config.css"></h3>'
+        template: '<h3 class="thing" v-text="config._index + \' (\'+_uid+\')\'" :style="config.css"></h3>'
     })
 
-//  This is what the data model should look like
-/*  [
-        {
-            index: '0',                    
-            component: 'container',         
-            container: [                   
-                {   
-                    index: '0, container, 0',
-                    component: 'thing',
-                    children: {}
-                }
-            ]
+
+var components = {};
+
+Vue.component('banner-image', {
+    props: ['config'],
+    template: '\
+        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+            <img @click="showFields" :src="config._fields.output.source" width="100%" /></a>\
+        <img v-else @click="showFields" :src="config._fields.output.source" width="100%" />',
+    methods: {
+        showFields: function() {
+            this.$emit('showfields', this.config);
         }
-    ]*/
+    }
+})
+
+components['banner-image'] = {
+    _name: 'banner-image',
+    _display: 'Banner Image',
+    // _index on mount
+    // no containers
+    // no _content
+    _fields: { // holds all field information
+        output: { // contains defaults
+            source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+            link: ''
+        },
+        list: [
+            {   name: 'image-source-field',
+                result: 'source'    },
+        ]
+    }
+}
+/*  component -> field-hub -> field data + field type -> view
+
+*/
+var fields = {
+    'image-source-field': {
+        type: 'field-text',
+        label: 'Write in an image URL',
+        input: 'url'
+    }
+}
+/*  field-text
+    field-group
+    field-dropdown
+    field-fieldchoice
+*/
+Vue.component('field-text', {
+    props: ['field', 'component'],
+    // We've put a layer between the component's data tied to the DOM and the data entered
+    // into the field. This is because some fields need to process the input in order to
+    // deliver the final output to the vm data.
+    // The input element is bound to the field's input data. On the input event, the data
+    // in the input is processed and sent to the designated component._fields.output key
+    template:'\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+        </div>',
+    data: function() {
+        return {
+            fields: fields
+        }
+    },
+    methods: {
+        process: _.debounce(function() {
+            var result = this.component._fields.output[this.field.result];
+            var fieldData = fields[this.field.name];
+            var input = this.field.inputs[fieldData.input];
+            this.component._fields.output[this.field.result] = input;
+        }, 500)
+    },
+    mounted: function() {
+        this.process();
+    }
+
+})
+
+Vue.component('field', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-wrap">\
+            <component :is="field.type" :field="field" :component="component"></component>\
+        </div>',
+    beforeMount: function() {
+        // result = default output listed in component
+        var result = this.component._fields.output[this.field.result];
+        // field instances aren't components; they're object literals passed to field components
+        var fieldData = fields[this.field.name];
+        this.field.label = fieldData.label;
+        this.field.type = fieldData.type;
+        // if no inputs, this is the first instantiation of this field for a given component.
+        // inputs are established based on the defaults provided to the fieldData and the components
+        if (!this.field.inputs) {
+            this.field.inputs = {};
+            this.field.inputs[fieldData.input] = result;
+        }
+        console.log(this.field);
+    }
+})
+
+Vue.component('fields', {
+    props: ['component'],
+    template: '\
+        <div class="fields-container">\
+            <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
+        </div>'
+})
+
 var drake;
 
     var app = new Vue({
         el: '#App',
         data: {
+            fieldsComponent: null,
+            test: components['banner-image'],
             components: [
                 {
-                    index: '',
-                    component: 'container',
-                    container: [{index: '', component: 'thing'}]
+                    _index: '',
+                    _name: 'container',
+                    container: [{_index: '', _name: 'thing'}]
                 },
-                {index: '', component: 'thing'},
-                {index: '', component: 'thing', css: {'background': 'lightgreen'}}
+                {_index: '', _name: 'thing'},
+                {_index: '', _name: 'thing', css: {'background': 'lightgreen'}}
             ],
             changes: 0,
             previous: null,
@@ -170,6 +274,10 @@ var drake;
             saved: []
         },
         methods: {
+            showFields: function(component) {
+                debug('showing fields for ' + component._name);
+                this.fieldsComponent = component;
+            },
             snapshot: function() {
                 this.changes++;
                 var shot = copy(this.stage);
@@ -323,7 +431,8 @@ var drake;
             },
             accepts: function(element, target, source, sibling) {
                 return target !== Components && !contains(element, target);
-            }
+            },
+            removeOnSpill: true
 
         }).on('drag', function(element, source) {
 
@@ -341,6 +450,8 @@ var drake;
             //  insertAfter on the sibling.
             if ($(source).closest('#Stage').length) {
                 draggedIndex = getDomIndex(element);
+                // var draggedData = retrieveVueContext(draggedIndex, app);
+                // console.log(draggedData);
                 if ($(element).prev().length === 0) {
                     dragSpot = $(element).parent();
                     insertType = 'prepend';
@@ -350,6 +461,25 @@ var drake;
                 }
                 debug('dragging from stage at ' + draggedIndex);
                 debug('insert type is "' + insertType + '"');
+            }
+
+        }).on('remove', function(el, container, source) {
+
+            if ($(source).closest('#Stage').length) {
+                var placeholder = '<div class="PLACEHOLDER"><strong></strong></div>';
+                if (insertType === 'prepend') {
+                    $(dragSpot).prepend(placeholder);
+                } else if (insertType === 'after') {
+                    $(placeholder).insertAfter(dragSpot);
+                }
+
+                $('.PLACEHOLDER').replaceWith(el);
+                $(el).removeClass('gu-hide');
+                var removeMe = retrieveVueContext(draggedIndex, app);
+                debug('removed component from stage at ' + removeMe.context[removeMe.key]._index);
+                removeMe.context.splice(removeMe.key, 1);
+                Vue.nextTick(refresh);
+                Vue.nextTick(app.snapshot);
             }
 
         }).on('drop', function(dropped, target, source, sibling) {
@@ -368,9 +498,7 @@ var drake;
                 domIndex = getDomIndex(dropped);
                 $(dropped).remove();
                 setVueIndex(domIndex, draggedData);
-                Vue.nextTick(function() {
-                    app.stage = copy(app.stage);
-                });
+                Vue.nextTick(refresh);
                 Vue.nextTick(updateDragContainers);
                 Vue.nextTick(app.snapshot);
                 debug('dropped new component in stage at ' + domIndex);
@@ -407,17 +535,11 @@ var drake;
                         var dataToDrop = retrieveVueContext(draggedIndex, app);
                         var dataDrop = retrieveVueContext(domIndex, app);
                         if (dataDrop.context == dataToDrop.context) {
-
                             var drag_i = draggedIndex[draggedIndex.length - 1];
                             var drop_i = dataDrop.key;
-
                             if (drag_i < drop_i) {
                                 dataDrop.key--;
                             }
-                            // } else {
-                            //     dataDrop.key--;
-                            // }
-
                             debug('reording in the same container');
                         }
                         dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
@@ -438,87 +560,7 @@ var drake;
         }) // ends on.drop()
     }
 
-/*
-    Thinking through the data structures for the field system
-    ---------------------------------------------------------
 
-    Component
-        props: ['config'],
-        template:
-            <div>
-                <a v-if="config._fields.output.link" href="config_.fields.output.link">
-                    <img src="config._fields.output.source" />
-                </a>
-                <img v-else src="config._fields.output.source" />
-                <div data-editor="basic" data-content="text" v-html="config._content.text"></div>
-            </div>
-
-    Component default 'config' prop
-        {
-            _name: 'banner', <-- machine name
-            _display: 'Banner Image' <-- display name
-            _index: [...], <-- path to data from DOM
-            container: [...] <-- if there was a contextual region
-            _content: { <-- holds references to editor content
-                text: '<div>Just some default text you can edit.</div>'
-            },
-            _fields: { <-- tells the field system what fields to generate and how to tie it to component
-                output: { <-- centralized list of outputs tied to the component template above
-                    link: '',
-                    source: '/public/images/default.png'
-                },
-                list: [ <-- list of fields to reference and what output they affect
-                    {
-                        name: 'image-source', <-- name of the field to call
-                        label: 'Write in an image URL', <-- label for the field
-                        result: 'source', <-- name of the output to update,
-                        inputs: { <-- DON'T ADD; the field will supply this information when it's generated
-                            url: ''
-                        }
-                    },
-                    {
-                        name: 'link-choice',
-                        result: 'link',
-                        inputs: {
-                            url: '',
-                            tel: '',
-                            to: '',
-                            subject: '',
-                            body: ''
-                        }
-                    }
-                ]
-            }
-        }
-
-    Field 'image-source' component
-        props: ['field', 'component'] <-- config = field data; component = all component config
-        template:
-            <div class="field-instance">
-                <label>{{ field.label }}</label>
-                <input type="text" v-model="preprocess" /> <-- bound to the preprocess watcher
-            </div>
-        beforeMount: function() {
-            if (!this.fields.input) { <-- create inputs if does not exist (this is for editing)
-                this.fields.input = {
-                    url: 'http://link.to/default/image.png'
-                }
-            }
-        },
-        methods: {
-            process: function(setup) {
-                this.component._fields.output[this.field.result] = setup + ' on ' + this._uid;
-            }
-        },
-        watch: {
-            preprocess: function() { <-- entry point for data manipulation
-                var setup = 'appended: ' + this.url;
-                this.process(setup)
-            }
-        }
-
-
-*/
 
     function contains(a, b){
       return a.contains ?
