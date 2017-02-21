@@ -22,14 +22,14 @@ var Cmint = (function() {
         } 
     }
 
-    function displayOnLoad() {
-        return Util.jprs($('#SavedContent').text());
+    function setAvailableComponents() {
+        return Util.jprs($('#AvailableComponents').text());
     }
 
     return {
         createComponent: createComponent,
         createField: createField,
-        displayOnLoad: displayOnLoad
+        setAvailableComponents: setAvailableComponents
     }
 
 })()

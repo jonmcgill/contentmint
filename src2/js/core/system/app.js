@@ -26,7 +26,7 @@ Cmint.app = new Vue({
 
     mounted: function() {
         Drag.init();
-        this.components = Cmint.displayOnLoad();
+        this.components = Cmint.setAvailableComponents();
         Util.debug('mounted app');
     }
 

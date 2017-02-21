@@ -4,7 +4,7 @@
 <title>Sandbox</title>
 <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
 <style type="text/css">
-.gu-mirror{position:fixed!important;margin:0!important;z-index:9999!important;opacity:.8;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";filter:alpha(opacity=80)}.gu-hide{display:none!important}.gu-unselectable{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}.gu-transit{opacity:.2;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";filter:alpha(opacity=20)}
+    .gu-mirror{position:fixed!important;margin:0!important;z-index:9999!important;opacity:.8;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";filter:alpha(opacity=80)}.gu-hide{display:none!important}.gu-unselectable{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}.gu-transit{opacity:.2;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";filter:alpha(opacity=20)}
 
     * { 
         box-sizing: border-box;
@@ -77,6 +77,39 @@
 </head>
 <body>
 
+<!--
+    
+    Implemetation:
+
+        Fields:
+            - dropdown
+            - fieldchoice
+            - fieldgroup
+            - tokenizing
+            - process hooks
+            - field input regex checks
+            - field input error message
+
+        Editing:
+            - component action bar
+            - how to indicate hover on a component
+            - trash component structure
+            - copy component structure
+            - tinymce inline editing
+            - tinymce editor synced with Vue data
+            - tinymce editing triggers field reprocessing
+            - tinymce output HTML has certain properties attached
+            - autosave
+
+        Application:
+            - component categories
+            - loading templates
+            - sidebar widget
+            - editor GUI
+            - way to inform the editor how to clean up its code
+
+-->
+
 <div id="App" v-cloak>
     <context id="Stage" data-context-name="stage" :children="stage"></context>
     <context id="Components" data-context-name="components" :children="components"></context>
@@ -90,9 +123,13 @@
     </aside>
     <div style="clear:both;"></div>
     <wrap :config="test" v-on:showfields="showFields"></wrap>
+
+    <!-- For testing data syncing -->
     <pre id="Model" v-text="toJson(stage)"></pre>
     <pre id="Model-Saved" v-text="toJson(saved)"></pre>
-    <textarea style="display: none" id="SavedContent">[{"_index": "","_name": "container","container": [{"_index": "", "_name": "thing"}]},{"_index": "", "_name": "thing"},{"_index": "", "_name": "thing", "css": {"background": "lightgreen"}}]</textarea>
+
+    <!-- Backend will inject json for available template components here -->
+    <textarea style="display: none" id="AvailableComponents">[{"_index": "","_name": "container","container": [{"_index": "", "_name": "thing"}]},{"_index": "", "_name": "thing"},{"_index": "", "_name": "thing", "css": {"background": "lightgreen"}}]</textarea>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -101,503 +138,3 @@
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
 <script src="dist/build.js"></script>
-<!-- <script type="text/javascript">
-    
-    function debug(thing) {
-        console.log('DEBUG: ' + thing);
-    }
-
-    Vue.component('comp', {
-        props: ['config'],
-        template: '\
-            <div class="Component">\
-                <component :is="config._name" :config="config"></component>\
-            </div>',
-        mounted: function() {
-            this.config._index = getDomIndex(this.$el);
-            debug('mounted "' + this.config._name + '" at ' + this.config._index);
-        },
-        updated: function() {
-            this.config._index = getDomIndex(this.$el);
-            debug('updated "' + this.config._name + '" at ' + this.config._index);
-        }
-    })
-
-    Vue.component('context', {
-        props: ['children'],
-        template: '\
-            <div class="Context">\
-                <comp v-for="child in children" :config="child"></comp>\
-            \</div>'
-    })
-
-    Vue.component('container', {
-        props: ['config'],
-        template: '\
-            <div class="Container">\
-                <context :children="config.container" data-context-name="container"></context>\
-            </div>'
-    })
-
-    Vue.component('thing', {
-        props: ['config'],
-        template: '<h3 class="thing" v-text="config._index + \' (\'+_uid+\')\'" :style="config.css"></h3>'
-    })
-
-
-var components = {};
-
-Vue.component('banner-image', {
-    props: ['config'],
-    template: '\
-        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-            <img @click="showFields" :src="config._fields.output.source" width="100%" /></a>\
-        <img v-else @click="showFields" :src="config._fields.output.source" width="100%" />',
-    methods: {
-        showFields: function() {
-            this.$emit('showfields', this.config);
-        }
-    }
-})
-
-components['banner-image'] = {
-    _name: 'banner-image',
-    _display: 'Banner Image',
-    // _index on mount
-    // no containers
-    // no _content
-    _fields: { // holds all field information
-        output: { // contains defaults
-            source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-            link: ''
-        },
-        list: [
-            {   name: 'image-source-field',
-                result: 'source'    },
-        ]
-    }
-}
-/*  component -> field-hub -> field data + field type -> view
-
-*/
-var fields = {
-    'image-source-field': {
-        type: 'field-text',
-        label: 'Write in an image URL',
-        input: 'url'
-    }
-}
-/*  field-text
-    field-group
-    field-dropdown
-    field-fieldchoice
-*/
-Vue.component('field-text', {
-    props: ['field', 'component'],
-    // We've put a layer between the component's data tied to the DOM and the data entered
-    // into the field. This is because some fields need to process the input in order to
-    // deliver the final output to the vm data.
-    // The input element is bound to the field's input data. On the input event, the data
-    // in the input is processed and sent to the designated component._fields.output key
-    template:'\
-        <div class="field-instance">\
-            <label>{{ field.label }}</label>\
-            <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
-        </div>',
-    data: function() {
-        return {
-            fields: fields
-        }
-    },
-    methods: {
-        process: _.debounce(function() {
-            var result = this.component._fields.output[this.field.result];
-            var fieldData = fields[this.field.name];
-            var input = this.field.inputs[fieldData.input];
-            this.component._fields.output[this.field.result] = input;
-        }, 500)
-    },
-    mounted: function() {
-        this.process();
-    }
-
-})
-
-Vue.component('field', {
-    props: ['field', 'component'],
-    template: '\
-        <div class="field-wrap">\
-            <component :is="field.type" :field="field" :component="component"></component>\
-        </div>',
-    beforeMount: function() {
-        // result = default output listed in component
-        var result = this.component._fields.output[this.field.result];
-        // field instances aren't components; they're object literals passed to field components
-        var fieldData = fields[this.field.name];
-        this.field.label = fieldData.label;
-        this.field.type = fieldData.type;
-        // if no inputs, this is the first instantiation of this field for a given component.
-        // inputs are established based on the defaults provided to the fieldData and the components
-        if (!this.field.inputs) {
-            this.field.inputs = {};
-            this.field.inputs[fieldData.input] = result;
-        }
-        console.log(this.field);
-    }
-})
-
-Vue.component('fields', {
-    props: ['component'],
-    template: '\
-        <div class="fields-container">\
-            <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
-        </div>'
-})
-
-var drake;
-
-    var app = new Vue({
-        el: '#App',
-        data: {
-            fieldsComponent: null,
-            test: components['banner-image'],
-            components: [
-                {
-                    _index: '',
-                    _name: 'container',
-                    container: [{_index: '', _name: 'thing'}]
-                },
-                {_index: '', _name: 'thing'},
-                {_index: '', _name: 'thing', css: {'background': 'lightgreen'}}
-            ],
-            changes: 0,
-            previous: null,
-            stage: [],
-            saved: []
-        },
-        methods: {
-            showFields: function(component) {
-                debug('showing fields for ' + component._name);
-                this.fieldsComponent = component;
-            },
-            snapshot: function() {
-                this.changes++;
-                var shot = copy(this.stage);
-                debug('snapshot taken (current changes: ' + this.changes + ')');
-                if (!this.previous) {
-                    this.previous = {
-                        snapshot: shot,
-                        prior: {
-                            snapshot: [],
-                            prior: null
-                        }
-                    }
-                } else {
-                    this.previous = {
-                        snapshot: shot,
-                        prior: this.previous
-                    }
-                }
-            },
-            undo: function() {
-                if (this.previous) {
-                    this.changes--;
-                    this.stage = this.previous.prior.snapshot;
-                    Vue.nextTick(updateDragContainers);
-                    this.previous = this.previous.prior;
-                    if (!this.previous.prior) {
-                        this.previous = null;
-                    }
-                    debug('state reverted (current changes: ' + this.changes + ')');
-                } else {
-                    debug('nothing to undo');
-                }
-                
-            },
-            save: function() {
-                this.saved = copy(this.stage);
-                debug('saved content')
-            },
-            load: function() {
-                this.stage = copy(this.saved);
-                Vue.nextTick(updateDragContainers);
-                Vue.nextTick(this.snapshot);
-                debug('loaded content');
-            },
-            toJson: function(obj) {
-                return JSON.stringify(obj, null, 2);
-            }
-        },
-        mounted: function() {
-            initiateDragging();
-            debug('mounted app');
-        }
-    })
-
-    function getContainerIndex(child, parent) {
-        var index = null;
-        $(parent).children().each(function(i, l) {
-            if (this === child) {
-                index = i;
-            }
-        })
-        return index;
-    }
-
-    function getDomIndex(elem, pathArray) {
-        var name, index, path, context, parent;
-        context = $(elem).closest('.Context');
-        pathArray = pathArray || [];
-        name = context.attr('data-context-name');
-        index = getContainerIndex(elem, context);
-        pathArray.unshift(index);
-        pathArray.unshift(name);  
-        parent = $(context).parent().closest('.Component');
-
-        if (parent.length) {
-            return pathArray = getDomIndex(parent[0], pathArray);
-        } else {
-            return pathArray;
-        }
-    }
-
-    function getVueIndex(index, context) {
-        var data;
-        data = copy(app[index.shift()]);
-        index.forEach(function(key, i) {
-            if (context && (i === index.length - 1)) {
-                data = {data: data, key: key};
-            } else {
-                data = data[key];
-            }
-        })
-        debug('got Vue index: ' + jstr(data));
-        return data;
-    }
-
-    function retrieveVueContext(index, startContext) {
-        var context = startContext,
-            output;
-        index.forEach(function(key, i) {
-            if (i === index.length - 1) {
-                output = { 
-                    context: context, 
-                    key: key
-                };
-            } else {
-                context = context[key];
-            }
-        })
-        return output;
-    }
-
-    function setVueIndex(index, data, newIndex) {
-        var startContext, context, appContext, keyName, cut, newContext;
-        startContext = app[index[0]];
-        context = app[index.shift()];
-        appContext = retrieveVueContext(index, context);
-        if (!newIndex) {
-            appContext.context.splice(appContext.key, 0, data);
-        } else {
-            newIndex.shift();
-            newContext = retrieveVueContext(newIndex, startContext);
-            var move = appContext.context.splice(appContext.key, 1)[0];
-            newContext.context.splice(newContext.key, 0, move);
-        }
-        
-    }
-
-    //  So, here's the thing: raw DOM manipulation with Vue is a bad thing - data no
-    //  longer takes precendence, state management becomes MORE difficult - it's a bad
-    //  idea. Problem is, dragula is ALL about raw DOM manipulation via drag-n-drop.
-    //  In order to let the Vue vm manage DOM, then, we need to let dragula have its
-    //  way with the DOM, we need to map - using the DOM - what should happen in the
-    //  Vue vm, then, we need to undo what dragula did, update the Vue data, and
-    //  then run a total DOM refresh() to ensure Vue has control.
-    function initiateDragging() {
-        var Stage, Components, draggedIndex, draggedData, dragSpot, insertType;
-
-        Stage = $('#Stage')[0];
-        Components = $('#Components')[0];
-
-        //  Out drake instance begins with Stage and Components as containers.
-        //  Copies are only made from Components and only Stage and Stage context
-        //  components can accept other components.
-        //  There will also be some components (like table rows) that should be bound
-        //  to specific kinds of containers and thus not allowed to be moved into other
-        //  types of contexts.
-        drake = dragula([Stage, Components], {
-
-            copy: function(theCopy, source) {
-                return source === Components;
-            },
-            accepts: function(element, target, source, sibling) {
-                return target !== Components && !contains(element, target);
-            },
-            removeOnSpill: true
-
-        }).on('drag', function(element, source) {
-
-            //  Creates a component copy on drag initiation
-            if (source === Components) {
-                draggedIndex = getDomIndex(element);
-                draggedData = copy(getVueIndex(draggedIndex));
-                debug('dragging from components at ' + draggedIndex);
-            }
-
-            //  If the drag is on stage it means the user is trying to reorder
-            //  components. In order to put the placeholder in the right spot, we need
-            //  to log the insertion method. If a component has no previous sibling, we'll
-            //  need to prepend the placeholder to the parent; if it does, we'll use
-            //  insertAfter on the sibling.
-            if ($(source).closest('#Stage').length) {
-                draggedIndex = getDomIndex(element);
-                // var draggedData = retrieveVueContext(draggedIndex, app);
-                // console.log(draggedData);
-                if ($(element).prev().length === 0) {
-                    dragSpot = $(element).parent();
-                    insertType = 'prepend';
-                } else {
-                    dragSpot = $(element).prev();
-                    insertType = 'after'
-                }
-                debug('dragging from stage at ' + draggedIndex);
-                debug('insert type is "' + insertType + '"');
-            }
-
-        }).on('remove', function(el, container, source) {
-
-            if ($(source).closest('#Stage').length) {
-                var placeholder = '<div class="PLACEHOLDER"><strong></strong></div>';
-                if (insertType === 'prepend') {
-                    $(dragSpot).prepend(placeholder);
-                } else if (insertType === 'after') {
-                    $(placeholder).insertAfter(dragSpot);
-                }
-
-                $('.PLACEHOLDER').replaceWith(el);
-                $(el).removeClass('gu-hide');
-                var removeMe = retrieveVueContext(draggedIndex, app);
-                debug('removed component from stage at ' + removeMe.context[removeMe.key]._index);
-                removeMe.context.splice(removeMe.key, 1);
-                Vue.nextTick(refresh);
-                Vue.nextTick(app.snapshot);
-            }
-
-        }).on('drop', function(dropped, target, source, sibling) {
-
-            var inContext, fromComponents, reordering, domIndex;
-            
-            toContext = $(target).closest('.Context').length > 0;
-            fromComponents = source === Components;
-            reordering = $(source).closest('#Stage').length > 0;
-
-            //  Once the component is dropped, we'll need to grab it's index and then
-            //  immediately remove it from DOM. We add the copied data to the vm and then
-            //  run a refresh.
-            if (fromComponents && toContext) {
-
-                domIndex = getDomIndex(dropped);
-                $(dropped).remove();
-                setVueIndex(domIndex, draggedData);
-                Vue.nextTick(refresh);
-                Vue.nextTick(updateDragContainers);
-                Vue.nextTick(app.snapshot);
-                debug('dropped new component in stage at ' + domIndex);
-
-            }
-
-            
-            if (reordering) {
-
-                //  We need the placeholder element to appear where the dragged item came from
-                //  so that when we grab the location from the DOM it is an accurate data model.
-                //  Once we have the index we can remove it immediately.
-                var placeholder = '<div class="PLACEHOLDER"><strong></strong></div>';
-                var debugDelay = 0;
-
-                if (insertType === 'prepend') {
-                    $(dragSpot).prepend(placeholder);
-                } else if (insertType === 'after') {
-                    $(placeholder).insertAfter(dragSpot);
-                }
-                domIndex = getDomIndex(dropped);
-
-                debug('dropped reordered component at ' + domIndex);
-
-                // These timeouts are here so I can debug easier. It's helpful.
-                setTimeout(function() {
-
-                    $('.PLACEHOLDER').replaceWith(dropped);
-                    debug('removing placeholder')
-
-                    setTimeout(function() {
-                        //  Now we use the index from the DOM to retrieve the vm context arrays.
-                        //  Once we have those, we splice the dragged data into the drop context array.
-                        var dataToDrop = retrieveVueContext(draggedIndex, app);
-                        var dataDrop = retrieveVueContext(domIndex, app);
-                        if (dataDrop.context == dataToDrop.context) {
-                            var drag_i = draggedIndex[draggedIndex.length - 1];
-                            var drop_i = dataDrop.key;
-                            if (drag_i < drop_i) {
-                                dataDrop.key--;
-                            }
-                            debug('reording in the same container');
-                        }
-                        dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
-                        debug('splicing vm data')
-
-                        setTimeout(function() {
-                            //  At this point, the data and the DOM should technically match, but we want to
-                            //  do a refresh() so that all other DOM components are updated with their new
-                            //  location. Lastly, we add any new context components to the dragula instance
-                            Vue.nextTick(refresh);
-                            Vue.nextTick(updateDragContainers);
-                            Vue.nextTick(app.snapshot);
-                            debug('refreshing and updating containers')
-                        }, debugDelay)
-                    }, debugDelay)
-                }, debugDelay)
-            } // ends reordering
-        }) // ends on.drop()
-    }
-
-
-
-    function contains(a, b){
-      return a.contains ?
-        a != b && a.contains(b) :
-        !!(a.compareDocumentPosition(b) & 16);
-    }
-
-    function jstr(obj) {
-        return JSON.stringify(obj);
-    }
-
-    function jprs(str) {
-        return JSON.parse(str);
-    }
-
-    function copy(obj) {
-        return jprs(jstr(obj));
-    }
-
-    function stringToNumber(string) {
-        var convert = string * 1;
-        return isNaN(convert) ? string : convert;
-    }
-
-    function refresh() {
-        app.stage = copy(app.stage);
-    }
-
-    function updateDragContainers() {
-        $('#Stage .Context').each(function() {
-            if (drake.containers.indexOf(this) <= -1) {
-                drake.containers.push(this);
-                debug('added new container to drake instance');
-            }
-        })
-    }
-
-</script> -->

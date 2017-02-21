@@ -146,14 +146,14 @@ var Cmint = (function() {
         } 
     }
 
-    function displayOnLoad() {
-        return Util.jprs($('#SavedContent').text());
+    function setAvailableComponents() {
+        return Util.jprs($('#AvailableComponents').text());
     }
 
     return {
         createComponent: createComponent,
         createField: createField,
-        displayOnLoad: displayOnLoad
+        setAvailableComponents: setAvailableComponents
     }
 
 })()
@@ -531,7 +531,7 @@ Cmint.app = new Vue({
 
     mounted: function() {
         Drag.init();
-        this.components = Cmint.displayOnLoad();
+        this.components = Cmint.setAvailableComponents();
         Util.debug('mounted app');
     }
 
