@@ -6,38 +6,30 @@ var gulp = require('gulp'),
 
 var js_files = [
     
-    './src/js/global.js',
-    './src/js/effects.js',
-    './src/js/fieldData.js',
-    './src/js/componentDefaults.js',
-
-    './src/js/component-wrapper.js',
-    './src/js/component-context.js',
-    
-    './src/js/component-dropdown.js',
-    './src/js/component-field.js',
-    './src/js/component-fieldgroup.js',
-    './src/js/component-field-widget.js',
-
-    './src/js/component-heading.js',
-    './src/js/component-body-copy.js',
-    './src/js/component-two-column.js',
-    './src/js/component-banner.js',
-
-    './src/js/app.js',
-
-    './src/js/nodes.js',
-    './src/js/documentHandlers.js',
-    './src/js/walk.js',
-    './src/js/util.js',
-    './src/js/collectData.js',
-    './src/js/dom-data-sync.js',
-    './src/js/initStageComponent.js',
-    './src/js/initEditor.js',
-    './src/js/initDragula.js',
+    './src2/js/core/system/util.js',
+    './src2/js/core/system/index.js',
+    './src2/js/core/system/cmint.js',
+    './src2/js/core/components/wrap.js',
+    './src2/js/core/components/context.js',
+    './src2/js/core/data/components.js',
+    './src2/js/components/**/*',
+    './src2/js/core/data/fields.js',
+    './src2/js/fields/**/*',
+    './src2/js/core/fields/field-text.js',
+    './src2/js/core/fields/field.js',
+    './src2/js/core/fields/fields.js',
+    './src2/js/core/system/drag/drag.js',
+    './src2/js/core/system/drag/fn/*',
+    './src2/js/core/system/fn/*',
+    './src2/js/core/system/app.js'
     
 ];
 
+gulp.task('build', function() {
+    gulp.src(js_files)
+        .pipe(concat('build.js'))
+        .pipe(gulp.dest('dist/'));
+})
 
 gulp.task('dev', function() {
     server.start({
@@ -45,9 +37,9 @@ gulp.task('dev', function() {
         port: 3000,
         watch: ['dist/**/*', 'index.html', 'sb.html']
     })
-    gulp.watch('src/js/**/*.js', function() {
+    gulp.watch('src2/js/**/*.js', function() {
         return gulp.src(js_files)
-            .pipe(concat('Build.js'))
+            .pipe(concat('build.js'))
             .pipe(gulp.dest('dist/'));
     })
     gulp.watch('src/scss/**/*.scss', function() {

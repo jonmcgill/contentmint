@@ -1,1258 +1,538 @@
-//
-//  src/js/global.js
-//
-var g = {
-    debug: true,
-    attr: {
-        contextName: '[data-context-name]',
-        editor: '[data-editor]'
-    },
-    class: {
-        component: '.Component',
-        context: '.Context',
-        hovered: '.hovered'
-    },
-    editors: {
-        plain: 'undo redo bold italic',
-        basic: 'undo redo bold italic alignleft aligncenter link',
-        robust: 'undo redo bold italic alignleft aligncenter link bullist numlist'
-    },
-    id: {
-        app: '#App',
-        editorToolbar: '#EditorToolbar',
-        loading: '#Loading',
-        stage: '#Stage',
-        thumbnails: '#Thumbnails',
-        trash: '#Trash'
-    },
-    name: {
-        config: 'data-config',
-        context: 'Context',
-        contextEmpty: 'Context-Empty',
-        contextName: 'data-context-name',
-        editor: 'data-editor',
-        editorID: 'data-editor-id',
-        editorPlain: 'plain',
-        editorBasic: 'basic',
-        editorRobust: 'robust',
-        hovered: 'hovered',
-        prop: 'data-prop',
-        thumbnail: 'thumbnail'
-    }
-}
-//
-//  src/js/effects.js
-//
-var effects = {
-
-    mailto: function(component, result, json) {
-
-        var config = json ? getComponentJSON(component.$el) : component.config;
-        var settings = config.settings;
-        var output = 'mailto:';
-
-        settings.to = settings.to || '';
-        settings.subject = settings.subject || '';
-        settings.body = settings.body || '';
-
-        output += settings.to + '?';
-        output += 'Subject=' + encodeURIComponent(effects.tokenize(component, settings.subject, json)) + '&';
-        output += 'Body=' + encodeURIComponent(effects.tokenize(component, settings.body, json));
-        output = effects.tokenize(component, output, json);
-
-        settings[result] = output;
-
-        return output;
-
-    },
-
-    telLink: function(component, result, json) {
-
-        var config = json ? getComponentJSON(component.$el) : component.config;
-        var settings = config.settings;
-        var output;
-
-        settings.number = settings.number || '';
-
-        if (settings.number) {
-            output = 'tel:' + effects.tokenize(component, settings.number, json);
-        }
-
-        settings[result] = output;
-
-        return output;
-
-    },
-
-    tokenize: function(component, value, json) {
-
-        if (component.config.tokens) {
-            component.config.tokens.forEach(function(token) {
-                var config = json ? getComponentJSON(component.$el) : component.config;
-                var data = config[token[1]] || config.settings[token[1]];
-                var clean = data.replace(/<.+?>/g, '');
-                var exp = new RegExp('\\{\\{\\s*'+token[0]+'\\s*\\}\\}', 'g');
-                value = value.replace(exp, clean);
-            })
-        }
-        return value;
-    }
-
-}
-//
-//  src/js/fieldData.js
-//
-var fieldData = {
-    'image-dropdown': {
-        label: 'Select a preset image',
-        result: 'src',
-        type: {
-            name: 'dropdown',
-            menu: 'images',
-            selected: 'Default'
-        }
-    },
-    'image-url': {
-        label: 'Write in an image URL',
-        result: 'src',
-        type: { name: 'text' }
-    },
-    'alt-text': {
-        label: 'Add image alt text',
-        result: 'alt',
-        type: { name: 'text' }
-    },
-    'link-mailto': {
-        result: 'href',
-        type: {
-            name: 'fieldgroup',
-            effect: 'mailto',
-            fields: [
-                {   type: { name: 'text' },
-                    result: 'to',
-                    label: 'Email address(s) to send to' },
-                {   type: { name: 'text' },
-                    result: 'subject',
-                    label: 'Subject line' },
-                {   type: { name: 'textarea' },
-                    result: 'body',
-                    label: 'Email body text' }
-            ]
-        }
-    },
-    'link-url': {
-        label: 'Link URL',
-        result: 'href',
-        type: { name: 'text' }
-    },
-    'link-tel': {
-        result: 'href',
-        type: {
-            name: 'fieldgroup',
-            effect: 'telLink',
-            fields: [
-                {   type: { name: 'text' },
-                    result: 'number',
-                    label: 'Enter telephone number'
-                }
-            ]
-        }
-    },
-    'link-choice': {
-        label: 'Select a link type',
-        fieldchoice: true,
-        result: 'href',
-        type: {
-            name: 'dropdown',
-            menu: 'link-types',
-            selected: 'None'
-        }
-    }
-
-}
-//
-//  src/js/componentDefaults.js
-//
-var componentDefaults = {
-    'two-column': {
-        name: 'two-column',
-        display: 'Two Columns',
-        contextTag: 'section',
-        left: [
-            {
-                name: 'body-copy',
-                display: 'Body Copy',
-                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis feugiat aliquet tristique.'
-            }
-        ],
-        right: [
-            {
-                name: 'body-copy',
-                display: 'Body Copy',
-                content: 'Fusce vitae eros metus. In mollis scelerisque lorem, at placerat sem porttitor a.'
-            }
-        ]
-    },
-    'body-copy': {
-        name: 'body-copy',
-        display: 'Body Copy',
-        content: 'Change this content. You can add lists, links, and special characters. You can make text bold, italic, or even center aligned.'
-    },
-    'table-data': {
-        name: 'table-data',
-        display: 'Course Table',
-        componentTag: 'table',
-        contextTag: 'tbody',
-        rows: [
-            {   name: 'table-row',
-                display: 'Course Row',
-                course: 'Course name goes here',
-                date: 'MM/DD/YYYY',
-                componentTag: 'tr',
-                settings: {
-                    active: false,
-                    href: ''
-                },
-                tokens: [['Course', 'course'], ['Date', 'date']],
-                fields: ['link-mailto'] 
-            }
-        ]
-    },
-    'table-row': {
-        name: 'table-row',
-        display: 'Course Row',
-        course: 'Course name goes here',
-        date: 'MM/DD/YYYY',
-        componentTag: 'tr',
-        settings: {
-            active: false,
-            href: ''
-        },
-        tokens: [['Course', 'course'], ['Date', 'date']],
-        fields: ['link-mailto']
-    },
-    'heading': {
-        name: 'heading',
-        display: 'Title',
-        content: '<div style="font-family:Arial,sans-serif;font-size:2.4em;">Lorem Ipsum Titlum</div>'
-    },
-    'banner': {
-        name: 'banner',
-        display: 'Banner Image',
-        settings: {
-            active: false,
-            src: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-            alt: 'Default alt text',
-            href: ''
-        },
-        fields: ['image-dropdown', 'image-url', 'alt-text', 'link-choice']
-    }
-}
-//
-//  src/js/component-wrapper.js
-//
-//  wrappers contain any given component. They handle the logic of the components.
-//  wrappers take raw component data, call the component with the name and then
-//  pass that data right on along to the generated component.
-//  wrappers will also look for the settings property and delegate that off to
-//  the <settings> component.
-Vue.component('wrapper', {
-    props: ['config'],
-
-    render: function(make) {
-        var _this = this;
-        var tag = this.config.componentTag
-            ? this.config.componentTag
-            : 'div';
-
-        var settingsBtn = function() {
-            return _this.config.settings
-                ? make('button', {
-                'class': { 'btn-toolbar': true },
-                on: { click: _this.openSettings }},
-                [   make('i', {'class': {'fa': true, 'fa-cog': true }} )])
-                : null;
-        }
-
-        return make(tag, {
-            'class': {
-                Component: true
-            }},
-            [
-            make(this.config.name, {
-                props: { config: this.config },
-            }),
-        ])
-    },
-
-    methods: {
-
-        trash: function() {
-            $(this.$el).remove();
-            syncStageAndStore();
-            debug(checkSync);
-        },
-
-        copy: function() {
-            var path = walk.up(this.$el);
-            path[0].index++;
-            var data = getComponentData(this.$el);
-            walk.down(path.reverse(), data);
-        },
-
-        openSettings: function() {
-            var _this = this;
-            this.$root.activeComponent = this;
-            setSettingsProperty(this.$el, 'active', true);
-            updateComponentData(this.$el);
-            Vue.nextTick(function() {
-                setTimeout(function() {
-                    $('.field-widget').addClass('active');
-                    _this.$root.fieldsOpen = true;
-                }, 100);
-            })
-        },
-
-        showToolbar: function() {
-            var _this = this;
-            var _el = this.$el;
-            $(_el).click(function(e) {
-                if ($(e.target).closest('.Component')[0] === _el) {
-                    var offset = $(_el).offset();
-                    var top = offset.top + 'px';
-                    _this.$root.toolbar = _this;
-                    $('#Toolbar').css({
-                        top: top
-                    }).addClass('active');
-                }
-            })
-        }
-
-    },
-    mounted: function() {
-        initStageComponent(this);
-        initEditor(this);
-        $(this.$el).find('a').click(function(e) {
-            debug('prevent link clicks');
-            e.preventDefault();
-        })
-        $(this.$el).find('[data-transfer]').each(function() {
-            transferContainer(this);
-        })
-        this.showToolbar();
-    },
-
-    updated: function() {
-        initStageComponent(this);
-        initEditor(this);
-        $(this.$el).find('a').click(function(e) {
-            debug('prevent link clicks');
-            e.preventDefault();
-        })
-        $(this.$el).find('[data-transfer]').each(function() {
-            transferContainer(this);
-        })
-        this.showToolbar();
-    }
-})
-
-//
-//  src/js/component-context.js
-//
-//  context components do not have editable content. Rather, they
-//  are additional wrappers around components that offer different
-//  layout possibilities. Each context instance dynamically generates
-//  wrapped components given the set of component data given
-//  
-//  Additionally, when mounted, the context component is added to the
-//  dragula instance so it can receive other components
-Vue.component('context', {
-    props: ['components', 'config'],
-    // template: '\
-    //     <div class="Context">\
-    //         <wrapper v-for="config in components" :config="config"></wrapper>\
-    //     </div>',
-    render: function(make) {
-        var tag = this.config.contextTag ? this.config.contextTag : 'div';
-        return make(tag, {'class':{Context: true}}, this.components.map(function(config) {
-            return make('wrapper', {
-                props: {
-                    'config': config
-                }
-            })
-        }))
-    },
-    mounted: function() {
-        addContainer(this.$el);
-    }
-})
-//
-//  src/js/component-dropdown.js
-//
-
-var menus = {
-
-    'images': {
-        'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-        'Keyboard': 'http://www.imakenews.com/rbm/sed_keyboard.jpg',
-    },
-
-    'link-types': {
-        'None': '',
-        'URL': 'link-url',
-        'Email Link': 'link-mailto',
-        'Telephone': 'link-tel'
-    }
-
-}
-
-Vue.component('dropdown', {
-
-    props: ['config', 'field'],
-
-    data: function() { return {
-        menus: menus,
-        down: false,
-        up: false
-    } },
-
-    template: '\
-        <div class="menu-dropdown">\
-            <div class="menu-selected" @click="toggle">\
-                <span v-html="field.type.selected"></span><i :class="iconClasses"></i>\
-            </div>\
-            <ul v-show="down || up">\
-                <li v-for="(value, key) in menus[field.type.menu]" \
-                    v-html="key" \
-                    @click="selected(key)"></li>\
-            </ul>\
-        </div>\
-    ',
-
-    computed: {
-        iconClasses: function() {
-            return {
-                'fa': true,
-                'fa-chevron-down': this.down,
-                'fa-chevron-up': this.up,
-                'fa-chevron-left': (!this.down && !this.up),
-                'active': (this.down || this.up)
-            }
-        }
-    },
-
-    methods: {
-
-        listPos: function() {
-            var offset = $(this.$el).offset().top;
-            var windowHeight = $(window).height();
-            var docScroll = $(document).scrollTop();
-            var expandUp = (offset - docScroll) > windowHeight / 2;
-            if (expandUp) {
-                $(this.$el).addClass('expand-up');
-            } else {
-                $(this.$el).removeClass('expand-up');
-            }
-        },
-
-        checkDefault: function(txt) {
-            return txt === 'DEFAULT' ? '&nbsp;' : txt;
-        },
-
-        selected: function(item) {
-            this.toggle();
-
-            var component = this.$root.activeComponent.$el;
-            var menu = this.menus[this.field.type.menu];
-            var prop = this.field.result;
-            var prevItem = this.field.type.selected;
-
-            this.field.type.selected = item;
-            if (this.field.fieldchoice) {
-                var fieldPos = this.getFieldPosition() + 1;
-                if (prevItem !== 'None' && prevItem !== item) {
-                    this.config.fields.splice(fieldPos, 1);
-                }
-                if (prevItem !== item) {
-                    this.config.settings[prop] = '';
-                    this.addFieldChoice();
-                }
-            } else {
-                this.config.settings[prop] = menu[item];
-                setComponentJSON(component, menu[item], this.field.result);
-            }
-        },
-
-        addFieldChoice: function() {
-            var component = this.$root.activeComponent.$el;
-            var fieldList = this.config.fields;
-            var fieldPos = this.getFieldPosition() + 1;
-            var menu = this.menus[this.field.type.menu];
-            if (this.field.type.selected !== 'None') {
-                fieldList.splice(fieldPos, 0, menu[this.field.type.selected]);
-            }
-            dataToDOMJSON(this.config, component);
-        },
-
-        getFieldPosition: function() {
-            return $('.field-instance')
-                .toArray()
-                .indexOf(this.$parent.$el);
-        },
-
-        toggle: function() {
-            this.down = !this.down;
-            this.listPos();
-        }
-    },
-
-    mounted: function() {
-        if (this.field.fieldchoice) {
-            // this.addFieldChoice();
-        }
-    }
-
-})
-
-//
-//  src/js/component-settings.js
-//
-Vue.component('field', {
-    props: ['field', 'config'],
-    template: '\
-    <div class="field-instance">\
-    \
-        <div class="field-wrap" v-if="field.type.name === \'text\'">\
-            <label>{{ field.label }}</label>\
-            <input v-model="config.settings[field.result]" />\
-        </div>\
-    \
-        <div class="field-wrap" v-if="field.type.name === \'textarea\'">\
-            <label>{{ field.label }}</label>\
-            <textarea v-model="config.settings[field.result]"></textarea>\
-        </div>\
-    \
-        <div class="field-wrap" v-if="field.type.name === \'dropdown\'">\
-            <label>{{ field.label }}</label>\
-            <dropdown :field="field" :config="config"></dropdown>\
-        </div>\
-    \
-        <div class="field-wrap" v-if="field.type.name === \'fieldgroup\'">\
-            <fieldgroup :field="field" :fields="field.type.fields" :config="config"></fieldgroup>\
-        </div>\
-    \
-    </div>',
-    mounted: function() {
-        var _this = this;
-        var data = _this.config.settings;
-        var result = _this.field.result;
-        var effect = _this.field.effect;
-        var component = this.$root.activeComponent.$el;
-        // Handles simple text input
-        // Updates Vue data and json model on component
-        if (this.field.type.name !== 'fieldgroup') {
-            $(_this.$el)
-                .find('input, textarea, .menu-selected')
-                .on('keyup click', function() {
-                    var value = $(this).val();
-                    if (result) {
-                        setComponentJSON(component, value, result);
-                }
-            })
-        }
-    }
-})
-
-//
-//  src/js/component-fieldgroup.js
-//
-Vue.component('fieldgroup', {
-
-    props: ['field', 'fields', 'config'],
-
-    template: '\
-    <div class="field-group-field">\
-        <field v-for="fld in fields" :field="fld" :config="config"></field>\
-        <div class="field-tokens" v-if="config.tokens">\
-            <p>\
-                <strong>Available tokens: </strong><span v-html="displayTokens()"></span>\
-            </p>\
-        </div>\
-    </div>',
-
-    methods: {
-        displayTokens: function() {
-            if (this.config.tokens) {
-                return this.config.tokens.map(function(token) {
-                    return token[0]
-                }).join(', ');
-            }
-        }
-    },
-
-    mounted: function() {
-        var _this = this;
-        var component = this.$root.activeComponent.$el;
-        effects[_this.field.type.effect](this, this.field.result);
-        dataToDOMJSON(_this.config, component);
-        $(this.$el)
-            .find('input, textarea, .menu-selected')
-            .on('keyup click', function() {
-                effects[_this.field.type.effect](_this, _this.field.result);
-                dataToDOMJSON(_this.config, component);
-            })
-    }
-
-})
-
-//
-//  src/js/field-widget.js
-//
-Vue.component('field-widget', {
-
-    props: ['config'],
-
-    template: '\
-        <div v-if="config.settings.active" class="field-widget">\
-            <button class="field-btn-back" @click="closeSettings">\
-                <i class="fa fa-chevron-left"></i>Components\
-            </button>\
-            <h2>Settings: {{ config.display }}</h2>\
-            <field v-for="field in config.fields"\
-                    :field="fieldData[field]"\
-                    :config="config"></field>\
-        </div>',
-
-    data: function() {
-        return {
-            fieldData: fieldData
-        }
-    },
-
-    methods: {
-
-        closeSettings: function() {
-            var _this = this;
-            var component = this.$root.activeComponent.$el;
-            $(_this.$el).removeClass('active');
-            setTimeout(function() {
-                _this.config.settings.active = false;
-                _this.$root.fieldsOpen = false;
-                _this.$root.activeComponent = false;
-                setSettingsProperty(component, 'active', false);
-            }, 250)
-        }
-
-    }
-
-})
-
-//
-//  src/js/component-heading.js
-//
-Vue.component('heading', {
-    props: ['config'],
-    template: '<div data-editor="basic" data-prop="content" v-html="config.content"></div>'
-})
-//
-//  src/js/component-body-copy.js
-//
-//  Remember, all components are wrapped by the wrapper component. They must take a 'config'
-//  prop passed from the wrapper.
-Vue.component('body-copy', {
-    props: ['config'],
-    template: '<div :style="css" data-editor="robust" data-prop="content" v-html="config.content"></div>',
-    data: function() {
-        return {
-            css: {
-                'font-size': '1.2em',
-                'font-family': 'Arial, sans-serif',
-                'line-height': '1.7',
-                'color': 'rgba(0,0,0,0.78)'
-            }
-        }
-    }
-})
-
-Vue.component('table-data', {
-    props: ['config'],
-    template: '\
-    <div data-transfer border="1" cellpadding="5" width="100%">\
-        <thead>\
-            <tr>\
-                <th width="33%" style="text-align:center;">Course Name</th>\
-                <th width="33%" style="text-align:center;">Date</th>\
-                <th width="33%" style="text-align:center;">Register</th>\
-            </tr>\
-        </thead>\
-        <context :config="config" :components="config.rows" data-context-name="rows"></context>\
-    </div>'
-})
-
-Vue.component('table-row', {
-    props: ['config'],
-    template: '\
-    <div>\
-        <td style="text-align:center;" data-editor="basic" data-prop="course" v-html="config.course"></td>\
-        <td style="text-align:center;" data-editor="basic" data-prop="date" v-html="config.date"></td>\
-        <td style="text-align:center;"><a data-mailto :href="config.settings.href">Register!</a></td>\
-    </div>',
-    mounted: function() {
-        $(this.$el).children().unwrap();
-    }
-})
-
-//
-//  src/js/component-two-column.js
-//
-//  This is an example of a context component. Every context component
-//  needs to identify its context regions with data-context-name.
-//  The associated default configuration must have those names as keys
-//  with arrays as values.
-Vue.component('two-column', {
-    props: ['config'],
-    template: '\
-        <div class="ColumnWrap">\
-            <context :components="config.left" data-context-name="left" :config="config"></context>\
-            <context :components="config.right" data-context-name="right" :config="config"></content>\
-        </div>'
-});
-//
-//  src/js/component-banner.js
-//
-Vue.component('banner', {
-    props: ['config'],
-    template: '\
-    <div>\
-        <a v-if="config.settings.href" :href="config.settings.href">\
-            <img :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
-        </a>\
-        <img v-else :src="config.settings.src" :alt="config.settings.alt" :style="css" />\
-    </div>\
-    ',
-    data: function() {
-        return {
-            css: {
-                'width': '100%'
-            }
-        }
-    }
-})
-
-//
-//  src/js/main.js
-//
-var app = new Vue({
-    el: '#App',
-    data: {
-        contentName: 'Content Name Goes Here',
-        fieldsOpen: false,
-        saved: '',
-        stage: [],
-        store: '[{"name":"heading","display":"Title","content":"<div style=\\"font-family: Arial,sans-serif; font-size: 2.4em;\\">TODO</div>"},{"name":"body-copy","display":"Body Copy","content":"<ul><div style=\\"text-align: center;\\" data-mce-style=\\"text-align: center;\\"><strong>Phase 1</strong><br data-mce-bogus=\\"1\\"></div><li style=\\"margin-bottom: 1.2em;\\">Fix the bug with alt input in banner component</li><li style=\\"margin-bottom: 1.2em;\\">Implement auto save</li><li style=\\"margin-bottom: 1.2em;\\">Make overlay on stage area when in field view</li><li style=\\"margin-bottom: 1.2em;\\">Style the loading graphic</li><li style=\\"margin-bottom: 1.2em;\\">Think of a better stage component hover state</li><li style=\\"margin-bottom: 1.2em;\\">Work on content pasted from Word</li><li style=\\"margin-bottom: 1.2em;\\">Create preview view mode</li><li style=\\"margin-bottom: 1.2em;\\">Implement code cleaning</li><li style=\\"margin-bottom: 1.2em;\\">Think through how to display different templates and tie specific components to those templates</li><li style=\\"margin-bottom: 1.2em;\\">Create dashboard view</li><li style=\\"margin-bottom: 1.2em;\\">Create user login/logout/password reset views</li></ul>"}]',
-        thumbnails: [
-            componentDefaults['heading'],
-            componentDefaults['body-copy'],
-            componentDefaults['table-data'],
-            componentDefaults['two-column'],
-            componentDefaults['banner']
-        ],
-        toolbar: { config: false },
-        activeComponent: false,
-        trash: [],
-        username: 'mcgilljo'
-    },
-    methods: {
-        save: function() {
-            this.saved = JSON.stringify(getStageData());
-        },
-        collect: function() {
-            this.store = JSON.stringify(getStageData());
-        },
-        refresh: function() {
-            var _this = this;
-            _this.empty();
-            Vue.nextTick(function() {
-                _this.stage = JSON.parse(_this.store);
-            })
-        },
-        empty: function() {
-            this.stage = [];
-            $(g.id.stage).empty();
-        },
-        load: function() {
-            var _this = this;
-            _this.empty();
-            Vue.nextTick(function() {
-                _this.stage = JSON.parse(_this.saved);
-            })
-        }
-    },
-    mounted: function() {
-        var _this = this;
-        $(g.id.loading).remove();
-        fireDocumentHandlers(this);
-        $('.thumbnail').on('mouseenter mouseleave', function() {
-            $(this).toggleClass('hovered');
-        })
-        $('#Toolbar button').click(function() {
-            var btn = $(this);
-            if (btn.hasClass('btn-clone')) _this.toolbar.copy();
-            if (btn.hasClass('btn-trash')) _this.toolbar.trash();
-            if (btn.hasClass('btn-settings')) _this.toolbar.openSettings();
-        })
-        if (this.store) this.refresh();
-    }
-})
-
-//
-//  src/js/nodes.js
-//
-g['$'] = {
-    app: $(g.id.app),
-    stage: $(g.id.stage),
-    thumbnails: $(g.id.thumbnails),
-    trash: $(g.id.trash)
-}
-
-g.node = {
-    app: g.$.app[0],
-    stage: g.$.stage[0],
-    thumbnails: g.$.thumbnails[0],
-    trash: g.$.trash[0]
-}
-//
-//  src/js/documentHandlers.js
-//
-function fireDocumentHandlers(app) {
-
-    $(document).on({
-        'click': function(e) {
-            var target = $(e.target);
-            var comp = target.closest('.Component');
-            var stage = target.closest('#Stage');
-            var toolbar = target.closest('#Toolbar');
-            
-            if (!comp.length && !stage.length && !toolbar.length) {
-                app.toolbar.active = false;
-            }
-        }
-    })
-
-}
-
-//
-//  src/js/walk.js
-//
-var walk = {
-    up: function(el, selector) {
-        var path = [];
-        function travel(elem) {
-            var nextContext = $(elem).closest('.Context')[0];
-            var index = getIndex(nextContext, elem);
-            var name = $(nextContext).attr('data-context-name');
-            path.push({index: index, name: name});
-            if ($(nextContext).attr('id') !== 'Stage') {
-                travel($(nextContext).closest('.Component')[0])
-            }
-        }
-        travel(el);
-        return path;
-    },
-
-    down: function(path, obj, remove) {
-        var item = app;
-        var remove = remove || 0;
-        path.forEach(function(data, i) {
-            if (i === path.length - 1) {
-                item[data.name].splice(data.index, remove, obj);
-            } else {
-                item = item[data.name][data.index];
-            }
-        })
-        return;
-    }
-}
-//
-//  src/js/util.js
-//
-function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-
-function genID(num) {
-    var id = 'ID-', i = 1;
-    while (i <= num) {
-        if (i % 2 === 0) {
-            id += String.fromCharCode(random(65, 90));
-        } else {
-            id += String.fromCharCode(random(48, 57));
-        }
-        i++;
-    }
-    return id;
-}
-
-
-function debug(output) {
-    if (g.debug) {
-        if (typeof(output) === 'string') {
-            console.log('DEBUG: ' + output);
-        } else if (typeof(output) === 'object') {
-            console.log(output);
-        } else if (typeof(output) === 'function') {
-            output();
-        }
-    }
-}
-
-
-function copy(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
-
-function getIndex(area, item) {
-    var index;
-    $(area).children().each(function(i) {
-        if (this === item) {
-            index = i;
-            return false;
-        }
-    })
-    return index;
-}
-
-
-function contains(a, b){
-  return a.contains ?
-    a != b && a.contains(b) :
-    !!(a.compareDocumentPosition(b) & 16);
-}
-
-
-function log(thing) {
-    console.log(thing);
-}
-
-
-
-function setComponentJSON(elem, value, result) {
-    var $comp = $(elem).closest('.Component');
-    data = JSON.parse($comp.attr(g.name.config));
-    data.settings[result] = value;
-    $comp.attr(g.name.config, JSON.stringify(data));
-}
-
-
-function updateComponentData(elem) {
-    var path = walk.up(elem);
-    var data = getComponentJSON(elem);
-    walk.down(path.reverse(), getComponentJSON(elem), 1);
-}
-
-function getComponentJSON(elem) {
-    return JSON.parse($(getParentDOMComponent(elem)).attr('data-config'));
-}
-
-function dataToDOMJSON(data, elem) {
-    $(elem).attr(g.name.config, JSON.stringify(data));
-}
-
-function getParentDOMComponent(elem) {
-    var found = $(elem).closest(g.class.component);
-    if (found.length) {
-        return found[0];
-    }
-}
-
-function setSettingsProperty(elem, prop, value) {
-    var $comp = $(elem).closest('.Component');
-    var data = JSON.parse($comp.attr(g.name.config));
-    data.settings[prop] = value;
-    $comp.attr(g.name.config, JSON.stringify(data));
-}
-
-function setComponentProperty(elem, prop, value) {
-    var $comp = $(elem).closest('.Component');
-    var data = JSON.parse($comp.attr(g.name.config));
-    data[prop] = value;
-    $comp.attr(g.name.config, JSON.stringify(data));
-}
-
-function getComponentProperty(elem, prop) {
-    var $comp = $(elem).closest('.Component');
-    return JSON.parse($comp.attr(g.name.config))[prop];
-}
-
-function transferContainer(container) {
-    var attributes = $(container)[0].attributes;
-    for (var i = 0; i < attributes.length; i++) {
-        $(container).parent().attr(attributes[i].name, $(container).attr(attributes[i].name))
-    }
-    $(container).parent().removeAttr('data-transfer');
-    $(container).children().unwrap();
-}
-
-
-function hoverIndication(elem) {
-    $(elem).on('mouseenter', function(e) {
-        var t = $(e.target);
-        if (t.hasClass('Component') || t.hasClass('Context')) {
-            t.addClass(g.name.hovered);
-            var parent = t.parents('.hovered');
-            if (parent[0] && parent[0] !== e.target) {
-                parent.addClass('hovered-nested');
-            }
-        }
-    }).on('mouseleave', function(e) {
-        var t = $(e.target);
-        if (t.hasClass('hovered-nested')) {
-            if (t.parents('.hovered').length === 0) {
-                t.removeClass('hovered hovered-nested')
-            }
-        } else if (t.hasClass('hovered')) {
-            if (t.parents('.hovered').length > 0) {
-                t.parents('.hovered').first().removeClass('hovered-nested');
-            }
-            t.removeClass('hovered');
-        }
-    })
-}
-
-function setThumbnailHeight() {
-    $('.thumbnail').each(function() {
-        var compHeight = $(this).find('.thumbnail-component').height();
-        $(this).css({ height: $(this).height() / 2 + 30 });
-    })
-}
-$(window).on('load', function() {
-    setThumbnailHeight();
-})
-
-//
-//  src/js/collectData.js
-//
-function getComponentData(elem) {
-    var $elem = $(elem);
-    var data = JSON.parse($elem.attr('data-config'));
-    var contextAreas = $elem.find('.Context')
-        .toArray()
-        .filter(function(context) {
-            return $(context).closest('.Component')[0] === elem;
-        })
-    contextAreas.forEach(function(context) {
-        var contextName = $(context).attr('data-context-name');
-        $(context).children().each(function() {
-            data[contextName].push(getComponentData(this));
-        })
-    })
-    return data;
-}
-
-function getStageData() {
-    return $('#Stage')
-        .children()
-        .toArray()
-        .map(getComponentData);
-}
-//
-//  src/js/dom-data-sync.js
-//
-function checkSync() {
-    setTimeout(function() {
-        console.log('Synced: ' + (JSON.stringify(getStageData()) === JSON.stringify(app.stage)));
-    }, 500);
+var Util = (function() {
     
-}
-function syncStageAndStore() {
-    app.collect();
-    Vue.nextTick(function() {
-        app.refresh();
-    })
-}
-//
-//  src/js/initStageComponent.js
-//
-function initStageComponent(instance) {
+    function contains(a, b){
+      return a.contains ?
+        a != b && a.contains(b) :
+        !!(a.compareDocumentPosition(b) & 16);
+    }
 
-    var element = instance.$el,
-        componentData = copy(instance.config);
+    function debug(thing) {
+        console.log('DEBUG: ' + thing);
+    }
 
-    var contextNames = $(element)
-        .find(g.attr.contextName)
-        .toArray()
-        .filter(function(elem) {
-            return $(elem).closest(g.class.component)[0] === element;
-        })
-        .map(function(elem) {
-            return $(elem).attr(g.name.contextName);
-        })
+    function jstr(obj) {
+        return JSON.stringify(obj);
+    }
 
-    contextNames.forEach(function(name) {
-        componentData[name] = [];
-    })
+    function jprs(str) {
+        return JSON.parse(str);
+    }
 
-    $(element).attr(g.name.config, JSON.stringify(componentData));
+    function copy(obj) {
+        return jprs(jstr(obj));
+    }
 
-}
+    function stringToNumber(string) {
+        var convert = string * 1;
+        return isNaN(convert) ? string : convert;
+    }
 
-//
-//  src/js/initEditor.js
-//
-function globalEditorConfig() {
     return {
-        inline: true,
-        menubar: false,
-        insert_toolbar: false,
-        fixed_toolbar_container: g.id.editorToolbar,
-        plugins: 'link lists paste textpattern autolink',
-        forced_root_block: 'div',
-        forced_root_block_attrs: {
-            'style': 'margin-bottom: 1.2em;'
-        }
+        contains: contains,
+        debug: debug,
+        jstr: jstr,
+        jprs: jprs,
+        copy: copy,
+        stringToNumber: stringToNumber
     }
-}
 
-
-function initEditor(component) {
-    var editorConfig = globalEditorConfig(),
-        $component = $(component.$el);
-
-    $component.find(g.attr.editor).each(function() {
-        var editorElement = this,
-            $editorElement = $(this),
-            editorType = $editorElement.attr(g.name.editor),
-            editorInitiated = $editorElement.attr(g.name.editorID),
-            isThumbnail = $component.parent().hasClass(g.name.thumbnail);
-        if (!editorInitiated && !isThumbnail) {
-            switch(editorType) {
-                case g.name.editorPlain:
-                    editorConfig.toolbar = g.editors.plain;
-                    break;
-                 case g.name.editorBasic:
-                    editorConfig.toolbar = g.editors.basic;
-                    break;
-                 case g.name.editorRobust:
-                    editorConfig.toolbar = g.editors.robust;
-                    break;
-                default:
-                    editorConfig.toolbar = g.editors.basic;
-                    break; 
+})()
+    
+var Index = (function() {
+    
+    function getContainerIndex(child, parent) {
+        var index = null;
+        $(parent).children().each(function(i, l) {
+            if (this === child) {
+                index = i;
             }
-
-            editorConfig.setup = function(editor) {
-                editor.on('Change keyup', function() {
-                    var componentData = JSON.parse($component.attr(g.name.config)),
-                        componentProp = $editorElement.attr(g.name.prop);
-                        
-                    componentData[componentProp] = editor.getContent();
-                    $component.attr(g.name.config, JSON.stringify(componentData));
-
-                    // If component has fields and component has an effect, run that effect
-                    // using the data stored in the component's data-config attribute
-                    // when the editor instance is updated. We use the stored json here so that
-                    // we don't fire Vue's rerendering on each update.
-                    if (component.config.fields) {
-                        component.config.fields.forEach(function(field) {
-                            var fld = fieldData[field];
-                            if (fld.type.effect) {
-                                var output = effects[fld.type.effect](component, fld.result, true);
-                                setSettingsProperty(editorElement, fld.result, output);
-                                $component
-                                    .find('[data-'+fld.type.effect+']')
-                                    .attr(fld.result, output);
-                            }
-                        })
-                    }
-                })
-            }
-
-            var editorID = genID(10);
-            $editorElement.attr(g.name.editorID, editorID)
-            editorConfig.selector = '['+g.name.editorID+'="'+editorID+'"]';
-            tinymce.init(editorConfig);
-
-        }
-
-    })
-
-}
-//
-//  src/js/initDragula.js
-//
-var drake = dragula([g.node.thumbnails, g.node.stage, g.node.trash], {
-
-    copy: function(el, source) {
-        if (app.shiftdown && source === g.node.stage) {
-            return true;
-        } else {
-            return source === g.node.thumbnails;
-        } 
-    },
-
-    // Disable rearranging components on stage when field widget is open
-    moves: function(el, source, handle, sibling) {
-        return !app.fieldsOpen;
-    },
-
-    // http://jsfiddle.net/cfenzo/7chaomnz/ (for the contains bit)
-    // Was getting child node error from dragula when moving nested containers
-    accepts: function(el, target, source, sibling) {
-        var check = true;
-        if (target === g.node.thumbnails) check = false;
-        if (contains(el, target)) check = false;
-        if ($(source)[0].nodeName === 'TBODY' && $(target)[0].nodeName !== 'TBODY') check = false;
-        return check;
-    },
-
-}).on('drop', function(el, target, source, sibling) {
-
-    if (target === g.node.trash) {
-        
-        syncStageAndStore();
-        debug('Component trashed');
-        debug(checkSync);
-        g.$.trash.empty();
-
-    } else if (source === g.node.thumbnails && $(target).hasClass(g.name.context)) {
-        
-        var $el = $(el);
-        var component = $el.find(g.class.component)[0];
-        var index = getIndex($el.parent(), el);
-        var dataPath = walk.up(el);
-
-        $el.remove();
-        walk.down(dataPath.reverse(), getComponentData(component));
-
-        Vue.nextTick(function() {
-            app.collect();
-            debug(checkSync);
         })
-    }
-    if ((source === g.node.Stage || $(source).hasClass(g.name.context)) &&
-        (target === g.node.Stage || $(target).hasClass(g.name.context))) {
-        syncStageAndStore();
-        debug(checkSync);
+        return index;
     }
 
-}).on('over', function(el, container, source) {
+    function getDomIndex(elem, pathArray) {
+        var name, index, path, context, parent;
+        context = $(elem).closest('.Context');
+        pathArray = pathArray || [];
+        name = context.attr('data-context-name');
+        index = getContainerIndex(elem, context);
+        pathArray.unshift(index);
+        pathArray.unshift(name);  
+        parent = $(context).parent().closest('.Component');
 
-    if (container === g.node.trash) {
-        g.$.trash.addClass('trashing');
-    } else {
-        g.$.trash.removeClass('trashing');
+        if (parent.length) {
+            return pathArray = getDomIndex(parent[0], pathArray);
+        } else {
+            return pathArray;
+        }
     }
 
-}).on('dragend', function(el, container, source) {
+    function getVueIndex(index, context) {
+        var data;
+        data = Util.copy(Cmint.app[index.shift()]);
+        index.forEach(function(key, i) {
+            if (context && (i === index.length - 1)) {
+                data = {data: data, key: key};
+            } else {
+                data = data[key];
+            }
+        })
+        Util.debug('got Vue index: ' + JSON.stringify(data));
+        return data;
+    }
 
-    g.$.trash.removeClass('trashing');
+    function retrieveVueContext(index, startContext) {
+        var context = startContext,
+            output;
+        index.forEach(function(key, i) {
+            if (i === index.length - 1) {
+                output = { 
+                    context: context, 
+                    key: key
+                };
+            } else {
+                context = context[key];
+            }
+        })
+        return output;
+    }
+
+    function setVueIndex(index, data, newIndex) {
+        var startContext, context, appContext, keyName, cut, newContext;
+        startContext = Cmint.app[index[0]];
+        context = Cmint.app[index.shift()];
+        console.log(context);
+        appContext = retrieveVueContext(index, context);
+        if (!newIndex) {
+            appContext.context.splice(appContext.key, 0, data);
+        } else {
+            newIndex.shift();
+            newContext = retrieveVueContext(newIndex, startContext);
+            var move = appContext.context.splice(appContext.key, 1)[0];
+            newContext.context.splice(newContext.key, 0, move);
+        }
+    }
+
+    return {
+        getDomIndex: getDomIndex,
+        getContainerIndex: getContainerIndex,
+        getVueIndex: getVueIndex,
+        retrieveVueContext: retrieveVueContext,
+        setVueIndex: setVueIndex
+    }
+
+})()
+var Cmint = (function() {
+    
+    function createComponent(options) {
+        if (!options.template) throw 'Your component is missing a template';
+        if (!options.config) throw 'You component is missing its config';
+        if (Components[options.config._name]) {
+            throw 'That component already exists';
+        } else {
+            Components[options.config._name] = options.config;
+            Vue.component(options.config._name, {
+                props: ['config'],
+                template: options.template
+            })
+        }
+    }
+
+    function createField(options) {
+        if (Fields[options.name]) {
+            throw 'Field already exists';
+        } else {
+            Fields[options.name] = options.config;
+        } 
+    }
+
+    function displayOnLoad() {
+        return Util.jprs($('#SavedContent').text());
+    }
+
+    return {
+        createComponent: createComponent,
+        createField: createField,
+        displayOnLoad: displayOnLoad
+    }
+
+})()
+Vue.component('wrap', {
+    props: ['config'],
+    template: '\
+        <div class="Component" @click="showFields">\
+            <component :is="config._name" :config="config"></component>\
+        </div>',
+    methods: {
+        showFields: function() {
+            this.$emit('showfields', this.config);
+        }
+    },
+    mounted: function() {
+        this.config._index = Index.getDomIndex(this.$el);
+        Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
+    },
+    updated: function() {
+        this.config._index = Index.getDomIndex(this.$el);
+        Util.debug('updated "' + this.config._name + '" at ' + this.config._index);
+    }
+})
+Vue.component('context', {
+    props: ['children'],
+    template: '\
+        <div class="Context">\
+            <wrap v-for="child in children" :config="child"></wrap>\
+        \</div>'
+})
+var Components = {};
+Cmint.createComponent({
+    template: '\
+        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+            <img :src="config._fields.output.source" width="100%" /></a>\
+        <img v-else :src="config._fields.output.source" width="100%" />',
+    config: {
+        _name: 'banner-image',
+        _display: 'Banner Image',
+        _fields: {
+            output: {
+                source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+                link: ''
+            },
+            list: [
+                {   name: 'image-source',
+                    result: 'source'    },
+            ]
+        }
+    }
+})
+Cmint.createComponent({
+    template: '\
+        <div class="Container">\
+            <context :children="config.container" data-context-name="container"></context>\
+        </div>',
+    config: {
+        _name: 'container',
+        _display: 'Container'
+    }
+})
+Cmint.createComponent({
+    template: '<h3 class="thing" v-text="config._index + \' (\'+_uid+\')\'" :style="config.css"></h3>',
+    config: {
+        _name: 'thing',
+        _display: 'Thing'
+    }
+})
+var Fields = {};
+Cmint.createField({
+    name: 'image-source',
+    config: {
+        type: 'field-text',
+        label: 'Write in an image URL',
+        input: 'url'   
+    }
+})
+Vue.component('field-text', {
+    props: ['field', 'component'],
+    // We've put a layer between the component's data tied to the DOM and the data entered
+    // into the field. This is because some fields need to process the input in order to
+    // deliver the final output to the vm data.
+    // The input element is bound to the field's input data. On the input event, the data
+    // in the input is processed and sent to the designated component._fields.output key
+    template:'\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+        </div>',
+    data: function() { return {
+        fields: Fields
+    }},
+    methods: {
+        process: _.debounce(function() {
+            var result = this.component._fields.output[this.field.result];
+            var fieldData = Fields[this.field.name];
+            var input = this.field.inputs[fieldData.input];
+            this.component._fields.output[this.field.result] = input;
+        }, 500)
+    },
+    mounted: function() {
+        this.process();
+    }
 
 })
+Vue.component('field', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-wrap">\
+            <component :is="field.type" :field="field" :component="component"></component>\
+        </div>',
+    beforeMount: function() {
+        // result = default output listed in component
+        var result = this.component._fields.output[this.field.result];
+        // field instances aren't components; they're object literals passed to field components
+        var fieldData = Fields[this.field.name];
+        this.field.label = fieldData.label;
+        this.field.type = fieldData.type;
+        // if no inputs, this is the first instantiation of this field for a given component.
+        // inputs are established based on the defaults provided to the fieldData and the components
+        if (!this.field.inputs) {
+            this.field.inputs = {};
+            this.field.inputs[fieldData.input] = result;
+        }
+    }
+})
+Vue.component('fields', {
+    props: ['component'],
+    template: '\
+        <div class="fields-container">\
+            <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
+        </div>'
+})
+var Drag = (function() {
+    
+    var drake;
 
-function addContainer(el) {
-    if (!$(el).closest('.thumbnail').length && drake) {
-        drake.containers.push(el);
+    function init() {
+
+        Drag.stage = $('#Stage')[0];
+        Drag.components = $('#Components')[0];
+        Drag.draggedIndex = null;
+        Drag.draggedData = null;
+        Drag.dragSpot = null;
+        Drag.insertType = null;
+
+        drake = dragula([Drag.stage, Drag.components], {
+            copy: function(theCopy, source) {
+                return source === Drag.components;
+            },
+            accepts: function(element, target, source, sibling) {
+                return target !== Drag.components && !Util.contains(element, target);
+            },
+            removeOnSpill: true
+        }).on('drag', Drag.onDrag)
+          .on('drop', Drag.onDrop)
+          .on('remove', Drag.onRemove);
+
+    }
+
+    function updateContainers() {
+        $('#Stage .Context').each(function() {
+            if (drake.containers.indexOf(this) <= -1) {
+                drake.containers.push(this);
+                Util.debug('added new container to drake instance');
+            }
+        })
+    }
+
+    function insertPlaceholder() {
+        var placeholder = '<div class="PLACEHOLDER"><strong></strong></div>';
+        if (Drag.insertType === 'prepend') {
+            $(Drag.dragSpot).prepend(placeholder);
+        } else if (Drag.insertType === 'after') {
+            $(placeholder).insertAfter(Drag.dragSpot);
+        }
+    }
+
+    return {
+        drake: drake,
+        init: init,
+        insertPlaceholder: insertPlaceholder,
+        updateContainers: updateContainers
+    }
+
+})()
+Drag.onDrag = function(element, source) {
+    
+    if (source === Drag.components) {
+        Drag.draggedIndex = Index.getDomIndex(element);
+        Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex));
+        Util.debug('dragging from components at ' + Drag.draggedIndex);
+    }
+
+    if ($(source).closest('#Stage').length) {
+        Drag.draggedIndex = Index.getDomIndex(element);
+        if ($(element).prev().length === 0) {
+            Drag.dragSpot = $(element).parent();
+            Drag.insertType = 'prepend';
+        } else {
+            Drag.dragSpot = $(element).prev();
+            Drag.insertType = 'after'
+        }
+        Util.debug('dragging from stage at ' + Drag.draggedIndex);
+        Util.debug('insert type is "' + Drag.insertType + '"');
+    }
+
+}
+Drag.onDrop = function(dropped, target, source, sibling) {
+
+    var inContext, fromComponents, reordering, domIndex;
+            
+    toContext = $(target).closest('.Context').length > 0;
+    fromComponents = source === Drag.components;
+    reordering = $(source).closest('#Stage').length > 0;
+
+    //  Once the component is dropped, we'll need to grab it's index and then
+    //  immediately remove it from DOM. We add the copied data to the vm and then
+    //  run a refresh.
+    if (fromComponents && toContext) {
+
+        domIndex = Index.getDomIndex(dropped);
+        $(dropped).remove();
+        Index.setVueIndex(domIndex, Drag.draggedData);
+        Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Drag.updateContainers);
+        Vue.nextTick(Cmint.app.snapshot);
+        Util.debug('dropped new component in stage at ' + domIndex);
+
+    }
+
+    if (reordering) {
+
+        //  We need the placeholder element to appear where the dragged item came from
+        //  so that when we grab the location from the DOM it is an accurate data model.
+        //  Once we have the index we can remove it immediately.
+        var debugDelay = 0;
+
+        Drag.insertPlaceholder();
+
+        domIndex = Index.getDomIndex(dropped);
+
+        Util.debug('dropped reordered component at ' + domIndex);
+
+        // These timeouts are here so I can debug easier. It's helpful.
+        setTimeout(function() {
+
+            $('.PLACEHOLDER').replaceWith(dropped);
+            Util.debug('removing placeholder')
+
+            setTimeout(function() {
+                //  Now we use the index from the DOM to retrieve the vm context arrays.
+                //  Once we have those, we splice the dragged data into the drop context array.
+                var dataToDrop = Index.retrieveVueContext(Drag.draggedIndex, Cmint.app);
+                var dataDrop = Index.retrieveVueContext(domIndex, Cmint.app);
+                if (dataDrop.context == dataToDrop.context) {
+                    var drag_i = Drag.draggedIndex[Drag.draggedIndex.length - 1];
+                    var drop_i = dataDrop.key;
+                    if (drag_i < drop_i) {
+                        dataDrop.key--;
+                    }
+                    Util.debug('reording in the same container');
+                }
+                dataDrop.context.splice(dataDrop.key, 0, dataToDrop.context.splice(dataToDrop.key, 1)[0]);
+                Util.debug('splicing vm data')
+
+                setTimeout(function() {
+                    //  At this point, the data and the DOM should technically match, but we want to
+                    //  do a refresh() so that all other DOM components are updated with their new
+                    //  location. Lastly, we add any new context components to the dragula instance
+                    Vue.nextTick(Cmint.app.refresh);
+                    Vue.nextTick(Drag.updateContainers);
+                    Vue.nextTick(Cmint.app.snapshot);
+                    Util.debug('refreshing and updating containers')
+                }, debugDelay)
+            }, debugDelay)
+        }, debugDelay)
+    } // ends reordering
+
+}
+Drag.onRemove = function(element, container, source) {
+
+    if ($(source).closest('#Stage').length) {
+
+        Drag.insertPlaceholder();
+        $('.PLACEHOLDER').replaceWith(element);
+        $(element).removeClass('gu-hide');
+        console.log(Cmint.app);
+        var removeMe = Index.retrieveVueContext(Drag.draggedIndex, Cmint.app);
+        Util.debug('removed component from stage at ' + removeMe.context[removeMe.key]._index);
+        removeMe.context.splice(removeMe.key, 1);
+        Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.app.snapshot);
+    }
+
+}
+Cmint.load = function() {
+    this.stage = Util.copy(this.saved);
+    Vue.nextTick(Drag.updateContainers);
+    Vue.nextTick(this.snapshot);
+    Util.debug('loaded content');
+}
+Cmint.refresh = function() {
+    this.stage = Util.copy(this.stage);
+}
+Cmint.save = function() {
+    this.saved = Util.copy(this.stage);
+    Util.debug('saved content');
+}
+Cmint.showFields = function(component) {
+    Util.debug('showing fields for ' + component._name);
+    this.fieldsComponent = component;
+}
+Cmint.snapshot = function() {
+    this.changes++;
+    var shot = Util.copy(this.stage);
+    Util.debug('snapshot taken (current changes: ' + this.changes + ')');
+    if (!this.previous) {
+        this.previous = {
+            snapshot: shot,
+            prior: {
+                snapshot: [],
+                prior: null
+            }
+        }
+    } else {
+        this.previous = {
+            snapshot: shot,
+            prior: this.previous
+        }
     }
 }
+Cmint.toJson = function(obj) {
+    return JSON.stringify(obj, null, 2);
+}
+Cmint.undo = function() {
+    if (this.previous) {
+        this.changes--;
+        this.stage = this.previous.prior.snapshot;
+        Vue.nextTick(Drag.updateContainers);
+        this.previous = this.previous.prior;
+        if (!this.previous.prior) {
+            this.previous = null;
+        }
+        Util.debug('state reverted (current changes: ' + this.changes + ')');
+    } else {
+        Util.debug('nothing to undo');
+    }
+}
+Cmint.app = new Vue({
+
+    el: '#App',
+
+    data: {
+        components: [],
+        stage: [],
+        saved: [],
+
+        fieldsComponent: null,
+        changes: null,
+        previous: null,
+
+        test: Components['banner-image'],
+    },
+
+    methods: {
+        showFields: Cmint.showFields,
+        snapshot: Cmint.snapshot,
+        undo: Cmint.undo,
+        save: Cmint.save,
+        load: Cmint.load,
+        refresh: Cmint.refresh,
+        toJson: Cmint.toJson
+    },
+
+    mounted: function() {
+        Drag.init();
+        this.components = Cmint.displayOnLoad();
+        Util.debug('mounted app');
+    }
+
+})

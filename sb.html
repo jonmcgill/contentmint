@@ -89,9 +89,10 @@
         <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     </aside>
     <div style="clear:both;"></div>
-    <banner-image :config="test" v-on:showfields="showFields"></banner-image>
+    <wrap :config="test" v-on:showfields="showFields"></wrap>
     <pre id="Model" v-text="toJson(stage)"></pre>
     <pre id="Model-Saved" v-text="toJson(saved)"></pre>
+    <textarea style="display: none" id="SavedContent">[{"_index": "","_name": "container","container": [{"_index": "", "_name": "thing"}]},{"_index": "", "_name": "thing"},{"_index": "", "_name": "thing", "css": {"background": "lightgreen"}}]</textarea>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -99,7 +100,8 @@
 <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
-<script type="text/javascript">
+<script src="dist/build.js"></script>
+<!-- <script type="text/javascript">
     
     function debug(thing) {
         console.log('DEBUG: ' + thing);
@@ -598,4 +600,4 @@ var drake;
         })
     }
 
-</script>
+</script> -->
