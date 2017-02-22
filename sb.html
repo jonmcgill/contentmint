@@ -118,11 +118,12 @@
         <button class="Button-Save" @click="save">save</button>
         <button class="Button-Load" @click="load">load</button>
     </div>
-    <aside>
+    <div style="clear:both;"></div>
+    <aside style="float:right; width: 48%">
         <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     </aside>
-    <div style="clear:both;"></div>
     <wrap :config="test" v-on:showfields="showFields"></wrap>
+    <div style="clear:both;"></div>
 
     <!-- For testing data syncing -->
     <pre id="Model" v-text="toJson(stage)"></pre>

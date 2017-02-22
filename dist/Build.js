@@ -150,10 +150,38 @@ var Cmint = (function() {
         return Util.jprs($('#AvailableComponents').text());
     }
 
+    function tokenize(input, component) {
+        var output = input;
+        component._tokens.forEach(function(pair) {
+            var token = Object.keys(pair)[0];
+            var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
+            var value, matches;
+            // searches output first for the token value
+            if (component._fields.output[pair[token]]) {
+                value = component._fields.output[pair[token]];
+            // then searches in the inputs
+            } else {
+                component._fields.list.forEach(function(field) {
+                    if (field.inputs[pair[token]]) {
+                        value = field.inputs[pair[token]];
+                    }
+                })
+            }
+            value = value || '';
+            matches = output.match(exp);
+            if (matches) {
+                output = output.replace(exp, value);
+                Util.debug('tokenizing: {{ ' + token + ' }} --> ' + value);
+            }
+        })
+        return output;
+    }
+
     return {
         createComponent: createComponent,
         createField: createField,
-        setAvailableComponents: setAvailableComponents
+        setAvailableComponents: setAvailableComponents,
+        tokenize: tokenize
     }
 
 })()
@@ -171,6 +199,9 @@ Vue.component('wrap', {
     mounted: function() {
         this.config._index = Index.getDomIndex(this.$el);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
+        $('a').click(function(e) {
+            e.preventDefault();
+        })
     },
     updated: function() {
         this.config._index = Index.getDomIndex(this.$el);
@@ -188,15 +219,18 @@ var Components = {};
 Cmint.createComponent({
     template: '\
         <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-            <img :src="config._fields.output.source" width="100%" /></a>\
-        <img v-else :src="config._fields.output.source" width="100%" />',
+            <img :src="config._fields.output.source" width="50%" /></a>\
+        <img v-else :src="config._fields.output.source" width="50%" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
+        _tokens: [
+            { 'URL': 'link' }
+        ],
         _fields: {
             output: {
-                source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-                link: ''
+                source: '',
+                link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
             },
             list: [
                 {   name: 'image-source',
@@ -237,7 +271,9 @@ Vue.component('field-text', {
     // into the field. This is because some fields need to process the input in order to
     // deliver the final output to the vm data.
     // The input element is bound to the field's input data. On the input event, the data
-    // in the input is processed and sent to the designated component._fields.output key
+    // in the input is processed and sent to the designated component._fields.output key.
+    // During processing, if the component has tokens defined, the input will be run through
+    // Cmint.tokenize().
     template:'\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
@@ -251,6 +287,9 @@ Vue.component('field-text', {
             var result = this.component._fields.output[this.field.result];
             var fieldData = Fields[this.field.name];
             var input = this.field.inputs[fieldData.input];
+            if (this.component._tokens) {
+                input = Cmint.tokenize(input, this.component);
+            }
             this.component._fields.output[this.field.result] = input;
         }, 500)
     },

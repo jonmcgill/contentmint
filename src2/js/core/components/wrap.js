@@ -12,6 +12,9 @@ Vue.component('wrap', {
     mounted: function() {
         this.config._index = Index.getDomIndex(this.$el);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
+        $('a').click(function(e) {
+            e.preventDefault();
+        })
     },
     updated: function() {
         this.config._index = Index.getDomIndex(this.$el);
