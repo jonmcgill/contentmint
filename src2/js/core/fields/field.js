@@ -13,14 +13,24 @@ Vue.component('field', {
         var fieldData = Fields[this.field.name];
         this.field.label = fieldData.label;
         this.field.type = fieldData.type;
+        this.field.menu = fieldData.menu || null;
+        this.field.help = fieldData.help || null;
+        this.field.check = fieldData.check || null;
         this.field.hook = fieldData.hook || null;
         
         // if no inputs, this is the first instantiation of this field for a given component.
         // inputs are established based on the defaults provided to the fieldData and the components
         if (!this.field.inputs) {
             this.field.inputs = {};
-            this.field.inputs[fieldData.input] = result;
+            // If text input, make the input equal the default result
+            if (this.field.type === 'field-text') {
+                this.field.inputs[fieldData.input] = result;
+            }
+            // If dropdown, make the input equal 'Default' selection
+            if (this.field.type === 'field-dropdown') {
+                this.field.inputs[fieldData.input] = 'Default';
+            }
         }
-        
+
     }
 })

@@ -15,6 +15,11 @@ var Cmint = (function() {
     }
 
     function createField(options) {
+        if (!options.name) throw 'You must give all created fields a name';
+        if (!options.config.type) throw 'You must give all created fields a field type';
+        if (!options.config.label) throw 'You must give all created fields a label';
+        if (!options.config.input) throw 'You must associate all created fields with an input';
+        
         if (Fields[options.name]) {
             throw 'Field already exists';
         } else {
@@ -27,6 +32,14 @@ var Cmint = (function() {
             throw 'Process name already exists';
         } else {
             Process[name] = fn;
+        }
+    }
+
+    function createMenu(name, items) {
+        if (Menus[name]) {
+            throw 'Menu name already exists';
+        } else {
+            Menus[name] = items;
         }
     }
 
@@ -65,6 +78,7 @@ var Cmint = (function() {
         createComponent: createComponent,
         createField: createField,
         createProcess: createProcess,
+        createMenu: createMenu,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }

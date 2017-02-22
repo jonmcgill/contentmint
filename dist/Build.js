@@ -1,6 +1,7 @@
 var Components = {},
     Fields = {},
-    Process = {};
+    Process = {},
+    Menus = {};
 var Util = (function() {
     
     function contains(a, b){
@@ -142,6 +143,11 @@ var Cmint = (function() {
     }
 
     function createField(options) {
+        if (!options.name) throw 'You must give all created fields a name';
+        if (!options.config.type) throw 'You must give all created fields a field type';
+        if (!options.config.label) throw 'You must give all created fields a label';
+        if (!options.config.input) throw 'You must associate all created fields with an input';
+        
         if (Fields[options.name]) {
             throw 'Field already exists';
         } else {
@@ -154,6 +160,14 @@ var Cmint = (function() {
             throw 'Process name already exists';
         } else {
             Process[name] = fn;
+        }
+    }
+
+    function createMenu(name, items) {
+        if (Menus[name]) {
+            throw 'Menu name already exists';
+        } else {
+            Menus[name] = items;
         }
     }
 
@@ -192,6 +206,7 @@ var Cmint = (function() {
         createComponent: createComponent,
         createField: createField,
         createProcess: createProcess,
+        createMenu: createMenu,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }
@@ -230,8 +245,12 @@ Vue.component('context', {
 Cmint.createComponent({
     template: '\
         <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-            <img :src="config._fields.output.source" width="50%" /></a>\
-        <img v-else :src="config._fields.output.source" width="50%" />',
+            <img :src="config._fields.output.source" \
+                 :data-src="config._fields.output.source2"\
+                  width="50%" /></a>\
+        <img v-else :src="config._fields.output.source" \
+                    :data-src="config._fields.output.source2"\
+                     width="50%" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
@@ -240,12 +259,15 @@ Cmint.createComponent({
         ],
         _fields: {
             output: {
-                source: '',
+                source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+                source2: '',
                 link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
             },
             list: [
                 {   name: 'image-source',
-                    result: 'source'    },
+                    result: 'source2'    },
+                {   name: 'image-presets',
+                    result: 'source'   }
             ]
         }
     }
@@ -270,32 +292,47 @@ Cmint.createComponent({
 Cmint.createProcess('test', function(input) {
     return input + '?param=true';
 })
+Cmint.createMenu('image-list', {
+    'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+    'Random': 'https://unsplash.it/800/300'
+})
+Cmint.createField({
+    name: 'image-presets',
+    config: {
+        type: 'field-dropdown',
+        label: 'Select an image',
+        input: 'selected-image',
+        menu: 'image-list'
+    }
+})
 Cmint.createField({
     name: 'image-source',
     config: {
         type: 'field-text',
         label: 'Write in an image URL',
         input: 'url',
+        help: 'Absolute path including http(s)://',
+        check: /^https*:\/\/.+(\.[a-zA-Z]+)$/g,
         hook: 'test'
     }
 })
 Vue.component('field-text', {
     props: ['field', 'component'],
-    // We've put a layer between the component's data tied to the DOM and the data entered
-    // into the field. This is because some fields need to process the input in order to
-    // deliver the final output to the vm data.
-    // The input element is bound to the field's input data. On the input event, the data
-    // in the input is processed and sent to the designated component._fields.output key.
-    // During processing, if the component has tokens defined, the input will be run through
-    // Cmint.tokenize().
     template:'\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
             <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+            <div v-if="field.help" :style="check">{{ field.help }}</div>\
         </div>',
     data: function() { return {
-        fields: Fields
+        fields: Fields,
+        pass: true
     }},
+    computed: {
+        check: function() {
+            return this.pass ? {'color': '#aaa'} : {'color': 'red'}; 
+        }
+    },
     methods: {
         process: _.debounce(function() {
             var result = this.component._fields.output[this.field.result];
@@ -303,6 +340,10 @@ Vue.component('field-text', {
             var input = this.field.inputs[fieldData.input];
             if (this.component._tokens) {
                 input = Cmint.tokenize(input, this.component);
+            }
+            if (this.field.check && input !== '') {
+                this.pass = !!input.match(this.field.check);
+                Util.debug('field passed - ' + this.pass);
             }
             if (this.field.hook) {
                 input = Process[this.field.hook](input);
@@ -314,6 +355,41 @@ Vue.component('field-text', {
         this.process();
     }
 
+})
+Vue.component('field-dropdown', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div class="dropdown">\
+                <button v-text="selected"></button>\
+                <div class="dropdown-list">\
+                    <button v-for="(item, key) in menu"\
+                            v-text="key"\
+                            @click="process(key)"></button>\
+                </div>\
+            </div>\
+        </div>',
+    data: function() { return {
+        fields: Fields,
+        menu: Menus[this.field.menu],
+        selected: 'Default'
+    }},
+    methods: {
+        process: function(selection) {
+            var output = Menus[this.field.menu][selection];
+            if (this.field.hook) {
+                output = Process[this.field.hook](output);
+            }
+            this.field.inputs[this.fields[this.field.name].input] = selection;
+            this.selected = selection;
+            this.component._fields.output[this.field.result] = output;
+        }
+    },
+    beforeMount: function() {
+        this.selected = this.field.inputs[this.fields[this.field.name].input] || 'Default';
+        this.process(this.selected);
+    }
 })
 Vue.component('field', {
     props: ['field', 'component'],
@@ -330,23 +406,41 @@ Vue.component('field', {
         var fieldData = Fields[this.field.name];
         this.field.label = fieldData.label;
         this.field.type = fieldData.type;
+        this.field.menu = fieldData.menu || null;
+        this.field.help = fieldData.help || null;
+        this.field.check = fieldData.check || null;
         this.field.hook = fieldData.hook || null;
         
         // if no inputs, this is the first instantiation of this field for a given component.
         // inputs are established based on the defaults provided to the fieldData and the components
         if (!this.field.inputs) {
             this.field.inputs = {};
-            this.field.inputs[fieldData.input] = result;
+            // If text input, make the input equal the default result
+            if (this.field.type === 'field-text') {
+                this.field.inputs[fieldData.input] = result;
+            }
+            // If dropdown, make the input equal 'Default' selection
+            if (this.field.type === 'field-dropdown') {
+                this.field.inputs[fieldData.input] = 'Default';
+            }
         }
-        
+
     }
 })
 Vue.component('fields', {
     props: ['component'],
     template: '\
         <div class="fields-container">\
+            <div v-if="component._tokens">Available tokens: {{ tokens }}</div>\
             <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
-        </div>'
+        </div>',
+    computed: {
+        tokens: function() {
+            return this.component._tokens.map(function(pair) {
+                return '{{'+ Object.keys(pair)[0] + '}}';
+            }).join(', ');
+        }
+    }
 })
 var Drag = (function() {
     
