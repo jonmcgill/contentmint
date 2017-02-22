@@ -2,7 +2,7 @@ Vue.component('fields', {
     props: ['component'],
     template: '\
         <div class="fields-container">\
-            <div v-if="component._tokens">Available tokens: {{ tokens }}</div>\
+            <div class="field-tokens" v-if="component._tokens">Available tokens: {{ tokens }}</div>\
             <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
         </div>',
     computed: {

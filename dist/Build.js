@@ -2,6 +2,16 @@ var Components = {},
     Fields = {},
     Process = {},
     Menus = {};
+
+var Bus = new Vue();
+
+Object.defineProperties(Vue.prototype, {
+    $bus: {
+        get: function() {
+            return Bus;
+        }
+    }
+})
 var Util = (function() {
     
     function contains(a, b){
@@ -223,6 +233,23 @@ Vue.component('wrap', {
             this.$emit('showfields', this.config);
         }
     },
+    created: function() {
+        var _this = this;
+        if (_this.config._tokens) {
+            _this.$options.watch = {};
+            _this.config._tokens.forEach(function(token) {
+                var source = token[Object.keys(token)[0]];
+                _this.$watch(
+                    function() { 
+                        return this.config._fields.output[source]; 
+                    },
+                    function(newVal, oldVal) {
+                        _this.$bus.$emit('outputUpdate', source);
+                    }
+                )
+            })
+        }
+    },
     mounted: function() {
         this.config._index = Index.getDomIndex(this.$el);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
@@ -255,19 +282,22 @@ Cmint.createComponent({
         _name: 'banner-image',
         _display: 'Banner Image',
         _tokens: [
-            { 'URL': 'link' }
+            { 'URL': 'link' },
+            { 'foo': 'foo' },
+            { 'SOURCE': 'source' }
         ],
         _fields: {
             output: {
                 source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
                 source2: '',
+                foo: '',
                 link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
             },
             list: [
-                {   name: 'image-source',
-                    result: 'source2'    },
-                {   name: 'image-presets',
-                    result: 'source'   }
+                {   name: 'link-mailto',
+                    result: 'link'    },
+                {   name: 'image-choice',
+                    result: 'source'    }
             ]
         }
     }
@@ -289,6 +319,19 @@ Cmint.createComponent({
         _display: 'Thing'
     }
 })
+Cmint.createProcess('mailto', function(inputs, component) {
+
+    var output = 'mailto:';
+
+    output += Cmint.tokenize(inputs.to.value, component) + '?';
+    output += encode(Cmint.tokenize(inputs.subject.value, component)) + '&';
+    output += encode(Cmint.tokenize(inputs.body.value, component));
+
+    function encode(val) { return encodeURIComponent(val); }
+
+    return output;
+
+})
 Cmint.createProcess('test', function(input) {
     return input + '?param=true';
 })
@@ -297,10 +340,28 @@ Cmint.createMenu('image-list', {
     'Random': 'https://unsplash.it/800/300'
 })
 Cmint.createField({
+    name: 'image-choice',
+    config: {
+        type: 'field-choice',
+        display: 'Image Input Type',
+        label: 'Select an image input type (field-choice)',
+        input: 'selected-field',
+        choices: [
+            {   name: 'image-source',
+                result: 'source'    },
+            {   name: 'image-presets',
+                result: 'source'   },
+            {   name: 'image-choice',
+                result: 'source'    }
+        ]
+    }
+})
+Cmint.createField({
     name: 'image-presets',
     config: {
         type: 'field-dropdown',
-        label: 'Select an image',
+        display: 'Preset Images',
+        label: 'Select an image (field-dropdown)',
         input: 'selected-image',
         menu: 'image-list'
     }
@@ -309,11 +370,34 @@ Cmint.createField({
     name: 'image-source',
     config: {
         type: 'field-text',
-        label: 'Write in an image URL',
+        display: 'Image URL',
+        label: 'Write in an image URL (field-text)',
         input: 'url',
         help: 'Absolute path including http(s)://',
         check: /^https*:\/\/.+(\.[a-zA-Z]+)$/g,
         hook: 'test'
+    }
+})
+Cmint.createField({
+    name: 'link-mailto',
+    config: {
+        type: 'field-group',
+        display: 'Email Link',
+        hook: 'mailto',
+        label: 'Fill in the fields for your email link (field-group)',
+        input: [
+            { name: 'to', 
+              label: 'The email sendee', 
+              type: 'input' },
+
+            { name: 'subject', 
+              label: 'The email subject line', 
+              type: 'input' },
+
+            { name: 'body', 
+              label: 'The body of your email', 
+              type: 'textarea' }
+        ],
     }
 })
 Vue.component('field-text', {
@@ -350,6 +434,9 @@ Vue.component('field-text', {
             }
             this.component._fields.output[this.field.result] = input;
         }, 500)
+    },
+    beforeMount: function() {
+        Cmint.watchOutputUpdates(this);
     },
     mounted: function() {
         this.process();
@@ -391,6 +478,103 @@ Vue.component('field-dropdown', {
         this.process(this.selected);
     }
 })
+Vue.component('field-choice', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div class="field-choice-wrap">\
+                <span class="field-selected" v-text="selected"></span>\
+                <div class="field-choices">\
+                    <div v-for="choice in field.choices"\
+                         v-text="displayName(choice)"\
+                         @click="process(choice)"></div>\
+                </div>\
+            </div>\
+            <div style="background:#eee;padding:0.5em" v-if="selected !== \'None\'">\
+                <field :field="selectionData" :component="component"></field>\
+            </div>\
+        </div>',
+    data: function() { return {
+        fields: Fields,
+        selected: this.field.selected || 'None',
+        selectionData: this.field.selectionData || null,
+        selectedFieldData: this.field.selectedFieldData || null
+    }},
+    methods: {
+        displayName: function(choice) {
+            if (choice === 'None') {
+                return 'None';
+            } else {
+                return this.fields[choice.name].display;
+            }
+        },
+        process: function(selection) {
+            var _this = this;
+            _this.selectionData = null;
+            _this.selectedFieldData = null;
+            _this.selected = 'None';
+
+            _this.field.selected = _this.selected;
+            _this.field.selectionData = _this.selectionData;
+            _this.field.selectedFieldData = _this.selectedFieldData;
+
+            Vue.nextTick(function() {
+                if (selection !== 'None') {
+                    _this.selectionData = Util.copy(selection);
+                    _this.selectedFieldData = _this.fields[_this.selectionData.name];
+                    _this.selected = _this.selectedFieldData.display;
+
+                    _this.field.selected = _this.selected;
+                    _this.field.selectionData = _this.selectionData;
+                    _this.field.selectedFieldData = _this.selectedFieldData;
+                }
+                Util.debug('field chosen: ' + _this.selected);
+            })
+        }
+    },
+    beforeMount: function() {
+        if (this.field.choices[0] !== 'None') {
+            this.field.choices.splice(0, 0, 'None');
+        }
+    }
+})
+Vue.component('field-group', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div class="field-group-wrap">\
+                <div class="field-group-input" v-for="(inp, key) in field.inputs">\
+                    <label>{{ firstUppercase(key) }}</label>\
+                    <input v-if="inp.type === \'input\'"\
+                        v-model="field.inputs[key].value"\
+                        @keyup="process()"\
+                        :placeholder="inp.label" />\
+                    <textarea v-else-if="inp.type === \'textarea\'"\
+                        v-model="field.inputs[key].value"\
+                        @keyup="process()"\
+                        :placeholder="inp.label"></textarea>\
+                </div>\
+            </div>\
+        </div>',
+    data: function() { return {
+        fields: Fields
+    }},
+    methods: {
+        process: function() {
+            var _this = this;
+            var output = Process[this.field.hook](this.field.inputs, this.component);
+            this.component._fields.output[this.field.result] = output;
+        },
+        firstUppercase: function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.replace(/^./,'');
+        }
+    },
+    beforeMount: function() {
+        Cmint.watchOutputUpdates(this);
+    }
+})
 Vue.component('field', {
     props: ['field', 'component'],
     template: '\
@@ -398,15 +582,17 @@ Vue.component('field', {
             <component :is="field.type" :field="field" :component="component"></component>\
         </div>',
     beforeMount: function() {
-
-        // result = default output listed in component
+        // result = default output listed in components
         var result = this.component._fields.output[this.field.result];
 
         // field instances aren't components; they're object literals passed to field components
         var fieldData = Fields[this.field.name];
+
         this.field.label = fieldData.label;
         this.field.type = fieldData.type;
+        this.field.display = fieldData.display;
         this.field.menu = fieldData.menu || null;
+        this.field.choices = fieldData.choices || null;
         this.field.help = fieldData.help || null;
         this.field.check = fieldData.check || null;
         this.field.hook = fieldData.hook || null;
@@ -423,6 +609,14 @@ Vue.component('field', {
             if (this.field.type === 'field-dropdown') {
                 this.field.inputs[fieldData.input] = 'Default';
             }
+            // If field group, cycle through and add to inputs
+            if (this.field.type === 'field-group') {
+                if (!this.field.hook) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated hook';
+                var inputs = this.field.inputs;
+                fieldData.input.forEach(function(inp) {
+                    inputs[inp.name] = { label: inp.label, type: inp.type, value: '' };
+                })
+            }
         }
 
     }
@@ -431,7 +625,7 @@ Vue.component('fields', {
     props: ['component'],
     template: '\
         <div class="fields-container">\
-            <div v-if="component._tokens">Available tokens: {{ tokens }}</div>\
+            <div class="field-tokens" v-if="component._tokens">Available tokens: {{ tokens }}</div>\
             <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
         </div>',
     computed: {
@@ -619,8 +813,13 @@ Cmint.save = function() {
     Util.debug('saved content');
 }
 Cmint.showFields = function(component) {
-    Util.debug('showing fields for ' + component._name);
-    this.fieldsComponent = component;
+    if (this.fieldsComponent) {
+        this.fieldsComponent = null;
+        Util.debug('closing field view for ' + component._name);
+    } else {
+        this.fieldsComponent = component;
+        Util.debug('opening field view for ' + component._name);
+    }
 }
 Cmint.snapshot = function() {
     this.changes++;
@@ -657,6 +856,13 @@ Cmint.undo = function() {
     } else {
         Util.debug('nothing to undo');
     }
+}
+Cmint.watchOutputUpdates = function(fieldComponent) {
+    fieldComponent.$bus.$on('outputUpdate', function(output) {
+        if (output !== fieldComponent.field.result) {
+            fieldComponent.process();
+        }
+    })
 }
 Cmint.app = new Vue({
 

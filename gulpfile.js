@@ -21,6 +21,8 @@ var js_files = [
 
     './src2/js/core/fields/field-text.js',
     './src2/js/core/fields/field-dropdown.js',
+    './src2/js/core/fields/field-choice.js',
+    './src2/js/core/fields/field-group.js',
     './src2/js/core/fields/field.js',
     './src2/js/core/fields/fields.js',
 

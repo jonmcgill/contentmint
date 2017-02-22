@@ -33,6 +33,9 @@ Vue.component('field-text', {
             this.component._fields.output[this.field.result] = input;
         }, 500)
     },
+    beforeMount: function() {
+        Cmint.watchOutputUpdates(this);
+    },
     mounted: function() {
         this.process();
     }

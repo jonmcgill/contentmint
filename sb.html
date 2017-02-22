@@ -73,6 +73,15 @@
         font-family: Arial;
         color: red;
     }
+    .field-wrap,
+    .field-tokens {
+        margin-bottom: 2em;
+    }
+    .field-instance input,
+    .field-instance button,
+    .field-instance textarea {
+        display: block;
+    }
 </style>
 </head>
 <body>
@@ -81,34 +90,38 @@
     
     Implemetation:
 
-        Fields:
+      ✓ Fields:
             ✓ dropdown
-            - fieldchoice
-            - fieldgroup
+            ✓ fieldchoice
+            ✓ fieldgroup
             ✓ menu system
             ✓ tokenizing
             ✓ show available tokens
             ✓ process hooks
             ✓ field input regex checks
             ✓ field input error message
+            ✓ run field processes when tokenable data updates
+        
+        Components
+              modify root tags for 'wrap' and 'context' via render function
 
         Editing:
-            - component action bar
-            - how to indicate hover on a component
-            - trash component structure
-            - copy component structure
-            - tinymce inline editing
-            - tinymce editor synced with Vue data
-            - tinymce editing triggers field reprocessing
-            - tinymce output HTML has certain properties attached
-            - autosave
+              component action bar
+              how to indicate hover on a component
+              trash component structure
+              copy component structure
+              tinymce inline editing
+              tinymce editor synced with Vue data
+              tinymce editing triggers field reprocessing
+              tinymce output HTML has certain properties attached
+              autosave
 
         Application:
-            - component categories
-            - loading templates
-            - sidebar widget
-            - editor GUI
-            - way to inform the editor how to clean up its code
+              component categories
+              loading templates
+              sidebar widget
+              editor GUI
+              way to inform the editor how to clean up its code
 
 -->
 

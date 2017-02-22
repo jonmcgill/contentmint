@@ -11,19 +11,22 @@ Cmint.createComponent({
         _name: 'banner-image',
         _display: 'Banner Image',
         _tokens: [
-            { 'URL': 'link' }
+            { 'URL': 'link' },
+            { 'foo': 'foo' },
+            { 'SOURCE': 'source' }
         ],
         _fields: {
             output: {
                 source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
                 source2: '',
+                foo: '',
                 link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
             },
             list: [
-                {   name: 'image-source',
-                    result: 'source2'    },
-                {   name: 'image-presets',
-                    result: 'source'   }
+                {   name: 'link-mailto',
+                    result: 'link'    },
+                {   name: 'image-choice',
+                    result: 'source'    }
             ]
         }
     }

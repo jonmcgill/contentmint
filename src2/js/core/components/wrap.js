@@ -9,6 +9,23 @@ Vue.component('wrap', {
             this.$emit('showfields', this.config);
         }
     },
+    created: function() {
+        var _this = this;
+        if (_this.config._tokens) {
+            _this.$options.watch = {};
+            _this.config._tokens.forEach(function(token) {
+                var source = token[Object.keys(token)[0]];
+                _this.$watch(
+                    function() { 
+                        return this.config._fields.output[source]; 
+                    },
+                    function(newVal, oldVal) {
+                        _this.$bus.$emit('outputUpdate', source);
+                    }
+                )
+            })
+        }
+    },
     mounted: function() {
         this.config._index = Index.getDomIndex(this.$el);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);

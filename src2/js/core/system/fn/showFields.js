@@ -1,4 +1,9 @@
 Cmint.showFields = function(component) {
-    Util.debug('showing fields for ' + component._name);
-    this.fieldsComponent = component;
+    if (this.fieldsComponent) {
+        this.fieldsComponent = null;
+        Util.debug('closing field view for ' + component._name);
+    } else {
+        this.fieldsComponent = component;
+        Util.debug('opening field view for ' + component._name);
+    }
 }
