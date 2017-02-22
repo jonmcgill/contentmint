@@ -23,6 +23,9 @@ Vue.component('field-text', {
             if (this.component._tokens) {
                 input = Cmint.tokenize(input, this.component);
             }
+            if (this.field.hook) {
+                input = Process[this.field.hook](input);
+            }
             this.component._fields.output[this.field.result] = input;
         }, 500)
     },

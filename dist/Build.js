@@ -1,3 +1,6 @@
+var Components = {},
+    Fields = {},
+    Process = {};
 var Util = (function() {
     
     function contains(a, b){
@@ -146,6 +149,14 @@ var Cmint = (function() {
         } 
     }
 
+    function createProcess(name, fn) {
+        if (Process[name]) {
+            throw 'Process name already exists';
+        } else {
+            Process[name] = fn;
+        }
+    }
+
     function setAvailableComponents() {
         return Util.jprs($('#AvailableComponents').text());
     }
@@ -180,6 +191,7 @@ var Cmint = (function() {
     return {
         createComponent: createComponent,
         createField: createField,
+        createProcess: createProcess,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }
@@ -215,7 +227,6 @@ Vue.component('context', {
             <wrap v-for="child in children" :config="child"></wrap>\
         \</div>'
 })
-var Components = {};
 Cmint.createComponent({
     template: '\
         <a v-if="config._fields.output.link" :href="config._fields.output.link">\
@@ -256,13 +267,16 @@ Cmint.createComponent({
         _display: 'Thing'
     }
 })
-var Fields = {};
+Cmint.createProcess('test', function(input) {
+    return input + '?param=true';
+})
 Cmint.createField({
     name: 'image-source',
     config: {
         type: 'field-text',
         label: 'Write in an image URL',
-        input: 'url'   
+        input: 'url',
+        hook: 'test'
     }
 })
 Vue.component('field-text', {
@@ -290,6 +304,9 @@ Vue.component('field-text', {
             if (this.component._tokens) {
                 input = Cmint.tokenize(input, this.component);
             }
+            if (this.field.hook) {
+                input = Process[this.field.hook](input);
+            }
             this.component._fields.output[this.field.result] = input;
         }, 500)
     },
@@ -305,18 +322,23 @@ Vue.component('field', {
             <component :is="field.type" :field="field" :component="component"></component>\
         </div>',
     beforeMount: function() {
+
         // result = default output listed in component
         var result = this.component._fields.output[this.field.result];
+
         // field instances aren't components; they're object literals passed to field components
         var fieldData = Fields[this.field.name];
         this.field.label = fieldData.label;
         this.field.type = fieldData.type;
+        this.field.hook = fieldData.hook || null;
+        
         // if no inputs, this is the first instantiation of this field for a given component.
         // inputs are established based on the defaults provided to the fieldData and the components
         if (!this.field.inputs) {
             this.field.inputs = {};
             this.field.inputs[fieldData.input] = result;
         }
+        
     }
 })
 Vue.component('fields', {

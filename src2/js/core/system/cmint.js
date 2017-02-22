@@ -22,6 +22,14 @@ var Cmint = (function() {
         } 
     }
 
+    function createProcess(name, fn) {
+        if (Process[name]) {
+            throw 'Process name already exists';
+        } else {
+            Process[name] = fn;
+        }
+    }
+
     function setAvailableComponents() {
         return Util.jprs($('#AvailableComponents').text());
     }
@@ -56,6 +64,7 @@ var Cmint = (function() {
     return {
         createComponent: createComponent,
         createField: createField,
+        createProcess: createProcess,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }

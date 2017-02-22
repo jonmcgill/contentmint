@@ -3,6 +3,7 @@ Cmint.createField({
     config: {
         type: 'field-text',
         label: 'Write in an image URL',
-        input: 'url'   
+        input: 'url',
+        hook: 'test'
     }
 })

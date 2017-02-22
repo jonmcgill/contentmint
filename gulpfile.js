@@ -6,14 +6,14 @@ var gulp = require('gulp'),
 
 var js_files = [
     
+    './src2/js/core/system/setup.js',
     './src2/js/core/system/util.js',
     './src2/js/core/system/index.js',
     './src2/js/core/system/cmint.js',
     './src2/js/core/components/wrap.js',
     './src2/js/core/components/context.js',
-    './src2/js/core/data/components.js',
     './src2/js/components/**/*',
-    './src2/js/core/data/fields.js',
+    './src2/js/processing/**/*',
     './src2/js/fields/**/*',
     './src2/js/core/fields/field-text.js',
     './src2/js/core/fields/field.js',
