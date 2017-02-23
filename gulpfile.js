@@ -13,6 +13,7 @@ var js_files = [
 
     './src2/js/core/components/wrap.js',
     './src2/js/core/components/context.js',
+    './src2/js/core/components/categories.js',
     './src2/js/core/components/sidebar.js',
 
     './src2/js/components/**/*',
@@ -52,8 +53,8 @@ gulp.task('dev', function() {
             .pipe(concat('build.js'))
             .pipe(gulp.dest('dist/'));
     })
-    gulp.watch('src/scss/**/*.scss', function() {
-        return gulp.src('src/scss/**/*.scss')
+    gulp.watch('src2/scss/**/*.scss', function() {
+        return gulp.src('src2/scss/**/*.scss')
             .pipe(sass())
             .pipe(gulp.dest('dist/'))
     })

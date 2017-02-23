@@ -1,0 +1,77 @@
+.cmint {
+
+    .category-container {
+        margin: 0 1em;
+        position: relative;
+
+        &:hover {
+            box-shadow: $shadow-sidebar-action;
+        }
+        // border: 1px solid $color-bd-light;
+
+        button {
+            background: #fafafa;
+            border: none;
+            border-bottom: 1px solid transparent;
+            padding: 0.65em 0.8em;
+            width: 100%;
+            outline: none;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+            @extend %cmint-type;
+            &:hover { 
+                background: lighten($color-accent,15%);
+                color: white;
+                -webkit-font-smoothing: antialiased;
+            }
+        }
+
+        .category-selected {
+            border-left: 1px solid $color-bd-light;
+            border-right: 1px solid $color-bd-light;
+            border-top: 1px solid $color-bd-light;
+            border-bottom: 1px solid transparent;
+            border-radius: 3px;
+            &:hover { 
+                background: white;
+                color: inherit;
+                i, span {
+                    color: $color-font-dark;
+                }
+            }
+            span {
+                color: $color-font-fade;
+            }
+            i { 
+                float: right;
+                font-size: 0.8em;
+                margin-top: 0.5em;
+                color: lighten($color-font-fade, 15%);
+            }
+        }
+
+        .category-list {
+            display: none;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+            border: 1px solid $color-bd-light;
+        }
+
+        &.active .category-list {
+            display: block;
+        }
+
+        &.active .category-selected span,
+        &.active .category-selected i {
+            color: $color-font-dark !important;
+        }
+
+        &:not(.active) .category-selected {
+            border-bottom:1px solid $color-bd-light;
+        }
+
+    }
+
+}

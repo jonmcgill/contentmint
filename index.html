@@ -2,87 +2,8 @@
 <html>
 <head>
 <title>Sandbox</title>
+<link rel="stylesheet" type="text/css" href="dist/build.css">
 <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
-<style type="text/css">
-    .gu-mirror{position:fixed!important;margin:0!important;z-index:9999!important;opacity:.8;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";filter:alpha(opacity=80)}.gu-hide{display:none!important}.gu-unselectable{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}.gu-transit{opacity:.2;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";filter:alpha(opacity=20)}
-
-    * { 
-        box-sizing: border-box;
-        margin: 0;
-    }
-    /*button, input[type="submit"] {
-        cursor: pointer;
-    }
-    button[disabled] {
-        cursor: default;
-    }
-    #Model, #Model-Saved {
-        background: #555;
-        padding: 1em;
-        color: white;
-        font-size: 1em;
-        font-family: consolas;
-        width: 50%;
-        float: left;
-    }
-    #Model-Saved {
-        background: black;
-        color: rgba(255,255,255,0.5);
-    }
-    #Stage, #Components {
-        float: left;
-        width: 48%;
-        background: #efefef;
-        padding: 8px;
-        border: 2px solid #aaa;
-        margin: 5px;
-    }
-    .Buttons {
-        float: right;
-        width: 50%;
-        text-align: center;
-        padding-right: 2em;
-        margin-bottom: 1em;
-    }
-    .Buttons button {
-        padding: 0.3em 1em;
-        font-size: 1em;
-    }
-    .Context {
-        border: 1px solid black;
-        padding: 8px;
-        background: white;
-    }
-    .Container {
-        padding: 8px;
-        border: 1px dashed rgba(0,0,0,0.3);
-        background: lightblue;
-    }
-    .Component {
-        cursor: -webkit-grab;
-        cursor: grab;
-        transition: padding-top 300ms, background 300ms;
-    }
-    .thing {
-        background: orange;
-        padding: 5px 10px;
-        border: 1px solid black;
-    }
-    .PLACEHOLDER {
-        background: yellow;
-        font-family: Arial;
-        color: red;
-    }
-    .field-wrap,
-    .field-tokens {
-        margin-bottom: 2em;
-    }
-    .field-instance input,
-    .field-instance button,
-    .field-instance textarea {
-        display: block;
-    }*/
-</style>
 </head>
 <body>
 
@@ -104,37 +25,42 @@
         
         Components
               modify root tags for 'wrap' and 'context' via render function
-              component action bar
-              how to indicate hover on a component
+            ✓ placeholder for empty context regions
 
         Editing:
+            2 -> action bar component
+              sidebar thumbnail styles
+              how to indicate hover on a component?
               trash component structure
               copy component structure
+              component drag handle
+              component fields button
               tinymce inline editing
               tinymce editor synced with Vue data
               tinymce editing triggers field reprocessing
               tinymce output HTML has certain properties attached
               autosave
+              initial render transitions
 
         Application:
               global naming
-              component categories
             ✓ loading templates
-            ->  sidebar component
-              editor GUI
+            ✓ sidebar component
+            ✓ sidebar categories component
+            3 -> sidebar fields component
               way to inform the editor how to clean up its code
               loading graphic
               transition effects
 
 -->
-<textarea style="display:none;" id="Data"></textarea>
-<div id="Loading">LOADING</div>
+<textarea style="display:none;" id="Data" class="cmint"></textarea>
+<div id="Loading" class="cmint">LOADING</div>
 <div id="App" v-cloak>
     <div id="Template"></div>
     <sidebar :user="username"
              :name="contentName"
              :components="components"
-             :fieldComponent="fieldComponent"></sidebar>
+             :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
 </div>
 <!-- <div id="App" v-cloak>
     <context id="Stage" data-context-name="stage" :children="stage"></context>

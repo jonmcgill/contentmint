@@ -287,36 +287,116 @@ Vue.component('context', {
     template: '\
         <div class="Context">\
             <wrap v-for="child in children" :config="child"></wrap>\
-        \</div>'
+            <div class="context-insert" v-if="childNum < 1">Drag components here</div>\
+        \</div>',
+    computed: {
+        childNum: function() {
+            return this.children.length;
+        }
+    }
+
+})
+Vue.component('categories', {
+    props: ['components'],
+    template: '\
+        <div :class="container">\
+            <button class="category-selected" @click="toggle = !toggle">\
+                <span>{{ selected }}</span><i :class="chevron"></i></button>\
+            <div class="category-list">\
+                <button class="category-option"\
+                    @click="select()">All</button>\
+                <button class="category-option"\
+                    v-for="cat in categories"\
+                    @click="select(cat)"\
+                    >{{ cat }}</button>\
+            </div>\
+        </div>',
+    data: function(){return{
+        toggle: false,
+        selected: 'All',
+        categories: []
+    }},
+    methods: {
+        select: function(item) {
+            this.selected = item || 'All';
+            this.toggle = false;
+            var filtered = this.components;
+            if (this.selected !== 'All') {
+                filtered = this.components.filter(function(comp) {
+                    return comp._category === item;
+                })
+            }
+            this.$bus.$emit('filteredCategories', filtered);
+        }
+    },
+    computed: {
+
+        container: function() {
+            return {
+                'category-container': true,
+                'active': this.toggle
+            } 
+        },
+        chevron: function() {
+            return {
+                'fa': true,
+                'fa-chevron-left': !this.toggle,
+                'fa-chevron-down': this.toggle
+            }
+        }
+    },
+    mounted: function() {
+        var _this = this;
+        _this.categories = _this.components.map(function(comp) {
+            return comp._category;
+        })
+        _this.categories = _this.categories.filter(function(cat, i) {
+            return _this.categories.indexOf(cat) === i;
+        }).sort();
+    }
 })
 Vue.component('sidebar', {
-    props: ['user', 'name', 'components', 'fieldComponent'],
+    props: ['user', 'name', 'components', 'fieldsComponent'],
     template: '\
         <aside id="Sidebar">\
             <div class="sidebar-top">\
-                <input type="text" v-model="name" class="content-name" />\
-                <span class="username">{{ user }}</span>\
+                <span class="content-name">{{ name }}</span>\
+                <div class="username">\
+                    <i class="fa fa-user"></i>\
+                    <a :href="\'/\' + user">{{ user }}</a>\
+                </div>\
             </div>\
             <div class="sidebar-sub">\
-            \
+                <categories :components="components"></categories>\
             </div>\
             <div class="sidebar-main">\
-                <context id="Components" data-context-name="components" :children="components"></context>\
+                <context id="Components" data-context-name="components" :children="componentList"></context>\
             </div>\
-        </aside>'
+            <div class="sidebar-fields">\
+                \
+            </div>\
+        </aside>',
+    data: function() {return{
+        componentList: this.components
+    }},
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('filteredCategories', function(filtered) {
+            _this.componentList = filtered;
+        })
+    }
 })
 Cmint.createComponent({
     template: '\
         <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-            <img :src="config._fields.output.source" \
-                 :data-src="config._fields.output.source2"\
-                  width="50%" /></a>\
-        <img v-else :src="config._fields.output.source" \
-                    :data-src="config._fields.output.source2"\
-                     width="50%" />',
+            <img :src="config._fields.output.source" width="100%" \
+                 :data-src="config._fields.output.source2" /></a>\
+        <img v-else :src="config._fields.output.source" width="100%" \
+                    :data-src="config._fields.output.source2" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
+        _category: 'Images',
         _tokens: [
             { 'URL': 'link' },
             { 'FOO': 'foo' },
@@ -346,6 +426,7 @@ Cmint.createComponent({
     config: {
         _name: 'container',
         _display: 'Container',
+        _category: 'Layout',
         container: []
     }
 })
@@ -353,7 +434,8 @@ Cmint.createComponent({
     template: '<h3 class="thing" v-text="config._index + \' (\'+_uid+\')\'" :style="config.css"></h3>',
     config: {
         _name: 'thing',
-        _display: 'Thing'
+        _display: 'Thing',
+        _category: 'Content',
     }
 })
 Cmint.createProcess('mailto', function(inputs, component) {

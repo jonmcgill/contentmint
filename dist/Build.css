@@ -1,21 +1,30 @@
-@import url("https://fonts.googleapis.com/css?family=Open+Sans");
-* {
+.cmint, .cmint .category-container button, .context-insert {
+  font-family: sans-serif;
+  color: rgba(0, 0, 0, 0.73);
+  font-size: 0.9em;
+  line-height: 1.3; }
+
+html {
   box-sizing: border-box; }
+  html * {
+    box-sizing: inherit; }
 
 body {
   margin: 0;
   padding: 0; }
 
-[v-cloak] {
-  display: none; }
-
-.font-base {
-  font-family: "Open Sans", "Helvetica", "Arial", sans-serif; }
-
-#Topbar i, #BottomBar i {
-  display: inline-block;
-  margin-right: 0.4em;
-  margin-left: -0.4em; }
+.cmint input[type="text"],
+.cmint textarea {
+  background: white;
+  width: 100%;
+  padding: 0.65em 0.8em;
+  outline: none;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 0 2px #ccc; }
+  .cmint input[type="text"]:focus,
+  .cmint textarea:focus {
+    border: 1px solid #039BE5;
+    box-shadow: 0px 0px 2px 0px #039BE5; }
 
 .gu-mirror {
   position: fixed !important;
@@ -39,392 +48,114 @@ body {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=20); }
 
-/* Overwrite */
-.gu-mirror {
-  opacity: 0.6;
-  /*background: rgba(0,0,0,0.3);*/
-  border-radius: 3px; }
+#Template {
+  margin: 2em 27em 2em 2em; }
 
-#Topbar {
+.cmint#Sidebar {
   position: fixed;
   top: 0;
-  left: 0;
-  height: 40px;
-  width: 100%;
-  background: white;
-  border-bottom: 2px solid rgba(0, 50, 0, 0.1);
-  font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
-  z-index: 200; }
-  #Topbar .left {
-    width: calc(100% - 400px);
-    float: left;
-    padding-left: 1em;
-    padding-right: 1em;
-    height: 40px; }
-  #Topbar #contentName {
-    line-height: 38px;
-    border: none;
-    font-family: inherit;
-    font-size: 0.9em;
-    outline: none;
-    padding: 0;
-    width: 40%;
-    color: rgba(0, 0, 0, 0.7); }
-  #Topbar #EditToolbar {
-    float: right; }
-  #Topbar .right {
-    width: 400px;
-    float: right;
-    border-left: 2px solid rgba(0, 50, 0, 0.1);
-    height: 40px;
-    background: #eff1ef;
-    border-bottom: 2px solid rgba(0, 50, 0, 0.1); }
-  #Topbar #SaveButton {
-    background: none;
-    border: none;
-    margin: none;
-    padding: 0 1em;
-    display: inline-block;
-    font-size: 0.9em;
-    height: 38px;
-    outline: none;
-    cursor: pointer;
+  bottom: 0;
+  right: 0;
+  background: #f2f2f2;
+  box-shadow: 0 0px 2px 1px #ccc;
+  width: 24em; }
+
+.cmint .sidebar-top {
+  padding: 1em 0 1em; }
+  .cmint .sidebar-top:after {
+    display: table;
+    content: '';
+    clear: both; }
+  .cmint .sidebar-top .content-name {
     color: rgba(0, 0, 0, 0.4);
-    width: 6em; }
-    #Topbar #SaveButton:hover {
-      color: rgba(0, 0, 0, 0.8); }
-  #Topbar #username {
-    float: right; }
-    #Topbar #username a {
-      color: #2196f3;
-      font-size: 0.9em;
-      line-height: 40px;
-      padding-right: 1em;
-      padding-left: 1em;
-      text-decoration: none; }
-      #Topbar #username a:hover {
-        text-decoration: underline; }
-
-#Thumbnails {
-  padding: 0.5em 0.5em 3em; }
-
-.thumbnail {
-  background: white;
-  border: 1px solid #ddd;
-  position: relative;
-  padding-bottom: 1em;
-  margin-bottom: 5px;
-  overflow: hidden;
-  transition: padding-left 200ms;
-  cursor: grab;
-  cursor: -webkit-grab; }
-  .thumbnail-component {
-    transform: scale(0.5);
-    -moz-transform: scale(0.5);
-    -ms-transform: scale(0.5);
-    -webkit-transform: scale(0.5);
-    transform-origin: 0 0;
-    -moz-transform-origin: 0 0;
-    -ms-transform-origin: 0 0;
-    -webkit-transform-origin: 0 0;
-    width: 200%;
-    overflow: hidden; }
-  .thumbnail .comp-toolbar {
-    display: none; }
-  .thumbnail.hovered {
-    padding-left: 0.6em; }
-  .thumbnail-overlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    z-index: 1; }
-  .thumbnail-grab {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 0;
-    background: #2196F3;
-    transition: width 200ms; }
-    .hovered .thumbnail-grab {
-      width: 0.6em; }
-  .thumbnail > span {
-    position: absolute;
-    font-size: 0.8em;
-    color: rgba(0, 0, 0, 0.5);
-    right: 1em;
-    bottom: 0.8em; }
-
-#Sidebar {
-  background: #eff1ef;
-  position: fixed;
-  top: 40px;
-  bottom: 0;
-  right: 0;
-  width: 400px;
-  overflow-y: auto;
-  border-left: 2px solid rgba(0, 50, 0, 0.1); }
-
-#BottomBar {
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  border-top: 2px solid rgba(0, 50, 0, 0.1);
-  height: 40px;
-  width: 400px;
-  background: #ededed; }
-  #BottomBar > * {
-    width: 33.33333%;
-    float: left;
-    line-height: 40px;
-    font-size: 0.9em;
-    padding: 0;
-    color: rgba(0, 0, 0, 0.7); }
-  #BottomBar button {
-    border: none;
-    background: none;
-    outline: none;
-    margin: none;
-    cursor: pointer;
-    border-left: 2px solid rgba(0, 50, 0, 0.1); }
-    #BottomBar button:hover {
-      background: rgba(0, 0, 0, 0.05); }
-  #BottomBar .trash-wrap {
-    position: relative; }
-    #BottomBar .trash-wrap span {
-      font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
-      position: absolute;
-      padding-left: calc(50% - 30px); }
-  #BottomBar #Trash {
-    overflow: hidden;
-    position: relative;
-    height: 40px; }
-    #BottomBar #Trash.trashing {
-      background: #EF9A9A;
-      opacity: 0.8;
-      border-left: 2px solid rgba(0, 0, 0, 0.1); }
-    #BottomBar #Trash * {
-      opacity: 0; }
-    #BottomBar #Trash:after {
-      position: absolute;
-      top: 0px;
-      left: 2px;
-      padding-left: calc(50% - 20px);
-      content: '';
-      line-height: 40px; }
-
-#Toolbar {
-  position: absolute;
-  z-index: 150;
-  margin-top: -3px;
-  right: 408px; }
-  #Toolbar button {
-    background: none;
-    border: none;
-    float: left;
-    font-size: 0.8em;
-    padding: 0;
-    color: white;
-    width: 1.8em;
-    line-height: 1.6em;
-    margin-left: 4px;
+    padding: 0.2em 0.5em;
+    margin-left: 1em;
+    float: left; }
+  .cmint .sidebar-top .username {
+    float: right;
+    margin-right: 1em;
+    background: #fafafa;
+    padding: 0.2em 0.5em;
+    color: rgba(0, 0, 0, 0.4);
+    border: 1px solid #cdcdcd;
     border-radius: 3px;
-    text-align: center;
-    outline: none; }
-  #Toolbar button, #Toolbar i {
     cursor: pointer; }
-  #Toolbar .btn-toolbar:nth-child(1) {
-    background-color: #689F38; }
-  #Toolbar .btn-toolbar:nth-child(2) {
-    background-color: #F44336; }
-  #Toolbar .btn-toolbar:nth-child(3) {
-    background-color: #2196F3; }
-  #Toolbar .btn-toolbar:nth-child(4) {
-    background-color: #37474F; }
+    .cmint .sidebar-top .username:hover {
+      background: white;
+      color: rgba(0, 0, 0, 0.73);
+      box-shadow: 0 3px 6px #dedede; }
+    .cmint .sidebar-top .username a {
+      text-decoration: none;
+      color: inherit; }
 
-#Template {
-  margin-top: 2.4em;
-  width: calc(100% - 400px); }
+.cmint .sidebar-sub {
+  padding: 1em 0 1em;
+  border-bottom: 1px solid #cdcdcd; }
+  .cmint .sidebar-sub .component-categories {
+    padding: 0 1em; }
 
-#Stage {
-  padding: 1em; }
-
-.Component {
-  cursor: grab;
-  cursor: -webkit-grab;
-  cursor: -moz-grab;
-  position: relative;
-  padding: 5px; }
-  .Component *:not(.Component) {
-    cursor: auto; }
-  .Component .comp-toolbar {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    display: none; }
-    .Component .comp-toolbar button {
-      background: none;
-      border: none;
-      float: left;
-      font-size: 0.8em;
-      padding: 0;
-      color: white;
-      width: 1.8em;
-      line-height: 1.6em;
-      margin-left: 4px;
-      border-radius: 3px;
-      text-align: center; }
-    .Component .comp-toolbar button, .Component .comp-toolbar i {
-      cursor: pointer; }
-    .Component .comp-toolbar .btn-toolbar:nth-child(1) {
-      background-color: #689F38; }
-    .Component .comp-toolbar .btn-toolbar:nth-child(2) {
-      background-color: #F44336; }
-    .Component .comp-toolbar .btn-toolbar:nth-child(3) {
-      background-color: #2196F3; }
-    .Component .comp-toolbar .btn-toolbar:nth-child(4) {
-      background-color: #37474F; }
-
-.Context:not(#Stage):not(#Trash),
-#Thumbnails .Component {
-  padding: 1em; }
-
-.active > .comp-toolbar {
-  display: block; }
-
-.ColumnWrap:after {
-  display: table;
-  content: '';
-  clear: both; }
-
-.ColumnWrap > * {
-  padding: 1em;
-  margin: 0.2em;
-  width: calc(50% - 0.4em);
-  float: left;
-  display: inline-block; }
-
-.field-widget {
-  background: #eff1ef;
-  position: fixed;
-  top: 40px;
-  bottom: 0;
-  right: -500px;
-  width: 400px;
+.cmint .sidebar-main {
+  border-top: 1px solid #f9f9f9;
+  padding: 1em 2em;
   overflow-y: auto;
-  border-left: 2px solid rgba(0, 50, 0, 0.1);
-  z-index: 100;
-  transition: right 200ms;
-  font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
-  font-size: 0.9em;
-  padding: 1em; }
-  .field-widget.active {
-    right: 0; }
-  .field-widget .field-instance {
-    margin-bottom: 1em; }
-  .field-widget label {
-    display: block;
-    padding-bottom: 0.2em;
-    color: rgba(0, 0, 0, 0.5); }
-  .field-widget input, .field-widget textarea {
-    font-size: 1em;
-    padding: 0.6em 0.8em;
+  position: absolute;
+  top: 8.58em;
+  bottom: 0; }
+
+.cmint .category-container {
+  margin: 0 1em;
+  position: relative; }
+  .cmint .category-container:hover {
+    box-shadow: 0 3px 6px #dedede; }
+  .cmint .category-container button {
+    background: #fafafa;
+    border: none;
+    border-bottom: 1px solid transparent;
+    padding: 0.65em 0.8em;
     width: 100%;
     outline: none;
-    border: 1px solid #ccc;
-    font-family: "Open Sans", "Helvetica", "Arial", sans-serif !important; }
-  .field-widget textarea {
-    min-height: 200px;
-    resize: none; }
-  .field-widget .menu-dropdown {
-    position: relative; }
-    .field-widget .menu-dropdown * {
-      cursor: pointer; }
-    .field-widget .menu-dropdown .menu-selected {
-      padding: 0.6em 0.8em;
+    text-align: left;
+    cursor: pointer;
+    font: inherit; }
+    .cmint .category-container button:hover {
+      background: #38bcfc;
+      color: white;
+      -webkit-font-smoothing: antialiased; }
+  .cmint .category-container .category-selected {
+    border-left: 1px solid #cdcdcd;
+    border-right: 1px solid #cdcdcd;
+    border-top: 1px solid #cdcdcd;
+    border-bottom: 1px solid transparent;
+    border-radius: 3px; }
+    .cmint .category-container .category-selected:hover {
       background: white;
-      line-height: 1.2em;
-      border: 1px solid #ccc; }
-      .field-widget .menu-dropdown .menu-selected i {
-        position: relative;
-        top: 4px;
-        float: right;
-        font-size: 0.8em;
-        color: rgba(0, 0, 0, 0.3); }
-        .field-widget .menu-dropdown .menu-selected i.active {
-          color: #2196F3; }
-    .field-widget .menu-dropdown ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      position: absolute;
-      width: 100%; }
-    .field-widget .menu-dropdown li {
-      padding: 0.6em 0.8em;
-      margin: 0;
-      background: white;
-      border-left: 1px solid #ccc;
-      border-right: 1px solid #ccc; }
-      .field-widget .menu-dropdown li:last-child {
-        border-bottom: 1px solid #ccc; }
-      .field-widget .menu-dropdown li:hover {
-        background: #51adf6;
-        color: white; }
-
-.menu-dropdown.expand-up ul {
-  bottom: 2.4em; }
-
-.field-btn-back {
-  background: none;
-  border: none;
-  font-size: 0.9em;
-  color: rgba(0, 0, 0, 0.4);
-  cursor: pointer !important;
-  position: relative;
-  outline: none;
-  padding-left: 1.5em;
-  transition: color 200ms; }
-  .field-btn-back i {
+      color: inherit; }
+      .cmint .category-container .category-selected:hover i, .cmint .category-container .category-selected:hover span {
+        color: rgba(0, 0, 0, 0.73); }
+    .cmint .category-container .category-selected span {
+      color: rgba(0, 0, 0, 0.4); }
+    .cmint .category-container .category-selected i {
+      float: right;
+      font-size: 0.8em;
+      margin-top: 0.5em;
+      color: rgba(38, 38, 38, 0.4); }
+  .cmint .category-container .category-list {
+    display: none;
     position: absolute;
-    color: #2196F3;
-    font-size: 0.9em;
-    left: 4px;
-    top: 6px;
-    transition: left 200ms;
-    cursor: pointer !important; }
-  .field-btn-back:hover {
-    color: rgba(0, 0, 0, 0.7); }
-    .field-btn-back:hover i {
-      left: 0px; }
+    width: 100%;
+    z-index: 100;
+    border: 1px solid #cdcdcd; }
+  .cmint .category-container.active .category-list {
+    display: block; }
+  .cmint .category-container.active .category-selected span,
+  .cmint .category-container.active .category-selected i {
+    color: rgba(0, 0, 0, 0.73) !important; }
+  .cmint .category-container:not(.active) .category-selected {
+    border-bottom: 1px solid #cdcdcd; }
 
-.field-tokens {
-  background: #ffdb99;
-  padding: 0.3em 0.6em;
-  margin-bottom: 1em;
-  color: rgba(0, 0, 0, 0.7); }
-  .field-tokens p {
-    margin: 0; }
-  .field-tokens span {
-    font-style: italic; }
-
-#EditorToolbar {
-  float: right;
-  color: rgba(0, 0, 0, 0.7) !important; }
-  #EditorToolbar > div {
-    border: none; }
-  #EditorToolbar * {
-    background: white; }
-  #EditorToolbar button, #EditorToolbar .mce-ico {
-    font-size: 0.9em;
-    color: rgba(0, 0, 0, 0.6) !important; }
-  #EditorToolbar .mce-container * {
-    text-align: center !important;
-    margin: 0; }
-  #EditorToolbar .mce-tinymce-inline {
-    top: 2px; }
-  #EditorToolbar .mce-toolbar-grp {
-    padding-top: 4.5px; }
-
-.mce-edit-focus {
-  outline: none !important; }
+.context-insert {
+  text-align: center;
+  background: #f2f2f2;
+  color: rgba(0, 0, 0, 0.4);
+  padding: 0.5em 1em;
+  border: 1px dashed #cdcdcd; }

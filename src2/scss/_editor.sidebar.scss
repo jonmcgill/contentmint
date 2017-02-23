@@ -1,0 +1,65 @@
+.cmint {
+
+    &#Sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: $color-bg-lightgray;
+        box-shadow: 0 0px 2px 1px #ccc;
+        width: 24em;
+    }
+
+    .sidebar-top {
+        padding: 1em 0 1em;
+        &:after {
+            display: table;
+            content:'';
+            clear: both;
+        }
+        .content-name {
+            color: $color-font-fade;
+            padding: 0.2em 0.5em;
+            margin-left: 1em;
+            float: left;
+        }
+        .username {
+            float: right;
+            margin-right: 1em;
+            background: #fafafa;
+            padding: 0.2em 0.5em;
+            color: $color-font-fade;
+            border: 1px solid $color-bd-light;
+            border-radius: 3px;
+            cursor: pointer;
+            &:hover {
+                background: white;
+                color: $color-font-dark;
+                box-shadow: $shadow-sidebar-action;
+            }
+            a {
+                text-decoration: none;
+                color: inherit;
+            }
+        }
+    }
+
+    .sidebar-sub {
+        padding: 1em 0 1em;
+        border-bottom: 1px solid $color-bd-light;
+        .component-categories {
+            padding: 0 1em;
+        }
+
+    }
+
+    .sidebar-main {
+        border-top: 1px solid $color-bd-lighter;
+        padding: 1em 2em;
+        overflow-y: auto;
+        position: absolute;
+        top: 8.58em;
+        bottom: 0;
+    }
+
+}

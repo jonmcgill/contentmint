@@ -1,0 +1,17 @@
+$color-bg-lightgray: #f2f2f2;
+$color-bd-light: #cdcdcd;
+$color-bd-lighter: #f9f9f9;
+$color-font-dark: rgba(0,0,0,0.73);
+$color-font-fade: rgba(0,0,0,0.4);
+$color-accent: #039BE5;
+
+$font-cmint: sans-serif;
+
+$shadow-sidebar-action: 0 3px 6px #dedede;
+
+%cmint-type {
+    font-family: $font-cmint;
+    color: $color-font-dark;
+    font-size: 0.9em;
+    line-height: 1.3;
+}
