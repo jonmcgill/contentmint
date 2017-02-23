@@ -6,6 +6,9 @@ var Cmint = (function() {
         if (Components[options.config._name]) {
             throw 'That component already exists';
         } else {
+            if (!options.config._index) {
+                options.config._index = '';
+            }
             Components[options.config._name] = options.config;
             Vue.component(options.config._name, {
                 props: ['config'],
@@ -43,8 +46,19 @@ var Cmint = (function() {
         }
     }
 
-    function setAvailableComponents() {
-        return Util.jprs($('#AvailableComponents').text());
+    function createTemplate(name, components) {
+        if (Templates[name]) {
+            throw 'Template name already exists';
+        } else {
+            Templates[name] = components
+        }
+    }
+
+    function setAvailableComponents(components) {
+        return components.map(function(comp) {
+            return Util.copy(Components[comp]);
+        })
+        // return Util.jprs($('#AvailableComponents').text());
     }
 
     function tokenize(input, component) {
@@ -79,6 +93,7 @@ var Cmint = (function() {
         createField: createField,
         createProcess: createProcess,
         createMenu: createMenu,
+        createTemplate: createTemplate,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }

@@ -13,11 +13,13 @@ var js_files = [
 
     './src2/js/core/components/wrap.js',
     './src2/js/core/components/context.js',
+    './src2/js/core/components/sidebar.js',
 
     './src2/js/components/**/*',
     './src2/js/processing/**/*',
     './src2/js/menus/**/*',
     './src2/js/fields/**/*',
+    './src2/js/templates/**/*',
 
     './src2/js/core/fields/field-text.js',
     './src2/js/core/fields/field-dropdown.js',
@@ -26,8 +28,8 @@ var js_files = [
     './src2/js/core/fields/field.js',
     './src2/js/core/fields/fields.js',
 
-    './src2/js/core/system/drag/drag.js',
-    './src2/js/core/system/drag/fn/*',
+    './src2/js/core/drag/drag.js',
+    './src2/js/core/drag/fn/*',
     './src2/js/core/system/fn/*',
     './src2/js/core/system/app.js'
     

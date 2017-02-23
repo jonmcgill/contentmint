@@ -5,6 +5,7 @@ Cmint.createComponent({
         </div>',
     config: {
         _name: 'container',
-        _display: 'Container'
+        _display: 'Container',
+        container: []
     }
 })

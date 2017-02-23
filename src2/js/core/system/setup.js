@@ -1,9 +1,11 @@
-var Components = {},
-    Fields = {},
-    Process = {},
-    Menus = {};
+var Components = Components || {},
+    Fields = Fields || {},
+    Process = Process || {},
+    Menus = Menus || {},
+    Templates = Templates || {}
+    Data = Data || {};
 
-var Bus = new Vue();
+var Bus = Bus || new Vue();
 
 Object.defineProperties(Vue.prototype, {
     $bus: {

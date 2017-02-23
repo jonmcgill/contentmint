@@ -11,13 +11,16 @@ Vue.component('wrap', {
     },
     created: function() {
         var _this = this;
+        Util.debug('created component ' + _this.config._name);
         if (_this.config._tokens) {
             _this.$options.watch = {};
             _this.config._tokens.forEach(function(token) {
                 var source = token[Object.keys(token)[0]];
                 _this.$watch(
-                    function() { 
-                        return this.config._fields.output[source]; 
+                    function() {
+                        if (_this.config._fiels) {
+                            return _this.config._fields.output[source]; 
+                        }
                     },
                     function(newVal, oldVal) {
                         _this.$bus.$emit('outputUpdate', source);

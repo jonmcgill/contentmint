@@ -1,9 +1,11 @@
-var Components = {},
-    Fields = {},
-    Process = {},
-    Menus = {};
+var Components = Components || {},
+    Fields = Fields || {},
+    Process = Process || {},
+    Menus = Menus || {},
+    Templates = Templates || {}
+    Data = Data || {};
 
-var Bus = new Vue();
+var Bus = Bus || new Vue();
 
 Object.defineProperties(Vue.prototype, {
     $bus: {
@@ -144,6 +146,9 @@ var Cmint = (function() {
         if (Components[options.config._name]) {
             throw 'That component already exists';
         } else {
+            if (!options.config._index) {
+                options.config._index = '';
+            }
             Components[options.config._name] = options.config;
             Vue.component(options.config._name, {
                 props: ['config'],
@@ -181,8 +186,19 @@ var Cmint = (function() {
         }
     }
 
-    function setAvailableComponents() {
-        return Util.jprs($('#AvailableComponents').text());
+    function createTemplate(name, components) {
+        if (Templates[name]) {
+            throw 'Template name already exists';
+        } else {
+            Templates[name] = components
+        }
+    }
+
+    function setAvailableComponents(components) {
+        return components.map(function(comp) {
+            return Util.copy(Components[comp]);
+        })
+        // return Util.jprs($('#AvailableComponents').text());
     }
 
     function tokenize(input, component) {
@@ -217,6 +233,7 @@ var Cmint = (function() {
         createField: createField,
         createProcess: createProcess,
         createMenu: createMenu,
+        createTemplate: createTemplate,
         setAvailableComponents: setAvailableComponents,
         tokenize: tokenize
     }
@@ -235,13 +252,16 @@ Vue.component('wrap', {
     },
     created: function() {
         var _this = this;
+        Util.debug('created component ' + _this.config._name);
         if (_this.config._tokens) {
             _this.$options.watch = {};
             _this.config._tokens.forEach(function(token) {
                 var source = token[Object.keys(token)[0]];
                 _this.$watch(
-                    function() { 
-                        return this.config._fields.output[source]; 
+                    function() {
+                        if (_this.config._fiels) {
+                            return _this.config._fields.output[source]; 
+                        }
                     },
                     function(newVal, oldVal) {
                         _this.$bus.$emit('outputUpdate', source);
@@ -269,6 +289,22 @@ Vue.component('context', {
             <wrap v-for="child in children" :config="child"></wrap>\
         \</div>'
 })
+Vue.component('sidebar', {
+    props: ['user', 'name', 'components', 'fieldComponent'],
+    template: '\
+        <aside id="Sidebar">\
+            <div class="sidebar-top">\
+                <input type="text" v-model="name" class="content-name" />\
+                <span class="username">{{ user }}</span>\
+            </div>\
+            <div class="sidebar-sub">\
+            \
+            </div>\
+            <div class="sidebar-main">\
+                <context id="Components" data-context-name="components" :children="components"></context>\
+            </div>\
+        </aside>'
+})
 Cmint.createComponent({
     template: '\
         <a v-if="config._fields.output.link" :href="config._fields.output.link">\
@@ -283,7 +319,7 @@ Cmint.createComponent({
         _display: 'Banner Image',
         _tokens: [
             { 'URL': 'link' },
-            { 'foo': 'foo' },
+            { 'FOO': 'foo' },
             { 'SOURCE': 'source' }
         ],
         _fields: {
@@ -309,7 +345,8 @@ Cmint.createComponent({
         </div>',
     config: {
         _name: 'container',
-        _display: 'Container'
+        _display: 'Container',
+        container: []
     }
 })
 Cmint.createComponent({
@@ -400,6 +437,9 @@ Cmint.createField({
         ],
     }
 })
+Cmint.createTemplate('test-template', [
+    'thing', 'container', 'banner-image'   
+])
 Vue.component('field-text', {
     props: ['field', 'component'],
     template:'\
@@ -864,36 +904,50 @@ Cmint.watchOutputUpdates = function(fieldComponent) {
         }
     })
 }
-Cmint.app = new Vue({
+$.getJSON('test/test-data.json', function(data) {
 
-    el: '#App',
+    Data = data;
 
-    data: {
-        components: [],
-        stage: [],
-        saved: [],
+    $.get('/templates/' + Data.template + '.html', function(markup) {
+        
+        var stage = '<context id="Stage" data-context-name="stage" :children="stage"></context>';
+        Data.markup = markup.replace(/\{\{\s*stage\s*\}\}/, stage);
+        $('#Template').html(Data.markup);
 
-        fieldsComponent: null,
-        changes: null,
-        previous: null,
+        Cmint.app = new Vue({
 
-        test: Components['banner-image'],
-    },
+            el: '#App',
 
-    methods: {
-        showFields: Cmint.showFields,
-        snapshot: Cmint.snapshot,
-        undo: Cmint.undo,
-        save: Cmint.save,
-        load: Cmint.load,
-        refresh: Cmint.refresh,
-        toJson: Cmint.toJson
-    },
+            data: {
+                components: Cmint.setAvailableComponents(Templates[Data.template]),
+                stage: [],
+                saved: Data.saved,
 
-    mounted: function() {
-        Drag.init();
-        this.components = Cmint.setAvailableComponents();
-        Util.debug('mounted app');
-    }
+                username: Data.username,
+                contentName: Data.contentName,
+
+                fieldsComponent: null,
+                changes: null,
+                previous: null,
+            },
+
+            methods: {
+                showFields: Cmint.showFields,
+                snapshot: Cmint.snapshot,
+                undo: Cmint.undo,
+                save: Cmint.save,
+                load: Cmint.load,
+                refresh: Cmint.refresh,
+                toJson: Cmint.toJson
+            },
+
+            mounted: function() {
+                Drag.init();
+                Util.debug('mounted app');
+            }
+
+        })
+
+    })
 
 })

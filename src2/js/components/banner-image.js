@@ -12,7 +12,7 @@ Cmint.createComponent({
         _display: 'Banner Image',
         _tokens: [
             { 'URL': 'link' },
-            { 'foo': 'foo' },
+            { 'FOO': 'foo' },
             { 'SOURCE': 'source' }
         ],
         _fields: {
