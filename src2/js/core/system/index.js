@@ -28,9 +28,16 @@ var Index = (function() {
         }
     }
 
-    function getVueIndex(index, context) {
+    function getVueIndex(index, context, env) {
         var data;
-        data = Util.copy(Cmint.app[index.shift()]);
+        var env = env || Cmint.app;
+        console.log(env);
+        if (env === Cmint.componentList) {
+            data = Util.copy(env);
+            index.shift();
+        } else {
+            data = Util.copy(env[index.shift()]);
+        }
         index.forEach(function(key, i) {
             if (context && (i === index.length - 1)) {
                 data = {data: data, key: key};
@@ -62,7 +69,6 @@ var Index = (function() {
         var startContext, context, appContext, keyName, cut, newContext;
         startContext = Cmint.app[index[0]];
         context = Cmint.app[index.shift()];
-        console.log(context);
         appContext = retrieveVueContext(index, context);
         if (!newIndex) {
             appContext.context.splice(appContext.key, 0, data);

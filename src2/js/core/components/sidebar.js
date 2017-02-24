@@ -23,9 +23,11 @@ Vue.component('sidebar', {
         componentList: this.components
     }},
     mounted: function() {
+        Cmint.componentList = this.componentList;
         var _this = this;
         this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            Cmint.componentList = _this.componentList;
         })
     }
 })

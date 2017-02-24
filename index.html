@@ -62,26 +62,6 @@
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
 </div>
-<!-- <div id="App" v-cloak>
-    <context id="Stage" data-context-name="stage" :children="stage"></context>
-    <context id="Components" data-context-name="components" :children="components"></context>
-    <div class="Buttons">
-        <button class="Button-Undo" @click="undo" :disabled="!previous">undo</button>
-        <button class="Button-Save" @click="save">save</button>
-        <button class="Button-Load" @click="load">load</button>
-    </div>
-    <div style="clear:both;"></div>
-    <aside style="float:right; width: 48%">
-        <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
-    </aside>
-    <wrap :config="test" v-on:showfields="showFields"></wrap>
-    <div style="clear:both;"></div>
-
-    <pre id="Model" v-text="toJson(stage)"></pre>
-    <pre id="Model-Saved" v-text="toJson(saved)"></pre>
-
-    <textarea style="display: none" id="AvailableComponents">[{"_index": "","_name": "container","container": [{"_index": "", "_name": "thing"}]},{"_index": "", "_name": "thing"},{"_index": "", "_name": "thing", "css": {"background": "lightgreen"}}]</textarea>
-</div> -->
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>

@@ -2,7 +2,7 @@ Drag.onDrag = function(element, source) {
     
     if (source === Drag.components) {
         Drag.draggedIndex = Index.getDomIndex(element);
-        Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex));
+        Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex, null, Cmint.componentList));
         Util.debug('dragging from components at ' + Drag.draggedIndex);
     }
 

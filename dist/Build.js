@@ -83,9 +83,16 @@ var Index = (function() {
         }
     }
 
-    function getVueIndex(index, context) {
+    function getVueIndex(index, context, env) {
         var data;
-        data = Util.copy(Cmint.app[index.shift()]);
+        var env = env || Cmint.app;
+        console.log(env);
+        if (env === Cmint.componentList) {
+            data = Util.copy(env);
+            index.shift();
+        } else {
+            data = Util.copy(env[index.shift()]);
+        }
         index.forEach(function(key, i) {
             if (context && (i === index.length - 1)) {
                 data = {data: data, key: key};
@@ -117,7 +124,6 @@ var Index = (function() {
         var startContext, context, appContext, keyName, cut, newContext;
         startContext = Cmint.app[index[0]];
         context = Cmint.app[index.shift()];
-        console.log(context);
         appContext = retrieveVueContext(index, context);
         if (!newIndex) {
             appContext.context.splice(appContext.key, 0, data);
@@ -380,9 +386,11 @@ Vue.component('sidebar', {
         componentList: this.components
     }},
     mounted: function() {
+        Cmint.componentList = this.componentList;
         var _this = this;
         this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            Cmint.componentList = _this.componentList;
         })
     }
 })
@@ -420,14 +428,16 @@ Cmint.createComponent({
 })
 Cmint.createComponent({
     template: '\
-        <div class="Container">\
+        <div class="Container" style="border:1px solid black;padding:16px;">\
             <context :children="config.container" data-context-name="container"></context>\
         </div>',
     config: {
         _name: 'container',
         _display: 'Container',
         _category: 'Layout',
-        container: []
+        container: [
+            { _name: 'thing', _display: 'Thing', _category: 'Content' }
+        ]
     }
 })
 Cmint.createComponent({
@@ -815,7 +825,7 @@ Drag.onDrag = function(element, source) {
     
     if (source === Drag.components) {
         Drag.draggedIndex = Index.getDomIndex(element);
-        Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex));
+        Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex, null, Cmint.componentList));
         Util.debug('dragging from components at ' + Drag.draggedIndex);
     }
 
