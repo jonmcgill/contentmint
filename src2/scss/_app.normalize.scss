@@ -18,6 +18,10 @@ body {
         // color: $color-accent;
     }
 
+    .hidden {
+        display: none !important;
+    }
+
     input[type="text"],
     textarea {
         background: white;

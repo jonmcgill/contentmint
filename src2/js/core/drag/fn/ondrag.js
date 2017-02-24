@@ -1,7 +1,11 @@
 Drag.onDrag = function(element, source) {
     
+    Bus.$emit('closeActionBar');
+
     if (source === Drag.components) {
         Drag.draggedIndex = Index.getDomIndex(element);
+        // Reference the componentList rather than app.stage because the user may
+        // have filtered the categories
         Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex, null, Cmint.componentList));
         Util.debug('dragging from components at ' + Drag.draggedIndex);
     }

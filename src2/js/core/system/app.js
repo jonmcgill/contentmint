@@ -21,6 +21,8 @@ $.getJSON('test/test-data.json', function(data) {
                 contentName: Data.contentName,
 
                 fieldsComponent: null,
+                focusedComponent: null,
+                
                 changes: null,
                 previous: null,
             },
@@ -37,7 +39,9 @@ $.getJSON('test/test-data.json', function(data) {
 
             mounted: function() {
                 Drag.init();
+                Cmint.fireDocHandlers();
                 Util.debug('mounted app');
+                $('#Loading').remove();
             }
 
         })

@@ -28,13 +28,11 @@
             ✓ placeholder for empty context regions
 
         Editing:
-            2 -> action bar component
-              sidebar thumbnail styles
-              how to indicate hover on a component?
-              trash component structure
-              copy component structure
-              component drag handle
-              component fields button
+            ✓ action bar component
+            ==>  sidebar thumbnail styles
+            ✓ how to indicate active component state
+            ==>  trash component structure
+            ==>  copy component structure
               tinymce inline editing
               tinymce editor synced with Vue data
               tinymce editing triggers field reprocessing
@@ -47,7 +45,7 @@
             ✓ loading templates
             ✓ sidebar component
             ✓ sidebar categories component
-            3 -> sidebar fields component
+            ==>  sidebar fields component
               way to inform the editor how to clean up its code
               loading graphic
               transition effects
@@ -57,6 +55,7 @@
 <div id="Loading" class="cmint">LOADING</div>
 <div id="App" v-cloak>
     <div id="Template"></div>
+    <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"
              :components="components"

@@ -15,6 +15,7 @@ var js_files = [
     './src2/js/core/components/context.js',
     './src2/js/core/components/categories.js',
     './src2/js/core/components/sidebar.js',
+    './src2/js/core/components/actionbar.js',
 
     './src2/js/components/**/*',
     './src2/js/processing/**/*',

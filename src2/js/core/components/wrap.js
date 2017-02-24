@@ -1,9 +1,12 @@
 Vue.component('wrap', {
     props: ['config'],
     template: '\
-        <div class="Component" @click="showFields">\
+        <div class="Component">\
             <component :is="config._name" :config="config"></component>\
         </div>',
+    data: function(){return{
+        environment: null
+    }},
     methods: {
         showFields: function() {
             this.$emit('showfields', this.config);
@@ -30,14 +33,19 @@ Vue.component('wrap', {
         }
     },
     mounted: function() {
+        this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
+        Cmint.actionBarHandler(this);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
         $('a').click(function(e) {
             e.preventDefault();
         })
+        
     },
     updated: function() {
+        this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
+        Cmint.actionBarHandler(this);
         Util.debug('updated "' + this.config._name + '" at ' + this.config._index);
     }
 })

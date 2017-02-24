@@ -248,9 +248,12 @@ var Cmint = (function() {
 Vue.component('wrap', {
     props: ['config'],
     template: '\
-        <div class="Component" @click="showFields">\
+        <div class="Component">\
             <component :is="config._name" :config="config"></component>\
         </div>',
+    data: function(){return{
+        environment: null
+    }},
     methods: {
         showFields: function() {
             this.$emit('showfields', this.config);
@@ -277,14 +280,19 @@ Vue.component('wrap', {
         }
     },
     mounted: function() {
+        this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
+        Cmint.actionBarHandler(this);
         Util.debug('mounted "' + this.config._name + '" at ' + this.config._index);
         $('a').click(function(e) {
             e.preventDefault();
         })
+        
     },
     updated: function() {
+        this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
+        Cmint.actionBarHandler(this);
         Util.debug('updated "' + this.config._name + '" at ' + this.config._index);
     }
 })
@@ -292,12 +300,12 @@ Vue.component('context', {
     props: ['children'],
     template: '\
         <div class="Context">\
-            <wrap v-for="child in children" :config="child"></wrap>\
-            <div class="context-insert" v-if="childNum < 1">Drag components here</div>\
-        \</div>',
+            <wrap v-for="child in children" :config="child" :key="child.id"></wrap>\
+            <div class="context-insert" v-if="childNum">Drag components here</div>\
+        </div>',
     computed: {
         childNum: function() {
-            return this.children.length;
+            return this.children.length === 0;
         }
     }
 
@@ -391,6 +399,61 @@ Vue.component('sidebar', {
         this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
             Cmint.componentList = _this.componentList;
+        })
+    }
+})
+Vue.component('actionbar', {
+    template: '\
+        <div id="ActionBar" :style="css" :class="{active: isActive, cmint: true}">\
+            <button class="actionbar-copy">\
+                <i class="fa fa-clone"></i></button>\
+            <button class="actionbar-trash">\
+                <i class="fa fa-trash-o"></i></button>\
+            <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
+                <i class="fa fa-cog"></i></button>\
+        </div>',
+    data: function(){return{
+        top: '20px',
+        left: '20px',
+        display: 'block',
+        isActive: false,
+        noFields: true
+    }},
+    computed: {
+        css: function() {
+            return {
+                'display': this.display,
+                'top': this.top,
+                'left': this.left,
+                'position': 'absolute'
+            }
+        }
+    },
+    methods: {
+        callFields: function() {
+            this.$bus.$emit('callComponentFields', Cmint.app.focusedComponent);
+        }
+    },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('getComponentCoordinates', function(spot, component) {
+            _this.top = spot.top;
+            _this.left = spot.left;
+            _this.hasFields = component._fields;
+            _this.display = 'block';
+        })
+        this.$bus.$on('openActionBar', function(component) {
+            _this.noFields = component.config._fields === undefined;
+            _this.isActive = true;
+            Util.debug('component in focus: ' + this.hasFields);
+        })
+        this.$bus.$on('closeActionBar', function() {
+            if (_this.isActive) {
+                _this.isActive = false;
+                setTimeout(function() {
+                    _this.display = 'none';
+                }, 200)
+            }
         })
     }
 })
@@ -823,8 +886,12 @@ var Drag = (function() {
 })()
 Drag.onDrag = function(element, source) {
     
+    Bus.$emit('closeActionBar');
+
     if (source === Drag.components) {
         Drag.draggedIndex = Index.getDomIndex(element);
+        // Reference the componentList rather than app.stage because the user may
+        // have filtered the categories
         Drag.draggedData = Util.copy(Index.getVueIndex(Drag.draggedIndex, null, Cmint.componentList));
         Util.debug('dragging from components at ' + Drag.draggedIndex);
     }
@@ -931,6 +998,67 @@ Drag.onRemove = function(element, container, source) {
     }
 
 }
+Cmint.actionBarHandler = function(component) {
+    if (component.environment === 'components') return;
+    var element = component.$el;
+    var $el = $(element);
+    $el.unbind();
+    $el.click(function(e) {
+        var nearestComponent = $(e.target).closest('.Component');
+        if (nearestComponent[0] === element && !nearestComponent.hasClass('active')) {
+
+            Cmint.app.focusedComponent = component;
+
+            setTimeout(function() {
+                var offset = $el.offset();
+                var output = {};
+                output.top = offset.top + 'px';
+                output.left = offset.left + 'px';
+                output.handle = offset.left + $el.width() + 'px';
+
+                if($('#ActionBar.active').length) {
+                    Bus.$emit('closeActionBar');
+                    setTimeout(function() {
+                        Bus.$emit('getComponentCoordinates', output, component);
+                        setTimeout(function() {
+                            Bus.$emit('openActionBar', component);
+                        }, 100);                                        
+                    },200)
+                } else {
+                    Bus.$emit('getComponentCoordinates', output, component);
+                    setTimeout(function() {
+                        Bus.$emit('openActionBar', component);
+                    }, 100); 
+                }
+            }, 50);
+        }
+    })
+}
+Cmint.fireDocHandlers = function() {
+    $(document).on({
+
+        'click': function(e) {
+            var $target = $(e.target);
+            var isComponent = $target.closest('.Component').length;
+            var isInStage = $target.closest('#Stage').length;
+            var isActionBar = $target.closest('#ActionBar').length;
+
+            if (isComponent && isInStage) {
+                var component = $target.closest('.Component');
+                if (!component.hasClass('active')) {
+                    $('.Component.active').removeClass('active');
+                    component.addClass('active');
+                }
+            } else {
+                $('.Component.active').removeClass('active');
+                if (!isActionBar) {
+                    Bus.$emit('closeActionBar');
+                }
+            }
+        }
+
+    })
+}
 Cmint.load = function() {
     this.stage = Util.copy(this.saved);
     Vue.nextTick(Drag.updateContainers);
@@ -1019,6 +1147,8 @@ $.getJSON('test/test-data.json', function(data) {
                 contentName: Data.contentName,
 
                 fieldsComponent: null,
+                focusedComponent: null,
+                
                 changes: null,
                 previous: null,
             },
@@ -1035,7 +1165,9 @@ $.getJSON('test/test-data.json', function(data) {
 
             mounted: function() {
                 Drag.init();
+                Cmint.fireDocHandlers();
                 Util.debug('mounted app');
+                $('#Loading').remove();
             }
 
         })

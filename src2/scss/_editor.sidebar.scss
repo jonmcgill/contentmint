@@ -6,7 +6,8 @@
         bottom: 0;
         right: 0;
         background: $color-bg-lightgray;
-        box-shadow: 0 0px 2px 1px #ccc;
+        // box-shadow: 0 0px 2px 1px #ccc;
+        border-left: 1px solid #ddd;
         width: 24em;
     }
 
