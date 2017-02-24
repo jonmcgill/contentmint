@@ -1,26 +1,38 @@
 Vue.component('field-choice', {
     props: ['field', 'component'],
     template: '\
-        <div class="field-instance">\
-            <label>{{ field.label }}</label>\
-            <div class="field-choice-wrap">\
-                <span class="field-selected" v-text="selected"></span>\
+        <div class="field-instance field-choice-container">\
+            <label class="field-choice-label">{{ field.label }}</label>\
+            <div :class="{\'field-choice-wrap\':true, active: toggle}">\
+                <div class="field-selected" @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </div>\
                 <div class="field-choices">\
                     <div v-for="choice in field.choices"\
                          v-text="displayName(choice)"\
                          @click="process(choice)"></div>\
                 </div>\
             </div>\
-            <div style="background:#eee;padding:0.5em" v-if="selected !== \'None\'">\
+            <div class="field-selected-field-wrap" v-if="selected !== \'None\'">\
                 <field :field="selectionData" :component="component"></field>\
             </div>\
         </div>',
     data: function() { return {
+        toggle: false,
         fields: Fields,
         selected: this.field.selected || 'None',
         selectionData: this.field.selectionData || null,
         selectedFieldData: this.field.selectedFieldData || null
     }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true,
+                'fa-chevron-left': !this.toggle,
+                'fa-chevron-down': this.toggle
+            }
+        }
+    },
     methods: {
         displayName: function(choice) {
             if (choice === 'None') {
@@ -31,6 +43,7 @@ Vue.component('field-choice', {
         },
         process: function(selection) {
             var _this = this;
+            _this.toggle = false;
             _this.selectionData = null;
             _this.selectedFieldData = null;
             _this.selected = 'None';

@@ -27,7 +27,8 @@ Vue.component('actionbar', {
     },
     methods: {
         callFields: function() {
-            this.$bus.$emit('callComponentFields', Cmint.app.focusedComponent);
+            this.$bus.$emit('callComponentFields');
+            this.$bus.$emit('closeActionBar');
         }
     },
     mounted: function() {

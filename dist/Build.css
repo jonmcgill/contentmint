@@ -23,11 +23,29 @@ body {
   padding: 0.65em 0.8em;
   outline: none;
   border: 1px solid #ccc;
-  box-shadow: inset 0 0 2px #ccc; }
+  color: rgba(0, 0, 0, 0.73); }
   .cmint input[type="text"]:focus,
   .cmint textarea:focus {
     border: 1px solid #039BE5;
     box-shadow: 0px 0px 2px 0px #039BE5; }
+
+.cmint ::-webkit-input-placeholder {
+  color: rgba(89, 89, 89, 0.5);
+  font-style: italic; }
+
+.cmint :-moz-placeholder {
+  /* Firefox 18- */
+  color: rgba(89, 89, 89, 0.5);
+  font-style: italic; }
+
+.cmint ::-moz-placeholder {
+  /* Firefox 19+ */
+  color: rgba(89, 89, 89, 0.5);
+  font-style: italic; }
+
+.cmint :-ms-input-placeholder {
+  color: rgba(89, 89, 89, 0.5);
+  font-style: italic; }
 
 .gu-mirror {
   position: fixed !important;
@@ -51,6 +69,22 @@ body {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=20); }
 
+#Overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: rgba(50, 50, 50, 0.5);
+  opacity: 0;
+  display: none;
+  transition: opacity 300ms; }
+  #Overlay.active {
+    display: block; }
+  #Overlay.visible {
+    opacity: 1; }
+
 #Template {
   margin: 2em 27em 2em 4em; }
 
@@ -58,10 +92,11 @@ body {
   position: fixed;
   top: 0;
   bottom: 0;
-  right: 0;
+  right: 0em;
   background: #f2f2f2;
   border-left: 1px solid #ddd;
-  width: 24em; }
+  width: 24em;
+  z-index: 35; }
 
 .cmint .sidebar-top {
   padding: 1em 0 1em; }
@@ -70,7 +105,7 @@ body {
     content: '';
     clear: both; }
   .cmint .sidebar-top .content-name {
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.5);
     padding: 0.2em 0.5em;
     margin-left: 1em;
     float: left; }
@@ -79,7 +114,7 @@ body {
     margin-right: 1em;
     background: #fafafa;
     padding: 0.2em 0.5em;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.5);
     border: 1px solid #cdcdcd;
     border-radius: 3px;
     cursor: pointer; }
@@ -104,6 +139,206 @@ body {
   position: absolute;
   top: 8.58em;
   bottom: 0; }
+
+.cmint.fields-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: -30em;
+  border-left: 1px solid #ddd;
+  background: #f2f2f2;
+  width: 24em;
+  z-index: 40;
+  padding: 1em;
+  transition: right 200ms; }
+  .cmint.fields-container.active {
+    right: 0; }
+
+.cmint .fields-close-btn {
+  background: none;
+  outline: none;
+  border: none;
+  padding: 0.2em 0.5em;
+  font: 1em sans-serif;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: pointer; }
+  .cmint .fields-close-btn:hover {
+    color: rgba(0, 0, 0, 0.73); }
+  .cmint .fields-close-btn i {
+    font-size: 0.8em;
+    display: inline-block;
+    margin-right: 0.5em;
+    position: relative;
+    bottom: 1px; }
+
+.cmint .fields-header {
+  font-weight: bold;
+  margin: 2em 0 0.5em; }
+
+.cmint .field-tokens {
+  color: rgba(0, 0, 0, 0.5);
+  padding: 0.4em 0.6em; }
+  .cmint .field-tokens i {
+    display: inline-block;
+    cursor: pointer;
+    position: relative; }
+    .cmint .field-tokens i:after {
+      content: 'If you want to pull in content from another area within a component, use a token. If it is available, the editor will know how to dynamically tie it to your field.';
+      display: none;
+      background: #444;
+      position: absolute;
+      margin-top: 12px;
+      width: 14em;
+      padding: 1em;
+      color: white;
+      font-family: sans-serif;
+      border-radius: 3px;
+      line-height: 1.7;
+      box-shadow: 0 3px 6px #dedede; }
+    .cmint .field-tokens i:hover {
+      color: rgba(0, 0, 0, 0.73); }
+      .cmint .field-tokens i:hover:after {
+        display: block; }
+
+.cmint .token-wrap span {
+  font-size: 0.8em;
+  background: #e5e5e5;
+  padding: 3px 5px;
+  border: 1px solid #cdcdcd;
+  border-radius: 3px; }
+
+.cmint .field-list {
+  margin-top: 2em; }
+
+.cmint .field-wrap {
+  margin-bottom: 2em; }
+  .cmint .field-wrap label {
+    color: rgba(0, 0, 0, 0.5);
+    display: block;
+    margin-bottom: 0.3em; }
+  .cmint .field-wrap input[type="text"], .cmint .field-wrap textarea {
+    background: #fafafa;
+    font-size: 0.9em;
+    border-radius: 3px;
+    margin-bottom: 0.8em; }
+  .cmint .field-wrap .field-help {
+    margin-top: -6px;
+    margin-left: 4px;
+    font-style: italic;
+    -webkit-font-smoothing: antialiased; }
+
+.cmint .field-group-wrap {
+  background: #fafafa;
+  padding: 0.5em;
+  border: 1px solid #cdcdcd; }
+
+.cmint .field-choice-label {
+  width: 50%;
+  float: left;
+  padding: 0.3em 0.5em 0.3em 0; }
+  .cmint .field-choice-label:after {
+    content: ':'; }
+
+.cmint .field-choice-wrap {
+  width: 50%;
+  float: right;
+  position: relative; }
+
+.cmint .field-choices {
+  position: absolute;
+  z-index: 100;
+  background: #fafafa;
+  border: 1px solid #cdcdcd;
+  width: 100%;
+  border-top: 0;
+  display: none; }
+  .cmint .field-choices > div {
+    color: rgba(0, 0, 0, 0.5);
+    padding: 0.2em 0.5em;
+    cursor: pointer; }
+    .cmint .field-choices > div:hover {
+      background: #039BE5;
+      color: white;
+      -webkit-font-smoothing: antialiased; }
+
+.cmint .field-selected {
+  color: rgba(0, 0, 0, 0.5);
+  padding: 0.2em 0.5em;
+  background: #fafafa;
+  border: 1px solid #cdcdcd;
+  width: 100%;
+  display: inline-block;
+  cursor: pointer; }
+  .cmint .field-selected:hover {
+    background: white;
+    color: rgba(0, 0, 0, 0.73);
+    box-shadow: 0 3px 6px #dedede; }
+  .cmint .field-selected i {
+    float: right;
+    font-size: 0.8em;
+    position: relative;
+    top: 4px; }
+
+.cmint .field-selected-field-wrap {
+  clear: both;
+  position: relative;
+  padding-top: 10px; }
+
+.cmint .field-choice-wrap.active .field-selected {
+  background: white;
+  color: rgba(0, 0, 0, 0.73);
+  box-shadow: 0 3px 6px #dedede; }
+
+.cmint .field-choice-wrap.active .field-choices {
+  display: block; }
+
+.cmint .dropdown {
+  position: relative; }
+  .cmint .dropdown button {
+    text-align: left;
+    width: 100%;
+    background: #fafafa;
+    border: none;
+    font: 1em sans-serif;
+    padding: 0.65em 0.8em;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.5);
+    margin: 0;
+    outline: none; }
+
+.cmint .dropdown > button {
+  border: 1px solid #cdcdcd; }
+  .cmint .dropdown > button:hover {
+    background: white;
+    color: rgba(0, 0, 0, 0.73);
+    box-shadow: 0 3px 6px #dedede; }
+  .cmint .dropdown > button i {
+    float: right;
+    position: relative;
+    top: 4px;
+    font-size: 0.8em; }
+
+.cmint .dropdown-list {
+  position: absolute;
+  width: 100%;
+  border: 1px solid #cdcdcd;
+  display: none;
+  margin-top: -1px;
+  z-index: 100; }
+  .cmint .dropdown-list > button {
+    margin: 0; }
+    .cmint .dropdown-list > button:hover {
+      background: #38bcfc;
+      color: white;
+      -webkit-font-smoothing: antialiased; }
+
+.cmint .dropdown.active > button {
+  border-bottom: 1px solid transparent;
+  color: rgba(0, 0, 0, 0.73);
+  background: white; }
+
+.cmint .dropdown.active .dropdown-list {
+  display: block; }
 
 .cmint .category-container {
   margin: 0 1em;
@@ -136,12 +371,12 @@ body {
       .cmint .category-container .category-selected:hover i, .cmint .category-container .category-selected:hover span {
         color: rgba(0, 0, 0, 0.73); }
     .cmint .category-container .category-selected span {
-      color: rgba(0, 0, 0, 0.4); }
+      color: rgba(0, 0, 0, 0.5); }
     .cmint .category-container .category-selected i {
       float: right;
       font-size: 0.8em;
       margin-top: 0.5em;
-      color: rgba(38, 38, 38, 0.4); }
+      color: rgba(38, 38, 38, 0.5); }
   .cmint .category-container .category-list {
     display: none;
     position: absolute;
@@ -164,15 +399,14 @@ body {
 .context-insert {
   text-align: center;
   background: #f2f2f2;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(0, 0, 0, 0.5);
   padding: 0.5em 1em;
   border: 1px dashed #cdcdcd; }
 
 #ActionBar {
-  width: 1.5em;
   opacity: 0;
   transition: opacity 200ms;
-  margin-left: -36px;
+  margin-left: -44px;
   margin-top: -2px; }
   #ActionBar.active {
     opacity: 1; }
@@ -180,14 +414,12 @@ body {
     display: block;
     background: #1fb4fc;
     color: rgba(0, 0, 0, 0.7);
-    border: 1px solid #0279b3;
-    font-size: 0.8em;
+    border: none;
+    font-size: 1em;
     font-weight: bold;
-    width: 2.2em;
-    height: 2.2em;
-    border-radius: 50%;
+    width: 2.5em;
+    padding: 0.7em 0;
     cursor: pointer;
-    margin-bottom: 3px;
     outline: none;
     position: relative; }
     #ActionBar button:hover:after {
@@ -200,13 +432,19 @@ body {
       color: rgba(255, 255, 255, 0.9);
       font-weight: normal;
       top: 3px;
-      left: 28px; }
+      left: 40px; }
     #ActionBar button:hover {
       background: #5bc8fd;
       color: black; }
-  #ActionBar .actionbar-copy:hover:after {
-    content: 'Copy'; }
-  #ActionBar .actionbar-trash:hover:after {
-    content: 'Remove'; }
-  #ActionBar .actionbar-fields:hover:after {
-    content: 'Edit fields'; }
+  #ActionBar .actionbar-copy:hover {
+    background: #81C784; }
+    #ActionBar .actionbar-copy:hover:after {
+      content: 'Copy'; }
+  #ActionBar .actionbar-trash:hover {
+    background: #E57373; }
+    #ActionBar .actionbar-trash:hover:after {
+      content: 'Remove'; }
+  #ActionBar .actionbar-fields:hover {
+    background: #BCAAA4; }
+    #ActionBar .actionbar-fields:hover:after {
+      content: 'Settings'; }

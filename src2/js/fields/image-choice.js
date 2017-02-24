@@ -3,7 +3,7 @@ Cmint.createField({
     config: {
         type: 'field-choice',
         display: 'Image Input Type',
-        label: 'Select an image input type (field-choice)',
+        label: 'Image Input Type',
         input: 'selected-field',
         choices: [
             {   name: 'image-source',

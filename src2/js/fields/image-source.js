@@ -3,7 +3,7 @@ Cmint.createField({
     config: {
         type: 'field-text',
         display: 'Image URL',
-        label: 'Write in an image URL (field-text)',
+        label: 'Image URL Address',
         input: 'url',
         help: 'Absolute path including http(s)://',
         check: /^https*:\/\/.+(\.[a-zA-Z]+)$/g,

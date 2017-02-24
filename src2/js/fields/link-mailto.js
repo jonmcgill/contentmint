@@ -4,7 +4,7 @@ Cmint.createField({
         type: 'field-group',
         display: 'Email Link',
         hook: 'mailto',
-        label: 'Fill in the fields for your email link (field-group)',
+        label: 'Email Link',
         input: [
             { name: 'to', 
               label: 'The email sendee', 

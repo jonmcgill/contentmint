@@ -294,6 +294,9 @@ Vue.component('wrap', {
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
         Util.debug('updated "' + this.config._name + '" at ' + this.config._index);
+        $('a').click(function(e) {
+            e.preventDefault();
+        })
     }
 })
 Vue.component('context', {
@@ -431,7 +434,8 @@ Vue.component('actionbar', {
     },
     methods: {
         callFields: function() {
-            this.$bus.$emit('callComponentFields', Cmint.app.focusedComponent);
+            this.$bus.$emit('callComponentFields');
+            this.$bus.$emit('closeActionBar');
         }
     },
     mounted: function() {
@@ -454,6 +458,29 @@ Vue.component('actionbar', {
                     _this.display = 'none';
                 }, 200)
             }
+        })
+    }
+})
+Vue.component('overlay', {
+    template: '<div id="Overlay"></div>',
+    data: function() {return{
+        isActive: false,
+        isVisible: false
+    }},
+    mounted: function() {
+        var _this = this;
+        var $el = $(this.$el);
+        this.$bus.$on('callComponentFields', function() {
+            $el.addClass('active');
+            setTimeout(function() {
+                $el.addClass('visible');
+            }, 20);
+        })
+        this.$bus.$on('closeFieldWidget', function() {
+            $el.removeClass('visible');
+            setTimeout(function() {
+                $el.removeClass('active');
+            }, 200);
         })
     }
 })
@@ -529,14 +556,18 @@ Cmint.createProcess('test', function(input) {
 })
 Cmint.createMenu('image-list', {
     'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-    'Random': 'https://unsplash.it/800/300'
+    'Random': 'https://unsplash.it/800/300',
+    'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
+    'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
+    'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
+    'YoYo': 'http://mediad.publicbroadcasting.net/p/michigan/files/styles/x_large/public/yoyo_ma_trumpie_12.jpg'
 })
 Cmint.createField({
     name: 'image-choice',
     config: {
         type: 'field-choice',
         display: 'Image Input Type',
-        label: 'Select an image input type (field-choice)',
+        label: 'Image Input Type',
         input: 'selected-field',
         choices: [
             {   name: 'image-source',
@@ -553,7 +584,7 @@ Cmint.createField({
     config: {
         type: 'field-dropdown',
         display: 'Preset Images',
-        label: 'Select an image (field-dropdown)',
+        label: 'Image List',
         input: 'selected-image',
         menu: 'image-list'
     }
@@ -563,7 +594,7 @@ Cmint.createField({
     config: {
         type: 'field-text',
         display: 'Image URL',
-        label: 'Write in an image URL (field-text)',
+        label: 'Image URL Address',
         input: 'url',
         help: 'Absolute path including http(s)://',
         check: /^https*:\/\/.+(\.[a-zA-Z]+)$/g,
@@ -576,7 +607,7 @@ Cmint.createField({
         type: 'field-group',
         display: 'Email Link',
         hook: 'mailto',
-        label: 'Fill in the fields for your email link (field-group)',
+        label: 'Email Link',
         input: [
             { name: 'to', 
               label: 'The email sendee', 
@@ -601,7 +632,7 @@ Vue.component('field-text', {
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
             <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
-            <div v-if="field.help" :style="check">{{ field.help }}</div>\
+            <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
         </div>',
     data: function() { return {
         fields: Fields,
@@ -609,7 +640,7 @@ Vue.component('field-text', {
     }},
     computed: {
         check: function() {
-            return this.pass ? {'color': '#aaa'} : {'color': 'red'}; 
+            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'}; 
         }
     },
     methods: {
@@ -643,20 +674,30 @@ Vue.component('field-dropdown', {
     template: '\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
-            <div class="dropdown">\
-                <button v-text="selected"></button>\
+            <div :class="{dropdown:true, active:toggle}">\
+                <button @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </button>\
                 <div class="dropdown-list">\
                     <button v-for="(item, key) in menu"\
                             v-text="key"\
-                            @click="process(key)"></button>\
+                            @click="process(key); toggle = !toggle"></button>\
                 </div>\
             </div>\
         </div>',
     data: function() { return {
         fields: Fields,
         menu: Menus[this.field.menu],
-        selected: 'Default'
+        selected: 'Default',
+        toggle: false
     }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true, 'fa-chevron-left': !this.toggle, 'fa-chevron-down': this.toggle
+            }
+        }
+    },
     methods: {
         process: function(selection) {
             var output = Menus[this.field.menu][selection];
@@ -676,26 +717,38 @@ Vue.component('field-dropdown', {
 Vue.component('field-choice', {
     props: ['field', 'component'],
     template: '\
-        <div class="field-instance">\
-            <label>{{ field.label }}</label>\
-            <div class="field-choice-wrap">\
-                <span class="field-selected" v-text="selected"></span>\
+        <div class="field-instance field-choice-container">\
+            <label class="field-choice-label">{{ field.label }}</label>\
+            <div :class="{\'field-choice-wrap\':true, active: toggle}">\
+                <div class="field-selected" @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </div>\
                 <div class="field-choices">\
                     <div v-for="choice in field.choices"\
                          v-text="displayName(choice)"\
                          @click="process(choice)"></div>\
                 </div>\
             </div>\
-            <div style="background:#eee;padding:0.5em" v-if="selected !== \'None\'">\
+            <div class="field-selected-field-wrap" v-if="selected !== \'None\'">\
                 <field :field="selectionData" :component="component"></field>\
             </div>\
         </div>',
     data: function() { return {
+        toggle: false,
         fields: Fields,
         selected: this.field.selected || 'None',
         selectionData: this.field.selectionData || null,
         selectedFieldData: this.field.selectedFieldData || null
     }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true,
+                'fa-chevron-left': !this.toggle,
+                'fa-chevron-down': this.toggle
+            }
+        }
+    },
     methods: {
         displayName: function(choice) {
             if (choice === 'None') {
@@ -706,6 +759,7 @@ Vue.component('field-choice', {
         },
         process: function(selection) {
             var _this = this;
+            _this.toggle = false;
             _this.selectionData = null;
             _this.selectedFieldData = null;
             _this.selected = 'None';
@@ -742,7 +796,7 @@ Vue.component('field-group', {
             <div class="field-group-wrap">\
                 <div class="field-group-input" v-for="(inp, key) in field.inputs">\
                     <label>{{ firstUppercase(key) }}</label>\
-                    <input v-if="inp.type === \'input\'"\
+                    <input type="text" v-if="inp.type === \'input\'"\
                         v-model="field.inputs[key].value"\
                         @keyup="process()"\
                         :placeholder="inp.label" />\
@@ -819,17 +873,63 @@ Vue.component('field', {
 Vue.component('fields', {
     props: ['component'],
     template: '\
-        <div class="fields-container">\
-            <div class="field-tokens" v-if="component._tokens">Available tokens: {{ tokens }}</div>\
-            <field v-for="field in component._fields.list" :field="field" :component="component"></field>\
+        <div :class="wrapClasses">\
+            <button class="fields-close-btn" @click="close">\
+                <i class="fa fa-chevron-left"></i>Components</button>\
+            <div class="fields-header">{{ \'Field Settings: \' + component._display }}</div>\
+            <div class="field-tokens" v-if="component._tokens">\
+                <i class="fa fa-question-circle-o"></i>\
+                <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+            </div>\
+            <div class="field-list">\
+                <field v-for="field in component._fields.list" :field="field" :component="component" :key="field.id"></field>\
+            </div>\
         </div>',
+    data: function(){return {
+        isActive: false
+    }},
     computed: {
+        wrapClasses: function() {
+            return {
+                'cmint': true,
+                'fields-container': true,
+                'active': this.isActive
+            }
+        },
         tokens: function() {
             return this.component._tokens.map(function(pair) {
-                return '{{'+ Object.keys(pair)[0] + '}}';
+                return '<span>{{ '+ Object.keys(pair)[0] + ' }}</span>';
             }).join(', ');
         }
-    }
+    },
+    methods: {
+        open: function() {
+            var _this = this;
+            setTimeout(function() {
+                _this.isActive = true;
+            },50);
+        },
+        close: function() {
+            var _this = this;
+            setTimeout(function() {
+                _this.isActive = false;
+                _this.$bus.$emit('closeFieldWidget');
+                setTimeout(function() {
+                    Cmint.app.fieldsComponent = null;
+                },200)
+                Util.debug('closed field wiget');
+            },50);
+            
+        }
+    },
+    mounted: function() {
+        this.open();
+        Util.debug('opened field wiget with ' + this.component._name)
+    },
+    // updated: function() {
+    //     this.open();
+    //     Util.debug('opened field wiget with ' + this.component._name)
+    // }
 })
 var Drag = (function() {
     
@@ -1164,10 +1264,19 @@ $.getJSON('test/test-data.json', function(data) {
             },
 
             mounted: function() {
+
                 Drag.init();
+
                 Cmint.fireDocHandlers();
+
+                var _this = this;
+                this.$bus.$on('callComponentFields', function() {
+                    _this.fieldsComponent = _this.focusedComponent.config;
+                })
+
                 Util.debug('mounted app');
                 $('#Loading').remove();
+
             }
 
         })

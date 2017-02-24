@@ -6,7 +6,7 @@ Vue.component('field-group', {
             <div class="field-group-wrap">\
                 <div class="field-group-input" v-for="(inp, key) in field.inputs">\
                     <label>{{ firstUppercase(key) }}</label>\
-                    <input v-if="inp.type === \'input\'"\
+                    <input type="text" v-if="inp.type === \'input\'"\
                         v-model="field.inputs[key].value"\
                         @keyup="process()"\
                         :placeholder="inp.label" />\

@@ -4,11 +4,12 @@
         position: fixed;
         top: 0;
         bottom: 0;
-        right: 0;
+        right: 0em;
         background: $color-bg-lightgray;
         // box-shadow: 0 0px 2px 1px #ccc;
         border-left: 1px solid #ddd;
         width: 24em;
+        z-index: 35;
     }
 
     .sidebar-top {

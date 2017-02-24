@@ -1,8 +1,7 @@
 #ActionBar {
-    width: 1.5em;
     opacity: 0;
     transition: opacity 200ms;
-    margin-left: -36px;
+    margin-left: -44px;
     margin-top: -2px;
     &.active {
         opacity: 1;
@@ -11,14 +10,12 @@
         display: block;
         background: lighten($color-accent, 10%);
         color: rgba(0,0,0,0.7);
-        border: 1px solid darken($color-accent, 10%);
-        font-size: 0.8em;
+        border: none;
+        font-size: 1em;
         font-weight: bold;
-        width: 2.2em;
-        height: 2.2em;
-        border-radius: 50%;
+        width: 2.5em;
+        padding: 0.7em 0;
         cursor: pointer;
-        margin-bottom: 3px;
         outline: none;
         position: relative;
         &:hover:after {
@@ -31,20 +28,29 @@
             color: rgba(255,255,255,0.9);
             font-weight: normal;
             top: 3px;
-            left: 28px;
+            left: 40px;
         }
         &:hover {
             background: lighten($color-accent, 22%);
             color: black;
         }
     }
-    .actionbar-copy:hover:after {
-        content: 'Copy';
+    .actionbar-copy:hover {
+        background: #81C784;
+        &:after {
+            content: 'Copy';
+        }
     }
-    .actionbar-trash:hover:after {
-        content: 'Remove';
+    .actionbar-trash:hover {
+        background: #E57373;
+        &:after {
+            content: 'Remove';
+        }
     }
-    .actionbar-fields:hover:after {
-        content: 'Edit fields';
+    .actionbar-fields:hover {
+        background: #BCAAA4;
+        &:after {
+            content: 'Settings';
+        }
     }
 }

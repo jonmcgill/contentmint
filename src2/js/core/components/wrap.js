@@ -47,5 +47,8 @@ Vue.component('wrap', {
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
         Util.debug('updated "' + this.config._name + '" at ' + this.config._index);
+        $('a').click(function(e) {
+            e.preventDefault();
+        })
     }
 })

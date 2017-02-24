@@ -1,10 +1,10 @@
 @import 'config.settings';
-
 @import 'app.normalize';
-
 @import 'editor.drag';
+@import 'editor.overlay';
 @import 'editor.template';
 @import 'editor.sidebar';
+@import 'editor.fields';
 @import 'editor.categories';
 @import 'editor.component';
 @import 'editor.context';

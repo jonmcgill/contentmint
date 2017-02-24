@@ -4,7 +4,7 @@ Vue.component('field-text', {
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
             <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
-            <div v-if="field.help" :style="check">{{ field.help }}</div>\
+            <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
         </div>',
     data: function() { return {
         fields: Fields,
@@ -12,7 +12,7 @@ Vue.component('field-text', {
     }},
     computed: {
         check: function() {
-            return this.pass ? {'color': '#aaa'} : {'color': 'red'}; 
+            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'}; 
         }
     },
     methods: {

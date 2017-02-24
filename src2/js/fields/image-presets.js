@@ -3,7 +3,7 @@ Cmint.createField({
     config: {
         type: 'field-dropdown',
         display: 'Preset Images',
-        label: 'Select an image (field-dropdown)',
+        label: 'Image List',
         input: 'selected-image',
         menu: 'image-list'
     }

@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
     sass = require('gulp-sass'),
+    plumber = require('gulp-plumber'),
     server = require('live-server');
 
 
@@ -16,6 +17,7 @@ var js_files = [
     './src2/js/core/components/categories.js',
     './src2/js/core/components/sidebar.js',
     './src2/js/core/components/actionbar.js',
+    './src2/js/core/components/overlay.js',
 
     './src2/js/components/**/*',
     './src2/js/processing/**/*',
@@ -56,6 +58,7 @@ gulp.task('dev', function() {
     })
     gulp.watch('src2/scss/**/*.scss', function() {
         return gulp.src('src2/scss/**/*.scss')
+            .pipe(plumber())
             .pipe(sass())
             .pipe(gulp.dest('dist/'))
     })

@@ -29,10 +29,11 @@
 
         Editing:
             ✓ action bar component
-            ==>  sidebar thumbnail styles
+              sidebar thumbnail styles
             ✓ how to indicate active component state
-            ==>  trash component structure
-            ==>  copy component structure
+              trash component structure
+              copy component structure
+            ✓ determine what can happen during field editting
               tinymce inline editing
               tinymce editor synced with Vue data
               tinymce editing triggers field reprocessing
@@ -45,7 +46,7 @@
             ✓ loading templates
             ✓ sidebar component
             ✓ sidebar categories component
-            ==>  sidebar fields component
+            ✓ sidebar fields component
               way to inform the editor how to clean up its code
               loading graphic
               transition effects
@@ -54,12 +55,14 @@
 <textarea style="display:none;" id="Data" class="cmint"></textarea>
 <div id="Loading" class="cmint">LOADING</div>
 <div id="App" v-cloak>
+    <overlay></overlay>
     <div id="Template"></div>
     <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
+    <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>

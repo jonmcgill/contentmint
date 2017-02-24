@@ -3,20 +3,30 @@ Vue.component('field-dropdown', {
     template: '\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
-            <div class="dropdown">\
-                <button v-text="selected"></button>\
+            <div :class="{dropdown:true, active:toggle}">\
+                <button @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </button>\
                 <div class="dropdown-list">\
                     <button v-for="(item, key) in menu"\
                             v-text="key"\
-                            @click="process(key)"></button>\
+                            @click="process(key); toggle = !toggle"></button>\
                 </div>\
             </div>\
         </div>',
     data: function() { return {
         fields: Fields,
         menu: Menus[this.field.menu],
-        selected: 'Default'
+        selected: 'Default',
+        toggle: false
     }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true, 'fa-chevron-left': !this.toggle, 'fa-chevron-down': this.toggle
+            }
+        }
+    },
     methods: {
         process: function(selection) {
             var output = Menus[this.field.menu][selection];

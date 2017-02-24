@@ -38,10 +38,19 @@ $.getJSON('test/test-data.json', function(data) {
             },
 
             mounted: function() {
+
                 Drag.init();
+
                 Cmint.fireDocHandlers();
+
+                var _this = this;
+                this.$bus.$on('callComponentFields', function() {
+                    _this.fieldsComponent = _this.focusedComponent.config;
+                })
+
                 Util.debug('mounted app');
                 $('#Loading').remove();
+
             }
 
         })

@@ -1,0 +1,243 @@
+.cmint {
+
+    &.fields-container {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: -30em;
+        border-left: 1px solid #ddd;
+        background: $color-bg-lightgray;
+        width: 24em;
+        z-index: 40;
+        padding: 1em;
+        transition: right 200ms;
+        &.active {
+            right: 0;
+        }
+    }
+
+    .fields-close-btn {
+        background: none;
+        outline: none;
+        border: none;
+        padding: 0.2em 0.5em;
+        font: 1em sans-serif;
+        color: $color-font-fade;
+        cursor: pointer;
+        &:hover {
+            color: $color-font-dark;
+        }
+        i {
+            font-size: 0.8em;
+            display: inline-block;
+            margin-right: 0.5em;
+            position: relative;
+            bottom: 1px;
+        }
+    }
+
+    .fields-header {
+        font-weight: bold;
+        margin: 2em 0 0.5em;
+    }
+
+    .field-tokens {
+        color: $color-font-fade;
+        padding: 0.4em 0.6em;
+        i {
+            display: inline-block;
+            cursor: pointer;
+            position: relative;
+            &:after {
+                content: 'If you want to pull in content from another area within a component, use a token. If it is available, the editor will know how to dynamically tie it to your field.';
+                display: none;
+                background: #444;
+                position: absolute;
+                margin-top: 12px;
+                width: 14em;
+                padding: 1em;
+                color: white;
+                font-family: sans-serif;
+                border-radius: 3px;
+                line-height: 1.7;
+                box-shadow: $shadow-sidebar-action;
+            }
+            &:hover {
+                color: $color-font-dark;
+                &:after {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    .token-wrap span {
+        font-size: 0.8em;
+        background: #e5e5e5;
+        padding: 3px 5px;
+        border: 1px solid $color-bd-light;
+        border-radius: 3px;
+    }
+
+    .field-list {
+        margin-top: 2em;
+    }
+
+    .field-wrap {
+
+        margin-bottom: 2em;
+
+        label {
+            color: $color-font-fade;
+            display: block;
+            margin-bottom: 0.3em;
+        }
+        input[type="text"], textarea {
+            background: #fafafa;
+            font-size: 0.9em;
+            border-radius: 3px;
+            margin-bottom: 0.8em;
+        }
+        .field-help {
+            margin-top: -6px;
+            margin-left: 4px;
+            font-style: italic;
+            -webkit-font-smoothing: antialiased;
+        }
+    }
+
+    .field-group-wrap {
+        background: #fafafa;
+        padding: 0.5em;
+        border: 1px solid $color-bd-light;
+    }
+
+    .field-choice-label {
+        width: 50%;
+        float: left;
+        padding: 0.3em 0.5em 0.3em 0;
+        &:after {
+            content: ':';
+        }
+    }
+    .field-choice-wrap {
+        width: 50%;
+        float: right;
+        position: relative;
+    }
+    .field-choices {
+        position: absolute;
+        z-index: 100;
+        background: #fafafa;
+        border: 1px solid $color-bd-light;
+        width: 100%;
+        border-top: 0;
+        display: none;
+        & > div {
+            color: $color-font-fade;
+            padding: 0.2em 0.5em;
+            cursor: pointer;
+            &:hover {
+                background: $color-accent;
+                color: white;
+                -webkit-font-smoothing: antialiased;
+            }
+        }
+    }
+    .field-selected {
+        color: $color-font-fade;
+        padding: 0.2em 0.5em;
+        background: #fafafa;
+        border: 1px solid $color-bd-light;
+        width: 100%;
+        display: inline-block;
+        cursor: pointer;
+        &:hover {
+            background: white;
+            color: $color-font-dark;
+            box-shadow: $shadow-sidebar-action;
+        }
+        i {
+            float: right;
+            font-size: 0.8em;
+            position: relative;
+            top: 4px;
+        }
+    }
+
+    .field-selected-field-wrap {
+        clear: both;
+        // border-top: 1px solid $color-bd-light;
+        position: relative;
+        // top: 10px;
+        padding-top: 10px;
+    }
+    .field-choice-wrap.active {
+        .field-selected {
+            background: white;
+            color: $color-font-dark;
+            box-shadow: $shadow-sidebar-action;
+        }
+        .field-choices {
+            display: block;
+        }
+    }
+
+    .dropdown {
+        position: relative;
+        button {
+            text-align: left;
+            width: 100%;
+            background: #fafafa;
+            border: none;
+            font: 1em sans-serif;
+            padding: 0.65em 0.8em;
+            cursor: pointer;
+            color: $color-font-fade;
+            margin: 0;
+            outline: none;
+        }
+    }
+    .dropdown > button {
+        border: 1px solid $color-bd-light;
+        &:hover {
+            background: white;
+            color: $color-font-dark;
+            box-shadow: $shadow-sidebar-action;
+        }
+        i {
+            float: right;
+            position: relative;
+            top: 4px;
+            font-size: 0.8em;
+        }
+    }
+    .dropdown-list {
+        position: absolute;
+        width: 100%;
+        border: 1px solid $color-bd-light;
+        display: none;
+        margin-top: -1px;
+        z-index: 100;
+        & > button {
+            // border-top: 1px solid transparent;
+            margin: 0;
+            &:hover { 
+                background: lighten($color-accent,15%);
+                color: white;
+                -webkit-font-smoothing: antialiased;
+            }
+        }
+    }
+    .dropdown.active {
+        & > button {
+            border-bottom: 1px solid transparent;
+            color: $color-font-dark;
+            background: white;
+        }
+        .dropdown-list {
+            display: block;
+        }
+    }
+
+}
