@@ -1,0 +1,52 @@
+#EditorToolbar {
+    position: fixed;
+    top: 1em;
+    right: 26.3em;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid $color-bd-light;
+
+    &, & * {
+        background: white;
+    }
+
+    & > * {
+        border-width: 0 !important;
+    }
+
+    *[style~="width:"] {
+        width: 33px !important;
+    }
+
+    *.mce-btn {
+        display: block !important;
+        margin: 0 !important;
+        border: none !important;
+        height: 2.4em !important;
+        &:not(:last-child) {
+            border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+        }
+        &:hover i {
+            color: rgba(0,0,0,0.9) !important;
+        }
+    }
+
+    i.mce-ico {
+        font-size: 0.8em !important;
+        text-align: center !important;
+        color: rgba(0,0,0,0.5) !important;
+        line-height: 2em;
+    }
+
+    *.mce-container, *.mce-container-body {
+        padding: 0 !important;
+        margin: 0 !important;
+        position: relative !important;
+    }
+
+}
+
+*.mce-edit-focus {
+        outline: none !important;
+        border: none !important;
+    }

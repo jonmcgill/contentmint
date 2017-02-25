@@ -34,8 +34,8 @@
               trash component structure
               copy component structure
             ✓ determine what can happen during field editting
-              tinymce inline editing
-              tinymce editor synced with Vue data
+            ==>  tinymce inline editing
+            ==>  tinymce editor synced with Vue data
               tinymce editing triggers field reprocessing
               tinymce output HTML has certain properties attached
               autosave
@@ -57,6 +57,7 @@
 <div id="App" v-cloak>
     <overlay></overlay>
     <div id="Template" :class="{ scale: !!fieldsComponent }"></div>
+    <div id="EditorToolbar"></div>
     <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"

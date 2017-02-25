@@ -27,13 +27,32 @@ var Util = (function() {
         return isNaN(convert) ? string : convert;
     }
 
+    function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+
+    function genID(num) {
+        var id = 'ID-', i = 1;
+        while (i <= num) {
+            if (i % 2 === 0) {
+                id += String.fromCharCode(random(65, 90));
+            } else {
+                id += String.fromCharCode(random(48, 57));
+            }
+            i++;
+        }
+        return id;
+    }
+
     return {
         contains: contains,
         debug: debug,
         jstr: jstr,
         jprs: jprs,
         copy: copy,
-        stringToNumber: stringToNumber
+        stringToNumber: stringToNumber,
+        genId: genID
     }
 
 })()

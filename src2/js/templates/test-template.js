@@ -1,3 +1,3 @@
 Cmint.createTemplate('test-template', [
-    'thing', 'container', 'banner-image'   
+    'body-copy', 'thing', 'container', 'banner-image'   
 ])

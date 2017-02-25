@@ -40,7 +40,7 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
-        
+        Editor.init(this);
     },
     updated: function() {
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
@@ -50,5 +50,6 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.init(this);
     }
 })

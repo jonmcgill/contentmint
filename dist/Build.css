@@ -442,21 +442,25 @@ body {
   opacity: 0;
   transition: opacity 200ms;
   margin-left: -44px;
-  margin-top: -2px; }
+  margin-top: -2px;
+  border: 1px solid #038acc;
+  border-top: 1px solid transparent;
+  border-radius: 3px; }
   #ActionBar.active {
     opacity: 1; }
   #ActionBar button {
     display: block;
     background: #1fb4fc;
-    color: rgba(0, 0, 0, 0.7);
+    color: rgba(0, 0, 0, 0.8);
     border: none;
-    font-size: 1em;
+    font-size: 0.85em;
     font-weight: bold;
-    width: 2.5em;
+    width: 30px;
     padding: 0.7em 0;
     cursor: pointer;
     outline: none;
-    position: relative; }
+    position: relative;
+    border-top: 1px solid #038acc; }
     #ActionBar button:hover:after {
       position: absolute;
       width: 5em;
@@ -483,3 +487,39 @@ body {
     background: #BCAAA4; }
     #ActionBar .actionbar-fields:hover:after {
       content: 'Settings'; }
+
+#EditorToolbar {
+  position: fixed;
+  top: 1em;
+  right: 26.3em;
+  overflow: hidden;
+  border-radius: 5px;
+  border: 1px solid #cdcdcd; }
+  #EditorToolbar, #EditorToolbar * {
+    background: white; }
+  #EditorToolbar > * {
+    border-width: 0 !important; }
+  #EditorToolbar *[style~="width:"] {
+    width: 33px !important; }
+  #EditorToolbar *.mce-btn {
+    display: block !important;
+    margin: 0 !important;
+    border: none !important;
+    height: 2.4em !important; }
+    #EditorToolbar *.mce-btn:not(:last-child) {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important; }
+    #EditorToolbar *.mce-btn:hover i {
+      color: rgba(0, 0, 0, 0.9) !important; }
+  #EditorToolbar i.mce-ico {
+    font-size: 0.8em !important;
+    text-align: center !important;
+    color: rgba(0, 0, 0, 0.5) !important;
+    line-height: 2em; }
+  #EditorToolbar *.mce-container, #EditorToolbar *.mce-container-body {
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important; }
+
+*.mce-edit-focus {
+  outline: none !important;
+  border: none !important; }

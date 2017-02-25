@@ -2,10 +2,10 @@ var Components = Components || {},
     Fields = Fields || {},
     Process = Process || {},
     Menus = Menus || {},
-    Templates = Templates || {}
-    Data = Data || {};
-
-var Bus = Bus || new Vue();
+    Editor = Editor || {},
+    Templates = Templates || {},
+    Data = Data || {},
+    Bus = Bus || new Vue();
 
 Object.defineProperties(Vue.prototype, {
     $bus: {
@@ -43,13 +43,32 @@ var Util = (function() {
         return isNaN(convert) ? string : convert;
     }
 
+    function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+
+    function genID(num) {
+        var id = 'ID-', i = 1;
+        while (i <= num) {
+            if (i % 2 === 0) {
+                id += String.fromCharCode(random(65, 90));
+            } else {
+                id += String.fromCharCode(random(48, 57));
+            }
+            i++;
+        }
+        return id;
+    }
+
     return {
         contains: contains,
         debug: debug,
         jstr: jstr,
         jprs: jprs,
         copy: copy,
-        stringToNumber: stringToNumber
+        stringToNumber: stringToNumber,
+        genId: genID
     }
 
 })()
@@ -287,7 +306,7 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
-        
+        Editor.init(this);
     },
     updated: function() {
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
@@ -297,6 +316,7 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.init(this);
     }
 })
 Vue.component('context', {
@@ -516,6 +536,17 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
+    template: '<div data-editor v-html="config._content.copy"></div>',
+    config: {
+        _name: 'body-copy',
+        _display: 'Body Copy',
+        _category: 'Content',
+        _content: {
+            copy: '<p>This is some lorem ipsum</p>'
+        }
+    }
+})
+Cmint.createComponent({
     template: '\
         <div class="Container" style="border:1px solid black;padding:16px;">\
             <context :children="config.container" data-context-name="container"></context>\
@@ -623,7 +654,7 @@ Cmint.createField({
     }
 })
 Cmint.createTemplate('test-template', [
-    'thing', 'container', 'banner-image'   
+    'body-copy', 'thing', 'container', 'banner-image'   
 ])
 Vue.component('field-text', {
     props: ['field', 'component'],
@@ -1251,6 +1282,26 @@ Cmint.watchOutputUpdates = function(fieldComponent) {
         if (output !== fieldComponent.field.result) {
             fieldComponent.process();
         }
+    })
+}
+Editor.config = {
+    inline: true,
+    menubar: false,
+    insert_toolbar: false,
+    fixed_toolbar_container: '#EditorToolbar',
+    plugins: 'link lists paste textpattern autolink',
+    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist'
+}
+
+Editor.init = function(component) {
+    if (component.environment === 'components') return;
+    $(component.$el).find('[data-editor]').each(function() {
+        var config = Util.copy(Editor.config);
+        var id = Util.genId(10);
+        $(this).attr('data-editor', id);
+        config.selector = '[data-editor="'+id+'"]';
+        tinymce.init(config);
+        $(this).removeAttr('data-editor');
     })
 }
 $.getJSON('test/test-data.json', function(data) {
