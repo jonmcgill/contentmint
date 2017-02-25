@@ -370,6 +370,10 @@ Vue.component('categories', {
         _this.categories = _this.categories.filter(function(cat, i) {
             return _this.categories.indexOf(cat) === i;
         }).sort();
+
+        this.$bus.$on('closeCategoryList', function() {
+            _this.toggle = false;
+        })
     }
 })
 Vue.component('sidebar', {
@@ -496,20 +500,15 @@ Cmint.createComponent({
         _display: 'Banner Image',
         _category: 'Images',
         _tokens: [
-            { 'URL': 'link' },
-            { 'FOO': 'foo' },
-            { 'SOURCE': 'source' }
+            { 'url': 'link' },
+            { 'source': 'source' }
         ],
         _fields: {
             output: {
-                source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-                source2: '',
-                foo: '',
-                link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
+                source: 'http://placehold.it/800x300',
+                link: ''
             },
             list: [
-                {   name: 'link-mailto',
-                    result: 'link'    },
                 {   name: 'image-choice',
                     result: 'source'    }
             ]
@@ -631,8 +630,10 @@ Vue.component('field-text', {
     template:'\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
-            <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
-            <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
+            <div class="field-input-wrap">\
+                <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+                <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
+            </div>\
         </div>',
     data: function() { return {
         fields: Fields,
@@ -699,6 +700,9 @@ Vue.component('field-dropdown', {
         }
     },
     methods: {
+        dropdown: function() {
+            
+        },
         process: function(selection) {
             var output = Menus[this.field.menu][selection];
             if (this.field.hook) {
@@ -712,6 +716,12 @@ Vue.component('field-dropdown', {
     beforeMount: function() {
         this.selected = this.field.inputs[this.fields[this.field.name].input] || 'Default';
         this.process(this.selected);
+    },
+    mounted: function() {
+        var _this = this;
+        _this.$bus.$on('closeDropdown', function() {
+            _this.toggle = false;
+        })
     }
 })
 Vue.component('field-choice', {
@@ -781,6 +791,12 @@ Vue.component('field-choice', {
                 Util.debug('field chosen: ' + _this.selected);
             })
         }
+    },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('closeFieldChoice', function() {
+            _this.toggle = false;
+        })
     },
     beforeMount: function() {
         if (this.field.choices[0] !== 'None') {
@@ -874,12 +890,15 @@ Vue.component('fields', {
     props: ['component'],
     template: '\
         <div :class="wrapClasses">\
-            <button class="fields-close-btn" @click="close">\
-                <i class="fa fa-chevron-left"></i>Components</button>\
-            <div class="fields-header">{{ \'Field Settings: \' + component._display }}</div>\
-            <div class="field-tokens" v-if="component._tokens">\
-                <i class="fa fa-question-circle-o"></i>\
-                <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+            <div class="fields-top">\
+                <button class="fields-close-btn" @click="close">\
+                    <i class="fa fa-chevron-left"></i>Done\
+                </button>\
+                <div class="fields-header">{{ component._display }}</div>\
+                <div class="field-tokens" v-if="component._tokens">\
+                    <i class="fa fa-question-circle-o"></i>\
+                    <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+                </div>\
             </div>\
             <div class="field-list">\
                 <field v-for="field in component._fields.list" :field="field" :component="component" :key="field.id"></field>\
@@ -1142,6 +1161,9 @@ Cmint.fireDocHandlers = function() {
             var isComponent = $target.closest('.Component').length;
             var isInStage = $target.closest('#Stage').length;
             var isActionBar = $target.closest('#ActionBar').length;
+            var categoryList = $target.closest('.category-container').length;
+            var fieldChoice = $target.closest('.field-choice-wrap').length;
+            var dropdown = $target.closest('.dropdown').length;
 
             if (isComponent && isInStage) {
                 var component = $target.closest('.Component');
@@ -1155,6 +1177,13 @@ Cmint.fireDocHandlers = function() {
                     Bus.$emit('closeActionBar');
                 }
             }
+
+            if (!categoryList) { Bus.$emit('closeCategoryList'); }
+
+            if (!fieldChoice) { Bus.$emit('closeFieldChoice'); }
+
+            if (!dropdown) { Bus.$emit('closeDropdown'); }
+
         }
 
     })

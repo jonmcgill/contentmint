@@ -7,20 +7,25 @@
         right: -30em;
         border-left: 1px solid #ddd;
         background: $color-bg-lightgray;
-        width: 24em;
+        width: 28em;
         z-index: 40;
-        padding: 1em;
         transition: right 200ms;
         &.active {
             right: 0;
         }
     }
 
+    .fields-top {
+        padding: 2em;
+        border-bottom: 1px solid $color-bd-light;
+        height: 8em;
+    }
+
     .fields-close-btn {
-        background: none;
+        background: lighten($color-accent, 20%);
         outline: none;
         border: none;
-        padding: 0.2em 0.5em;
+        padding: 0.4em 0.8em;
         font: 1em sans-serif;
         color: $color-font-fade;
         cursor: pointer;
@@ -32,18 +37,20 @@
             display: inline-block;
             margin-right: 0.5em;
             position: relative;
-            bottom: 1px;
         }
     }
 
     .fields-header {
         font-weight: bold;
-        margin: 2em 0 0.5em;
+        float: right;
+        padding: 0.2em 0.8em;
     }
 
     .field-tokens {
         color: $color-font-fade;
-        padding: 0.4em 0.6em;
+        padding: 0;
+        clear: both;
+        margin-top: 1.5em;
         i {
             display: inline-block;
             cursor: pointer;
@@ -54,13 +61,15 @@
                 background: #444;
                 position: absolute;
                 margin-top: 12px;
-                width: 14em;
+                width: 18em;
                 padding: 1em;
                 color: white;
+                font-size: 0.9em;
                 font-family: sans-serif;
                 border-radius: 3px;
-                line-height: 1.7;
+                line-height: 1.5;
                 box-shadow: $shadow-sidebar-action;
+                z-index: 80;
             }
             &:hover {
                 color: $color-font-dark;
@@ -80,7 +89,13 @@
     }
 
     .field-list {
-        margin-top: 2em;
+        border-top: 1px solid $color-bd-lighter;
+        top: 8em;
+        bottom: 0;
+        padding: 2em;
+        position: absolute;
+        width: 100%;
+        overflow: auto;
     }
 
     .field-wrap {
@@ -94,7 +109,8 @@
         }
         input[type="text"], textarea {
             background: #fafafa;
-            font-size: 0.9em;
+            // font-size: 0.9em;
+            font-family: sans-serif;
             border-radius: 3px;
             margin-bottom: 0.8em;
         }
@@ -106,10 +122,22 @@
         }
     }
 
-    .field-group-wrap {
-        background: #fafafa;
-        padding: 0.5em;
-        border: 1px solid $color-bd-light;
+    .field-group-wrap,
+    .field-selected-field-wrap .field-wrap,
+    .field-input-wrap,
+    .dropdown {
+        background: #f8f8f8;
+        padding: 0.8em;
+        border-left: 5px solid #888;
+        border-bottom: 2px solid #ddd;
+        border-right: 1px solid #ddd;
+        border-top: 1px solid #ddd;
+    }
+    .field-selected-field-wrap .field-input-wrap,
+    .field-selected-field-wrap .dropdown {
+        padding:0;
+        border: none;
+        box-shadow: none;
     }
 
     .field-choice-label {
@@ -167,9 +195,7 @@
 
     .field-selected-field-wrap {
         clear: both;
-        // border-top: 1px solid $color-bd-light;
         position: relative;
-        // top: 10px;
         padding-top: 10px;
     }
     .field-choice-wrap.active {
@@ -214,13 +240,15 @@
     }
     .dropdown-list {
         position: absolute;
-        width: 100%;
+        width: calc(100% - 23px);
+        max-height: 10em;
+        overflow: auto;
         border: 1px solid $color-bd-light;
         display: none;
         margin-top: -1px;
+        background: white;
         z-index: 100;
         & > button {
-            // border-top: 1px solid transparent;
             margin: 0;
             &:hover { 
                 background: lighten($color-accent,15%);
@@ -229,9 +257,13 @@
             }
         }
     }
+
+    .field-selected-field-wrap .dropdown-list {
+        width: 100%;
+    }
+
     .dropdown.active {
         & > button {
-            border-bottom: 1px solid transparent;
             color: $color-font-dark;
             background: white;
         }

@@ -6,6 +6,9 @@ Cmint.fireDocHandlers = function() {
             var isComponent = $target.closest('.Component').length;
             var isInStage = $target.closest('#Stage').length;
             var isActionBar = $target.closest('#ActionBar').length;
+            var categoryList = $target.closest('.category-container').length;
+            var fieldChoice = $target.closest('.field-choice-wrap').length;
+            var dropdown = $target.closest('.dropdown').length;
 
             if (isComponent && isInStage) {
                 var component = $target.closest('.Component');
@@ -19,6 +22,13 @@ Cmint.fireDocHandlers = function() {
                     Bus.$emit('closeActionBar');
                 }
             }
+
+            if (!categoryList) { Bus.$emit('closeCategoryList'); }
+
+            if (!fieldChoice) { Bus.$emit('closeFieldChoice'); }
+
+            if (!dropdown) { Bus.$emit('closeDropdown'); }
+
         }
 
     })

@@ -2,12 +2,15 @@ Vue.component('fields', {
     props: ['component'],
     template: '\
         <div :class="wrapClasses">\
-            <button class="fields-close-btn" @click="close">\
-                <i class="fa fa-chevron-left"></i>Components</button>\
-            <div class="fields-header">{{ \'Field Settings: \' + component._display }}</div>\
-            <div class="field-tokens" v-if="component._tokens">\
-                <i class="fa fa-question-circle-o"></i>\
-                <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+            <div class="fields-top">\
+                <button class="fields-close-btn" @click="close">\
+                    <i class="fa fa-chevron-left"></i>Done\
+                </button>\
+                <div class="fields-header">{{ component._display }}</div>\
+                <div class="field-tokens" v-if="component._tokens">\
+                    <i class="fa fa-question-circle-o"></i>\
+                    <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+                </div>\
             </div>\
             <div class="field-list">\
                 <field v-for="field in component._fields.list" :field="field" :component="component" :key="field.id"></field>\

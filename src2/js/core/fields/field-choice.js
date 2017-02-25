@@ -66,6 +66,12 @@ Vue.component('field-choice', {
             })
         }
     },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('closeFieldChoice', function() {
+            _this.toggle = false;
+        })
+    },
     beforeMount: function() {
         if (this.field.choices[0] !== 'None') {
             this.field.choices.splice(0, 0, 'None');

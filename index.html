@@ -56,7 +56,7 @@
 <div id="Loading" class="cmint">LOADING</div>
 <div id="App" v-cloak>
     <overlay></overlay>
-    <div id="Template"></div>
+    <div id="Template" :class="{ scale: !!fieldsComponent }"></div>
     <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"

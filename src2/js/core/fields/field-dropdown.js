@@ -28,6 +28,9 @@ Vue.component('field-dropdown', {
         }
     },
     methods: {
+        dropdown: function() {
+            
+        },
         process: function(selection) {
             var output = Menus[this.field.menu][selection];
             if (this.field.hook) {
@@ -41,5 +44,11 @@ Vue.component('field-dropdown', {
     beforeMount: function() {
         this.selected = this.field.inputs[this.fields[this.field.name].input] || 'Default';
         this.process(this.selected);
+    },
+    mounted: function() {
+        var _this = this;
+        _this.$bus.$on('closeDropdown', function() {
+            _this.toggle = false;
+        })
     }
 })

@@ -6,9 +6,8 @@
         bottom: 0;
         right: 0em;
         background: $color-bg-lightgray;
-        // box-shadow: 0 0px 2px 1px #ccc;
         border-left: 1px solid #ddd;
-        width: 24em;
+        width: 28em;
         z-index: 35;
     }
 
@@ -21,13 +20,13 @@
         }
         .content-name {
             color: $color-font-fade;
-            padding: 0.2em 0.5em;
-            margin-left: 1em;
+            padding: 0.2em 0;
+            margin-left: 2em;
             float: left;
         }
         .username {
             float: right;
-            margin-right: 1em;
+            margin-right: 2em;
             background: #fafafa;
             padding: 0.2em 0.5em;
             color: $color-font-fade;

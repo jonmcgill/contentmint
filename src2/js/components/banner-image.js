@@ -10,20 +10,15 @@ Cmint.createComponent({
         _display: 'Banner Image',
         _category: 'Images',
         _tokens: [
-            { 'URL': 'link' },
-            { 'FOO': 'foo' },
-            { 'SOURCE': 'source' }
+            { 'url': 'link' },
+            { 'source': 'source' }
         ],
         _fields: {
             output: {
-                source: 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-                source2: '',
-                foo: '',
-                link: 'http://scoopit.co.nz/static/images/default/placeholder.gif'
+                source: 'http://placehold.it/800x300',
+                link: ''
             },
             list: [
-                {   name: 'link-mailto',
-                    result: 'link'    },
                 {   name: 'image-choice',
                     result: 'source'    }
             ]

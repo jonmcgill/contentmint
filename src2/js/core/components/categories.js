@@ -55,5 +55,9 @@ Vue.component('categories', {
         _this.categories = _this.categories.filter(function(cat, i) {
             return _this.categories.indexOf(cat) === i;
         }).sort();
+
+        this.$bus.$on('closeCategoryList', function() {
+            _this.toggle = false;
+        })
     }
 })

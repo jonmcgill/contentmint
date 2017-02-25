@@ -3,8 +3,10 @@ Vue.component('field-text', {
     template:'\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
-            <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
-            <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
+            <div class="field-input-wrap">\
+                <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+                <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
+            </div>\
         </div>',
     data: function() { return {
         fields: Fields,
