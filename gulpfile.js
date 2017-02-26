@@ -7,36 +7,36 @@ var gulp = require('gulp'),
 
 var js_files = [
     
-    './src2/js/core/system/setup.js',
-    './src2/js/core/system/util.js',
-    './src2/js/core/system/index.js',
-    './src2/js/core/system/cmint.js',
+    './src/js/core/system/setup.js',
+    './src/js/core/system/util.js',
+    './src/js/core/system/index.js',
+    './src/js/core/system/cmint.js',
 
-    './src2/js/core/components/wrap.js',
-    './src2/js/core/components/context.js',
-    './src2/js/core/components/categories.js',
-    './src2/js/core/components/sidebar.js',
-    './src2/js/core/components/actionbar.js',
-    './src2/js/core/components/overlay.js',
+    './src/js/core/components/wrap.js',
+    './src/js/core/components/context.js',
+    './src/js/core/components/categories.js',
+    './src/js/core/components/sidebar.js',
+    './src/js/core/components/actionbar.js',
+    './src/js/core/components/overlay.js',
 
-    './src2/js/components/**/*',
-    './src2/js/processing/**/*',
-    './src2/js/menus/**/*',
-    './src2/js/fields/**/*',
-    './src2/js/templates/**/*',
+    './src/js/components/**/*',
+    './src/js/processing/**/*',
+    './src/js/menus/**/*',
+    './src/js/fields/**/*',
+    './src/js/templates/**/*',
 
-    './src2/js/core/fields/field-text.js',
-    './src2/js/core/fields/field-dropdown.js',
-    './src2/js/core/fields/field-choice.js',
-    './src2/js/core/fields/field-group.js',
-    './src2/js/core/fields/field.js',
-    './src2/js/core/fields/fields.js',
+    './src/js/core/fields/field-text.js',
+    './src/js/core/fields/field-dropdown.js',
+    './src/js/core/fields/field-choice.js',
+    './src/js/core/fields/field-group.js',
+    './src/js/core/fields/field.js',
+    './src/js/core/fields/fields.js',
 
-    './src2/js/core/drag/drag.js',
-    './src2/js/core/drag/fn/*',
-    './src2/js/core/system/fn/*',
-    './src2/js/core/system/editor.js',
-    './src2/js/core/system/app.js'
+    './src/js/core/drag/drag.js',
+    './src/js/core/drag/fn/*',
+    './src/js/core/system/fn/*',
+    './src/js/core/system/editor.js',
+    './src/js/core/system/app.js'
     
 ];
 
@@ -52,13 +52,13 @@ gulp.task('dev', function() {
         port: 3000,
         watch: ['dist/**/*', 'index.html', 'sb.html']
     })
-    gulp.watch('src2/js/**/*.js', function() {
+    gulp.watch('src/js/**/*.js', function() {
         return gulp.src(js_files)
             .pipe(concat('build.js'))
             .pipe(gulp.dest('dist/'));
     })
-    gulp.watch('src2/scss/**/*.scss', function() {
-        return gulp.src('src2/scss/**/*.scss')
+    gulp.watch('src/scss/**/*.scss', function() {
+        return gulp.src('src/scss/**/*.scss')
             .pipe(plumber())
             .pipe(sass())
             .pipe(gulp.dest('dist/'))
