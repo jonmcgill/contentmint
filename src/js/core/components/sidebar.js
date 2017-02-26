@@ -13,7 +13,10 @@ Vue.component('sidebar', {
                 <categories :components="components"></categories>\
             </div>\
             <div class="sidebar-main">\
-                <context id="Components" data-context-name="components" :children="componentList"></context>\
+                <context id="Components"\
+                    data-context-name="components"\
+                    :thumbnails="true"\
+                    :children="componentList"></context>\
             </div>\
             <div class="sidebar-fields">\
                 \

@@ -1,0 +1,41 @@
+.thumbnail {
+    margin: 1em 2em 2em;
+}
+
+.thumbnail-name {
+    color: lighten($color-font-fade, 40%);
+    font-size: 0.85em;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.thumbnail-component {
+    background: white;
+    border: 1px solid $color-bd-light;
+    padding: 1em;
+    height: 8em;
+    overflow: hidden;
+    opacity: 0.7;
+    cursor: grab;
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+    cursor: -ms-grab;
+    &:hover {
+        opacity: 1;
+        box-shadow: $shadow-sidebar-action;
+    }
+}
+
+$scale: 0.7;
+.thumbnail-scale-wrap {
+    transform: scale($scale);
+    -moz-transform: scale($scale);
+    -ms-transform: scale($scale);
+    -webkit-transform: scale($scale);
+    transform-origin: 0 0;
+    -moz-transform-origin: 0 0;
+    -ms-transform-origin: 0 0;
+    -webkit-transform-origin: 0 0;
+    width: 142.85714%;
+    overflow: hidden;
+}

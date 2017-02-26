@@ -1,9 +1,11 @@
 Vue.component('wrap', {
     props: ['config'],
-    template: '\
-        <div class="Component">\
-            <component :is="config._name" :config="config"></component>\
-        </div>',
+    render: function(make) {
+        var tag = this.config._tag || 'div';
+        return make(tag, {'class': {'Component': true}}, [
+            make(this.config._name, {props: {'config': this.config}})
+        ])
+    },
     data: function(){return{
         environment: null
     }},

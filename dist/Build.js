@@ -272,10 +272,12 @@ var Cmint = (function() {
 })()
 Vue.component('wrap', {
     props: ['config'],
-    template: '\
-        <div class="Component">\
-            <component :is="config._name" :config="config"></component>\
-        </div>',
+    render: function(make) {
+        var tag = this.config._tag || 'div';
+        return make(tag, {'class': {'Component': true}}, [
+            make(this.config._name, {props: {'config': this.config}})
+        ])
+    },
     data: function(){return{
         environment: null
     }},
@@ -326,18 +328,47 @@ Vue.component('wrap', {
     }
 })
 Vue.component('context', {
-    props: ['children'],
-    template: '\
-        <div class="Context">\
-            <wrap v-for="child in children" :config="child" :key="child.id"></wrap>\
-            <div class="context-insert" v-if="childNum">Drag components here</div>\
-        </div>',
+    props: ['children', 'thumbnails', 'tag'],
+    render: function(make) {
+        var tag = this.tag || 'div';
+        var output;
+        if (this.thumbnails) {
+            output = this.children.map(function(child) {
+                return make('div', {'class': {'thumbnail': true}}, [
+                    make('span', {'class': {'thumbnail-name': true}}, [child._display]),
+                    make('div', {'class': {'thumbnail-component': true}}, [
+                        make('div', {'class': {'thumbnail-scale-wrap': true}}, [
+                            make('wrap', {props:{ 'config': child }})
+                        ])
+                    ])
+                ])
+            })
+        } else {
+            output = this.children.map(function(child) {
+                return make('wrap', {
+                    props: { 'config': child },
+                    key: child.id
+                })
+            })
+        }
+        if (!this.children.length) {
+            output = [make('div', {'class':{'context-insert':true}},['Drag components here'])]
+        }
+        return make(tag, {'class': {'Context': true}}, output)
+    },
     computed: {
         childNum: function() {
             return this.children.length === 0;
         }
+    },
+    mounted: function() {
+        var unwrap = $(this.$el).find('.unwrap');
+        if (unwrap.children().length) {
+            unwrap.children().unwrap();
+        } else {
+            // unwrap.remove();
+        }
     }
-
 })
 Vue.component('categories', {
     props: ['components'],
@@ -417,7 +448,10 @@ Vue.component('sidebar', {
                 <categories :components="components"></categories>\
             </div>\
             <div class="sidebar-main">\
-                <context id="Components" data-context-name="components" :children="componentList"></context>\
+                <context id="Components"\
+                    data-context-name="components"\
+                    :thumbnails="true"\
+                    :children="componentList"></context>\
             </div>\
             <div class="sidebar-fields">\
                 \
@@ -582,11 +616,12 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
-    template: '<div data-edit="copy"></div>',
+    template: '<section data-edit="copy"></section>',
     config: {
         _name: 'body-copy',
         _display: 'Body Copy',
         _category: 'Content',
+        _tag: 'article',
         _content: {
             copy: '<p>This is some lorem ipsum</p>'
         }
@@ -1132,7 +1167,7 @@ Drag.onDrag = function(element, source) {
 
 }
 Drag.onDrop = function(dropped, target, source, sibling) {
-
+    
     var inContext, fromComponents, reordering, domIndex;
             
     toContext = $(target).closest('.Context').length > 0;

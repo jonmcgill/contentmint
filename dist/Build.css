@@ -69,6 +69,12 @@ body {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
   filter: alpha(opacity=20); }
 
+.gu-mirror, .gu-transit {
+  opacity: 0.7 !important;
+  filter: alpha(opacity=70) !important; }
+  .gu-mirror .thumbnail-name, .gu-transit .thumbnail-name {
+    display: none; }
+
 #Overlay {
   position: fixed;
   top: 0;
@@ -142,7 +148,44 @@ body {
   overflow-y: auto;
   position: absolute;
   top: 8.58em;
-  bottom: 0; }
+  bottom: 0;
+  width: 100%; }
+
+.thumbnail {
+  margin: 1em 2em 2em; }
+
+.thumbnail-name {
+  color: rgba(102, 102, 102, 0.5);
+  font-size: 0.85em;
+  display: block;
+  margin-bottom: 4px; }
+
+.thumbnail-component {
+  background: white;
+  border: 1px solid #cdcdcd;
+  padding: 1em;
+  height: 8em;
+  overflow: hidden;
+  opacity: 0.7;
+  cursor: grab;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: -ms-grab; }
+  .thumbnail-component:hover {
+    opacity: 1;
+    box-shadow: 0 1px 7px #dedede; }
+
+.thumbnail-scale-wrap {
+  transform: scale(0.7);
+  -moz-transform: scale(0.7);
+  -ms-transform: scale(0.7);
+  -webkit-transform: scale(0.7);
+  transform-origin: 0 0;
+  -moz-transform-origin: 0 0;
+  -ms-transform-origin: 0 0;
+  -webkit-transform-origin: 0 0;
+  width: 142.85714%;
+  overflow: hidden; }
 
 .cmint.fields-container {
   position: fixed;

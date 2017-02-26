@@ -1,5 +1,5 @@
 Drag.onDrop = function(dropped, target, source, sibling) {
-
+    
     var inContext, fromComponents, reordering, domIndex;
             
     toContext = $(target).closest('.Context').length > 0;
