@@ -67,8 +67,14 @@ var Cmint = (function() {
             var token = Object.keys(pair)[0];
             var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
             var value, matches;
-            // searches output first for the token value
-            if (component._fields.output[pair[token]]) {
+            // searches _content first for token
+            if (component._content[pair[token]]) {
+                value = component._content[pair[token]];
+                // get rid of html tags if present
+                value = value.replace(/<.+?>/g,'');
+            }
+            // then search output for the token value
+             else if (component._fields.output[pair[token]]) {
                 value = component._fields.output[pair[token]];
             // then searches in the inputs
             } else {

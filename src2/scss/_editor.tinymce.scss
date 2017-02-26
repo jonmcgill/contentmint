@@ -47,6 +47,10 @@
 }
 
 *.mce-edit-focus {
-        outline: none !important;
-        border: none !important;
-    }
+    outline: none !important;
+    border: none !important;
+}
+
+.mce-tooltip {
+    display: none !important;
+}

@@ -19,6 +19,7 @@ Drag.onDrag = function(element, source) {
             Drag.dragSpot = $(element).prev();
             Drag.insertType = 'after'
         }
+        
         Util.debug('dragging from stage at ' + Drag.draggedIndex);
         Util.debug('insert type is "' + Drag.insertType + '"');
     }

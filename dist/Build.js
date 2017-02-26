@@ -232,8 +232,14 @@ var Cmint = (function() {
             var token = Object.keys(pair)[0];
             var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
             var value, matches;
-            // searches output first for the token value
-            if (component._fields.output[pair[token]]) {
+            // searches _content first for token
+            if (component._content[pair[token]]) {
+                value = component._content[pair[token]];
+                // get rid of html tags if present
+                value = value.replace(/<.+?>/g,'');
+            }
+            // then search output for the token value
+             else if (component._fields.output[pair[token]]) {
                 value = component._fields.output[pair[token]];
             // then searches in the inputs
             } else {
@@ -510,18 +516,25 @@ Vue.component('overlay', {
 })
 Cmint.createComponent({
     template: '\
-        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-            <img :src="config._fields.output.source" width="100%" \
-                 :data-src="config._fields.output.source2" /></a>\
-        <img v-else :src="config._fields.output.source" width="100%" \
-                    :data-src="config._fields.output.source2" />',
+        <div>\
+            <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+                <img :src="config._fields.output.source" width="100%" \
+                     :data-src="config._fields.output.source2" /></a>\
+            <img v-else :src="config._fields.output.source" width="100%" \
+                     :data-src="config._fields.output.source2" />\
+            <div data-edit="caption"></div>\
+        </div>',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
         _category: 'Images',
+        _content: {
+            caption: '<p>Write your image caption here</p>'
+        },
         _tokens: [
             { 'url': 'link' },
-            { 'source': 'source' }
+            { 'source': 'source' },
+            { 'caption': 'caption' }
         ],
         _fields: {
             output: {
@@ -529,6 +542,8 @@ Cmint.createComponent({
                 link: ''
             },
             list: [
+                {   name: 'link-mailto',
+                    result: 'link'      },
                 {   name: 'image-choice',
                     result: 'source'    }
             ]
@@ -536,7 +551,7 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
-    template: '<div data-editor v-html="config._content.copy"></div>',
+    template: '<div data-edit="copy"></div>',
     config: {
         _name: 'body-copy',
         _display: 'Body Copy',
@@ -573,8 +588,8 @@ Cmint.createProcess('mailto', function(inputs, component) {
     var output = 'mailto:';
 
     output += Cmint.tokenize(inputs.to.value, component) + '?';
-    output += encode(Cmint.tokenize(inputs.subject.value, component)) + '&';
-    output += encode(Cmint.tokenize(inputs.body.value, component));
+    output += 'Subject=' + encode(Cmint.tokenize(inputs.subject.value, component)) + '&';
+    output += 'Body=' + encode(Cmint.tokenize(inputs.body.value, component));
 
     function encode(val) { return encodeURIComponent(val); }
 
@@ -653,6 +668,17 @@ Cmint.createField({
         ],
     }
 })
+Cmint.createField({
+    name: 'link-url',
+    config: {
+        type: 'field-text',
+        display: 'Link',
+        label: 'Link URL',
+        input: 'link',
+        help: 'Absolute path including http(s)://',
+        check: /^https*:\/\/.+/g,
+    }
+})
 Cmint.createTemplate('test-template', [
     'body-copy', 'thing', 'container', 'banner-image'   
 ])
@@ -672,7 +698,7 @@ Vue.component('field-text', {
     }},
     computed: {
         check: function() {
-            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'}; 
+            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'};
         }
     },
     methods: {
@@ -697,7 +723,12 @@ Vue.component('field-text', {
         Cmint.watchOutputUpdates(this);
     },
     mounted: function() {
+        var _this = this;
         this.process();
+        this.$bus.$on('fieldProcessing', function() {
+            _this.process();
+            Util.debug('processing ' + _this.field.name + ' after editor updates');
+        });
     }
 
 })
@@ -869,6 +900,13 @@ Vue.component('field-group', {
     },
     beforeMount: function() {
         Cmint.watchOutputUpdates(this);
+    },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('fieldProcessing', function() {
+            _this.process();
+            Util.debug('processing ' + _this.field.name + ' after editor updates');
+        });
     }
 })
 Vue.component('field', {
@@ -1055,6 +1093,7 @@ Drag.onDrag = function(element, source) {
             Drag.dragSpot = $(element).prev();
             Drag.insertType = 'after'
         }
+        
         Util.debug('dragging from stage at ' + Drag.draggedIndex);
         Util.debug('insert type is "' + Drag.insertType + '"');
     }
@@ -1229,6 +1268,7 @@ Cmint.refresh = function() {
     this.stage = Util.copy(this.stage);
 }
 Cmint.save = function() {
+    Bus.$emit('updateEditorData');
     this.saved = Util.copy(this.stage);
     Util.debug('saved content');
 }
@@ -1289,20 +1329,42 @@ Editor.config = {
     menubar: false,
     insert_toolbar: false,
     fixed_toolbar_container: '#EditorToolbar',
-    plugins: 'link lists paste textpattern autolink',
-    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist'
+    plugins: 'link lists paste textpattern autolink charmap',
+    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap'
 }
 
 Editor.init = function(component) {
-    if (component.environment === 'components') return;
-    $(component.$el).find('[data-editor]').each(function() {
+
+    $(component.$el).find('[data-edit]').each(function() {
+
         var config = Util.copy(Editor.config);
         var id = Util.genId(10);
-        $(this).attr('data-editor', id);
-        config.selector = '[data-editor="'+id+'"]';
+        var contentProp = $(this).attr('data-edit');
+
+        $(this).html(component.config._content[contentProp]);
+        
+        if (component.environment === 'components' || !component.config._content) return false;
+
+        $(this).attr('data-editor-id', id);
+        config.selector = '[data-editor-id="'+id+'"]';
+        
+        config.setup = function(editor) {
+            editor.on('Change keyup', _.debounce(function() {
+                if (component) {
+                    component.config._content[contentProp] = editor.getContent();
+                    Bus.$emit('fieldProcessing');
+                    Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
+                }
+            }));
+        }
+
         tinymce.init(config);
-        $(this).removeAttr('data-editor');
+        $(this).removeAttr('data-editor-id');
+
     })
+
+
+
 }
 $.getJSON('test/test-data.json', function(data) {
 

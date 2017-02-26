@@ -14,7 +14,7 @@ Vue.component('field-text', {
     }},
     computed: {
         check: function() {
-            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'}; 
+            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'};
         }
     },
     methods: {
@@ -39,7 +39,12 @@ Vue.component('field-text', {
         Cmint.watchOutputUpdates(this);
     },
     mounted: function() {
+        var _this = this;
         this.process();
+        this.$bus.$on('fieldProcessing', function() {
+            _this.process();
+            Util.debug('processing ' + _this.field.name + ' after editor updates');
+        });
     }
 
 })

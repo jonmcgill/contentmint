@@ -1,5 +1,5 @@
 Cmint.createComponent({
-    template: '<div data-editor v-html="config._content.copy"></div>',
+    template: '<div data-edit="copy"></div>',
     config: {
         _name: 'body-copy',
         _display: 'Body Copy',

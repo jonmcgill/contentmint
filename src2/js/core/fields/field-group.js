@@ -32,5 +32,12 @@ Vue.component('field-group', {
     },
     beforeMount: function() {
         Cmint.watchOutputUpdates(this);
+    },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('fieldProcessing', function() {
+            _this.process();
+            Util.debug('processing ' + _this.field.name + ' after editor updates');
+        });
     }
 })

@@ -226,7 +226,7 @@ body {
   padding: 2em;
   position: absolute;
   width: 100%;
-  overflow: auto; }
+  overflow-y: scroll; }
 
 .cmint .field-wrap {
   margin-bottom: 2em; }
@@ -523,3 +523,6 @@ body {
 *.mce-edit-focus {
   outline: none !important;
   border: none !important; }
+
+.mce-tooltip {
+  display: none !important; }
