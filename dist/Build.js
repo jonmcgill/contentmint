@@ -105,7 +105,7 @@ var Index = (function() {
     function getVueIndex(index, context, env) {
         var data;
         var env = env || Cmint.app;
-        console.log(env);
+        
         if (env === Cmint.componentList) {
             data = Util.copy(env);
             index.shift();
@@ -438,9 +438,9 @@ Vue.component('sidebar', {
 Vue.component('actionbar', {
     template: '\
         <div id="ActionBar" :style="css" :class="{active: isActive, cmint: true}">\
-            <button class="actionbar-copy">\
+            <button class="actionbar-copy" @click="copyComponent">\
                 <i class="fa fa-clone"></i></button>\
-            <button class="actionbar-trash">\
+            <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
@@ -463,6 +463,31 @@ Vue.component('actionbar', {
         }
     },
     methods: {
+        trashComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+
+            index.context.splice(index.key, 1);
+
+            Vue.nextTick(Cmint.app.refresh);
+            Vue.nextTick(Drag.updateContainers);
+            Vue.nextTick(Cmint.app.snapshot);
+            this.$bus.$emit('closeActionBar');
+            Util.debug('trashed ' + comp.config._name + '[' + comp.config._index + ']');
+        },
+        copyComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+            var clone = Util.copy(index.context[index.key])
+
+            index.context.splice(index.key + 1, 0, clone);
+
+            Vue.nextTick(Cmint.app.refresh);
+            Vue.nextTick(Drag.updateContainers);
+            Vue.nextTick(Cmint.app.snapshot);
+            this.$bus.$emit('closeActionBar');
+            Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
+        },
         callFields: function() {
             this.$bus.$emit('callComponentFields');
             this.$bus.$emit('closeActionBar');
@@ -518,9 +543,9 @@ Cmint.createComponent({
     template: '\
         <div>\
             <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-                <img :src="config._fields.output.source" width="100%" \
+                <img :src="config._fields.output.source" :style="config._css" \
                      :data-src="config._fields.output.source2" /></a>\
-            <img v-else :src="config._fields.output.source" width="100%" \
+            <img v-else :src="config._fields.output.source" :style="config._css" \
                      :data-src="config._fields.output.source2" />\
             <div data-edit="caption"></div>\
         </div>',
@@ -528,6 +553,12 @@ Cmint.createComponent({
         _name: 'banner-image',
         _display: 'Banner Image',
         _category: 'Images',
+        _css: {
+            'width':'100%',
+            'max-width':'32em',
+            'display': 'block',
+            'margin':'0 auto'
+        },
         _content: {
             caption: '<p>Write your image caption here</p>'
         },
@@ -1004,6 +1035,7 @@ Vue.component('fields', {
                 _this.$bus.$emit('closeFieldWidget');
                 setTimeout(function() {
                     Cmint.app.fieldsComponent = null;
+                    Vue.nextTick(Cmint.app.snapshot);
                 },200)
                 Util.debug('closed field wiget');
             },50);
@@ -1335,6 +1367,8 @@ Editor.config = {
 
 Editor.init = function(component) {
 
+    if (!component.config._content) return;
+
     $(component.$el).find('[data-edit]').each(function() {
 
         var config = Util.copy(Editor.config);
@@ -1343,7 +1377,7 @@ Editor.init = function(component) {
 
         $(this).html(component.config._content[contentProp]);
         
-        if (component.environment === 'components' || !component.config._content) return false;
+        if (component.environment === 'components') return false;
 
         $(this).attr('data-editor-id', id);
         config.selector = '[data-editor-id="'+id+'"]';
@@ -1356,6 +1390,9 @@ Editor.init = function(component) {
                     Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
                 }
             }));
+            editor.on('blur', function() {
+                Cmint.app.snapshot();
+            })
         }
 
         tinymce.init(config);

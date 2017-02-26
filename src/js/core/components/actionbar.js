@@ -1,9 +1,9 @@
 Vue.component('actionbar', {
     template: '\
         <div id="ActionBar" :style="css" :class="{active: isActive, cmint: true}">\
-            <button class="actionbar-copy">\
+            <button class="actionbar-copy" @click="copyComponent">\
                 <i class="fa fa-clone"></i></button>\
-            <button class="actionbar-trash">\
+            <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
@@ -26,6 +26,31 @@ Vue.component('actionbar', {
         }
     },
     methods: {
+        trashComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+
+            index.context.splice(index.key, 1);
+
+            Vue.nextTick(Cmint.app.refresh);
+            Vue.nextTick(Drag.updateContainers);
+            Vue.nextTick(Cmint.app.snapshot);
+            this.$bus.$emit('closeActionBar');
+            Util.debug('trashed ' + comp.config._name + '[' + comp.config._index + ']');
+        },
+        copyComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+            var clone = Util.copy(index.context[index.key])
+
+            index.context.splice(index.key + 1, 0, clone);
+
+            Vue.nextTick(Cmint.app.refresh);
+            Vue.nextTick(Drag.updateContainers);
+            Vue.nextTick(Cmint.app.snapshot);
+            this.$bus.$emit('closeActionBar');
+            Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
+        },
         callFields: function() {
             this.$bus.$emit('callComponentFields');
             this.$bus.$emit('closeActionBar');

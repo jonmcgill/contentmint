@@ -3,11 +3,11 @@
     top: 1em;
     right: 26.3em;
     overflow: hidden;
-    border-radius: 5px;
+    border-radius: 3px;
     border: 1px solid $color-bd-light;
 
     &, & * {
-        background: white;
+        background: $color-bg-lightgray;
     }
 
     & > * {
@@ -23,18 +23,23 @@
         margin: 0 !important;
         border: none !important;
         height: 2.4em !important;
+        &:hover,
+        &:hover button {
+            background:darken($color-bg-lightgray,5%) !important;
+        }
         &:not(:last-child) {
             border-bottom: 1px solid rgba(0,0,0,0.1) !important;
         }
         &:hover i {
             color: rgba(0,0,0,0.9) !important;
+            background:darken($color-bg-lightgray,5%) !important;
         }
     }
 
     i.mce-ico {
         font-size: 0.8em !important;
         text-align: center !important;
-        color: rgba(0,0,0,0.5) !important;
+        color: rgba(0,0,0,0.9) !important;
         line-height: 2em;
     }
 

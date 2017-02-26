@@ -31,7 +31,7 @@ var Index = (function() {
     function getVueIndex(index, context, env) {
         var data;
         var env = env || Cmint.app;
-        console.log(env);
+        
         if (env === Cmint.componentList) {
             data = Util.copy(env);
             index.shift();

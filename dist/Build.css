@@ -493,10 +493,10 @@ body {
   top: 1em;
   right: 26.3em;
   overflow: hidden;
-  border-radius: 5px;
+  border-radius: 3px;
   border: 1px solid #cdcdcd; }
   #EditorToolbar, #EditorToolbar * {
-    background: white; }
+    background: #f2f2f2; }
   #EditorToolbar > * {
     border-width: 0 !important; }
   #EditorToolbar *[style~="width:"] {
@@ -506,14 +506,18 @@ body {
     margin: 0 !important;
     border: none !important;
     height: 2.4em !important; }
+    #EditorToolbar *.mce-btn:hover,
+    #EditorToolbar *.mce-btn:hover button {
+      background: #e5e5e5 !important; }
     #EditorToolbar *.mce-btn:not(:last-child) {
       border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important; }
     #EditorToolbar *.mce-btn:hover i {
-      color: rgba(0, 0, 0, 0.9) !important; }
+      color: rgba(0, 0, 0, 0.9) !important;
+      background: #e5e5e5 !important; }
   #EditorToolbar i.mce-ico {
     font-size: 0.8em !important;
     text-align: center !important;
-    color: rgba(0, 0, 0, 0.5) !important;
+    color: rgba(0, 0, 0, 0.9) !important;
     line-height: 2em; }
   #EditorToolbar *.mce-container, #EditorToolbar *.mce-container-body {
     padding: 0 !important;

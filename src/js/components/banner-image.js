@@ -2,9 +2,9 @@ Cmint.createComponent({
     template: '\
         <div>\
             <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-                <img :src="config._fields.output.source" width="100%" \
+                <img :src="config._fields.output.source" :style="config._css" \
                      :data-src="config._fields.output.source2" /></a>\
-            <img v-else :src="config._fields.output.source" width="100%" \
+            <img v-else :src="config._fields.output.source" :style="config._css" \
                      :data-src="config._fields.output.source2" />\
             <div data-edit="caption"></div>\
         </div>',
@@ -12,6 +12,12 @@ Cmint.createComponent({
         _name: 'banner-image',
         _display: 'Banner Image',
         _category: 'Images',
+        _css: {
+            'width':'100%',
+            'max-width':'32em',
+            'display': 'block',
+            'margin':'0 auto'
+        },
         _content: {
             caption: '<p>Write your image caption here</p>'
         },

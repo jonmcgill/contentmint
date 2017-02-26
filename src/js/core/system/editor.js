@@ -9,6 +9,8 @@ Editor.config = {
 
 Editor.init = function(component) {
 
+    if (!component.config._content) return;
+
     $(component.$el).find('[data-edit]').each(function() {
 
         var config = Util.copy(Editor.config);
@@ -17,7 +19,7 @@ Editor.init = function(component) {
 
         $(this).html(component.config._content[contentProp]);
         
-        if (component.environment === 'components' || !component.config._content) return false;
+        if (component.environment === 'components') return false;
 
         $(this).attr('data-editor-id', id);
         config.selector = '[data-editor-id="'+id+'"]';
@@ -30,6 +32,9 @@ Editor.init = function(component) {
                     Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
                 }
             }));
+            editor.on('blur', function() {
+                Cmint.app.snapshot();
+            })
         }
 
         tinymce.init(config);
