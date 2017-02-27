@@ -5,4 +5,9 @@
     color: $color-font-fade;
     padding: 0.5em 1em;
     border: 1px dashed $color-bd-light;
+    &.hide {
+        opacity: 0;
+        height: 0px;
+        padding: 0;
+    }
 }

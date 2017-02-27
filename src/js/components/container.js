@@ -7,8 +7,6 @@ Cmint.createComponent({
         _name: 'container',
         _display: 'Container',
         _category: 'Layout',
-        container: [
-            { _name: 'thing', _display: 'Thing', _category: 'Content' }
-        ]
+        container: []
     }
 })

@@ -1,4 +1,4 @@
-.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, .notification {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -92,7 +92,7 @@ body {
     opacity: 1; }
 
 #Template {
-  margin: 2em 30em 2em 5em;
+  margin: 2em 30em 5em 5em;
   transform: scale(1);
   transition: transform 200ms; }
   #Template.scale {
@@ -138,16 +138,16 @@ body {
 
 .cmint .sidebar-sub {
   padding: 1em 0 1em;
-  border-bottom: 1px solid #cdcdcd; }
+  border-bottom: 1px solid #ccc; }
   .cmint .sidebar-sub .component-categories {
     padding: 0 1em; }
 
 .cmint .sidebar-main {
-  border-top: 1px solid #f9f9f9;
   padding: 1em 2em;
+  background: #e4e4e4;
   overflow-y: auto;
   position: absolute;
-  top: 7.8em;
+  top: 7.85em;
   bottom: 0;
   width: 100%; }
 
@@ -276,10 +276,11 @@ body {
   border-radius: 3px; }
 
 .cmint .field-list {
-  border-top: 1px solid #f9f9f9;
+  background: #e4e4e4;
   top: 8em;
   bottom: 0;
   padding: 2em;
+  padding-bottom: 18em;
   position: absolute;
   width: 100%;
   overflow-y: scroll; }
@@ -493,6 +494,10 @@ body {
   color: rgba(0, 0, 0, 0.5);
   padding: 0.5em 1em;
   border: 1px dashed #cdcdcd; }
+  .context-insert.hide {
+    opacity: 0;
+    height: 0px;
+    padding: 0; }
 
 #ActionBar {
   opacity: 0;
@@ -592,22 +597,22 @@ body {
   right: 26.4em;
   bottom: 2em; }
   #Toolbar button {
-    display: block;
     width: 2.5em;
     height: 2.5em;
     border-radius: 50%;
     background: #1fb4fc;
     cursor: pointer;
     border: none;
-    margin-top: 0.5em;
-    position: relative; }
+    position: relative;
+    outline: none;
+    margin-left: 0.5em; }
     #Toolbar button:hover {
       background: #47c1fd; }
     #Toolbar button:hover:before {
       content: 'Undo';
       position: absolute;
-      left: -7em;
-      top: 0.5em;
+      left: -2em;
+      top: 3em;
       background: #444;
       color: white;
       padding: 0.3em;
@@ -628,3 +633,14 @@ body {
     content: 'Save'; }
   #Toolbar .toolbar-code:hover:before {
     content: 'Get Code'; }
+
+.notification {
+  background: orange;
+  display: inline-block;
+  padding: 0.5em 1em;
+  position: fixed;
+  bottom: 2em;
+  left: -5em;
+  transition: left 200ms; }
+  .notification.active {
+    left: 0; }

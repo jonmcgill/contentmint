@@ -233,13 +233,15 @@ var Cmint = (function() {
             var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
             var value, matches;
             // searches _content first for token
-            if (component._content[pair[token]]) {
-                value = component._content[pair[token]];
-                // get rid of html tags if present
-                value = value.replace(/<.+?>/g,'');
+            if (component._content) {
+                if (component._content[pair[token]]) {
+                    value = component._content[pair[token]];
+                    // get rid of html tags if present
+                    value = value.replace(/<.+?>/g,'');
+                }
             }
             // then search output for the token value
-             else if (component._fields.output[pair[token]]) {
+            else if (component._fields.output[pair[token]]) {
                 value = component._fields.output[pair[token]];
             // then searches in the inputs
             } else {
@@ -506,6 +508,8 @@ Vue.component('actionbar', {
             Vue.nextTick(Cmint.app.refresh);
             Vue.nextTick(Drag.updateContainers);
             Vue.nextTick(Cmint.app.snapshot);
+            Cmint.app.save();
+
             this.$bus.$emit('closeActionBar');
             Util.debug('trashed ' + comp.config._name + '[' + comp.config._index + ']');
         },
@@ -519,6 +523,8 @@ Vue.component('actionbar', {
             Vue.nextTick(Cmint.app.refresh);
             Vue.nextTick(Drag.updateContainers);
             Vue.nextTick(Cmint.app.snapshot);
+            Cmint.app.save();
+
             this.$bus.$emit('closeActionBar');
             Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
         },
@@ -574,23 +580,34 @@ Vue.component('overlay', {
     }
 })
 Vue.component('toolbar', {
+    props: ['changes'],
     template: '\
         <div id="Toolbar">\
-            <button class="toolbar-undo" disabled="false"><i class="fa fa-undo"></i></button>\
-            <button class="toolbar-save"><i class="fa fa-save"></i></button>\
-            <button class="toolbar-code"><i class="fa fa-code"></i></button>\
-        </div>'
+            <button class="toolbar-undo" @click="undoClick" v-if="changes">\
+                <i class="fa fa-undo"></i></button>\
+            <button class="toolbar-undo" @click="undoClick" v-else disabled>\
+                <i class="fa fa-undo"></i></button>\
+            <button class="toolbar-save" @click="saveClick">\
+                <i class="fa fa-save"></i></button>\
+            <button class="toolbar-code">\
+                <i class="fa fa-code"></i></button>\
+        </div>',
+    methods: {
+        undoClick: function() {
+            Cmint.app.undo();
+        },
+        saveClick: function() {
+            Cmint.app.save();
+        }
+    }
 })
 Cmint.createComponent({
     template: '\
-        <div>\
-            <a v-if="config._fields.output.link" :href="config._fields.output.link">\
-                <img :src="config._fields.output.source" :style="config._css" \
-                     :data-src="config._fields.output.source2" /></a>\
-            <img v-else :src="config._fields.output.source" :style="config._css" \
-                     :data-src="config._fields.output.source2" />\
-            <div data-edit="caption"></div>\
-        </div>',
+        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+            <img :src="config._fields.output.source" :style="config._css" \
+                 :data-src="config._fields.output.source2" /></a>\
+        <img v-else :src="config._fields.output.source" :style="config._css" \
+                 :data-src="config._fields.output.source2" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
@@ -601,13 +618,9 @@ Cmint.createComponent({
             'display': 'block',
             'margin':'0 auto'
         },
-        _content: {
-            caption: '<p>Write your image caption here</p>'
-        },
         _tokens: [
             { 'url': 'link' },
-            { 'source': 'source' },
-            { 'caption': 'caption' }
+            { 'source': 'source' }
         ],
         _fields: {
             output: {
@@ -647,9 +660,7 @@ Cmint.createComponent({
         _name: 'container',
         _display: 'Container',
         _category: 'Layout',
-        container: [
-            { _name: 'thing', _display: 'Thing', _category: 'Content' }
-        ]
+        container: []
     }
 })
 Cmint.createComponent({
@@ -757,7 +768,7 @@ Cmint.createField({
     }
 })
 Cmint.createTemplate('test-template', [
-    'body-copy', 'thing', 'container', 'banner-image'   
+    'body-copy', 'banner-image', 'container'  
 ])
 Vue.component('field-text', {
     props: ['field', 'component'],
@@ -1082,6 +1093,7 @@ Vue.component('fields', {
                 setTimeout(function() {
                     Cmint.app.fieldsComponent = null;
                     Vue.nextTick(Cmint.app.snapshot);
+                    Cmint.app.save();
                 },200)
                 Util.debug('closed field wiget');
             },50);
@@ -1196,6 +1208,7 @@ Drag.onDrop = function(dropped, target, source, sibling) {
         Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Drag.updateContainers);
         Vue.nextTick(Cmint.app.snapshot);
+        Cmint.app.save();
         Util.debug('dropped new component in stage at ' + domIndex);
 
     }
@@ -1242,6 +1255,7 @@ Drag.onDrop = function(dropped, target, source, sibling) {
                     Vue.nextTick(Cmint.app.refresh);
                     Vue.nextTick(Drag.updateContainers);
                     Vue.nextTick(Cmint.app.snapshot);
+                    Cmint.app.save();
                     Util.debug('refreshing and updating containers')
                 }, debugDelay)
             }, debugDelay)
@@ -1256,7 +1270,6 @@ Drag.onRemove = function(element, container, source) {
         Drag.insertPlaceholder();
         $('.PLACEHOLDER').replaceWith(element);
         $(element).removeClass('gu-hide');
-        console.log(Cmint.app);
         var removeMe = Index.retrieveVueContext(Drag.draggedIndex, Cmint.app);
         Util.debug('removed component from stage at ' + removeMe.context[removeMe.key]._index);
         removeMe.context.splice(removeMe.key, 1);
@@ -1348,6 +1361,13 @@ Cmint.refresh = function() {
 Cmint.save = function() {
     Bus.$emit('updateEditorData');
     this.saved = Util.copy(this.stage);
+    
+    var $notify = $('.notification');
+    $notify.addClass('active');
+    setTimeout(function() {
+        $notify.removeClass('active');
+    }, 2500);
+
     Util.debug('saved content');
 }
 Cmint.showFields = function(component) {
@@ -1428,6 +1448,12 @@ Editor.init = function(component) {
         $(this).attr('data-editor-id', id);
         config.selector = '[data-editor-id="'+id+'"]';
         
+        var STASH;
+
+        config.init_instance_callback = function(editor) {
+            STASH = editor.getContent();
+        }
+
         config.setup = function(editor) {
             editor.on('Change keyup', _.debounce(function() {
                 if (component) {
@@ -1436,8 +1462,14 @@ Editor.init = function(component) {
                     Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
                 }
             }));
+            editor.on('focus', function() {
+                STASH = editor.getContent();
+            });
             editor.on('blur', function() {
-                Cmint.app.snapshot();
+                if (component.config._content[contentProp] !== STASH) {
+                    Cmint.app.save();
+                    Cmint.app.snapshot();
+                }
             })
         }
 
@@ -1445,8 +1477,6 @@ Editor.init = function(component) {
         $(this).removeAttr('data-editor-id');
 
     })
-
-
 
 }
 $.getJSON('test/test-data.json', function(data) {

@@ -102,10 +102,12 @@
 
     .field-list {
         @extend %cmint-type;
-        border-top: 1px solid $color-bd-lighter;
+        background: #e4e4e4;
+        // border-top: 1px solid $color-bd-lighter;
         top: 8em;
         bottom: 0;
         padding: 2em;
+        padding-bottom: 18em;
         position: absolute;
         width: 100%;
         overflow-y: scroll;

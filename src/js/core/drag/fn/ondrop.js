@@ -17,6 +17,7 @@ Drag.onDrop = function(dropped, target, source, sibling) {
         Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Drag.updateContainers);
         Vue.nextTick(Cmint.app.snapshot);
+        Cmint.app.save();
         Util.debug('dropped new component in stage at ' + domIndex);
 
     }
@@ -63,6 +64,7 @@ Drag.onDrop = function(dropped, target, source, sibling) {
                     Vue.nextTick(Cmint.app.refresh);
                     Vue.nextTick(Drag.updateContainers);
                     Vue.nextTick(Cmint.app.snapshot);
+                    Cmint.app.save();
                     Util.debug('refreshing and updating containers')
                 }, debugDelay)
             }, debugDelay)

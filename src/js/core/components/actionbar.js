@@ -35,6 +35,8 @@ Vue.component('actionbar', {
             Vue.nextTick(Cmint.app.refresh);
             Vue.nextTick(Drag.updateContainers);
             Vue.nextTick(Cmint.app.snapshot);
+            Cmint.app.save();
+
             this.$bus.$emit('closeActionBar');
             Util.debug('trashed ' + comp.config._name + '[' + comp.config._index + ']');
         },
@@ -48,6 +50,8 @@ Vue.component('actionbar', {
             Vue.nextTick(Cmint.app.refresh);
             Vue.nextTick(Drag.updateContainers);
             Vue.nextTick(Cmint.app.snapshot);
+            Cmint.app.save();
+
             this.$bus.$emit('closeActionBar');
             Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
         },

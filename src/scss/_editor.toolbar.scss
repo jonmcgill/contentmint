@@ -4,23 +4,23 @@
     bottom: 2em;
 
     button {
-        display: block;
         width: 2.5em;
         height: 2.5em;
         border-radius: 50%;
         background: lighten($color-accent, 10%);
         cursor: pointer;
         border: none;
-        margin-top: 0.5em;
         position: relative;
+        outline: none;
+        margin-left: 0.5em;
         &:hover {
             background: lighten($color-accent, 18%);
         }
         &:hover:before {
             content: 'Undo';
             position: absolute;
-            left: -7em;
-            top: 0.5em;
+            left: -2em;
+            top: 3em;
             background: #444;
             color: white;
             padding: 0.3em;
@@ -51,4 +51,18 @@
         content: 'Get Code';
     }
 
+}
+
+.notification {
+    @extend %cmint-type;
+    background: orange;
+    display: inline-block;
+    padding: 0.5em 1em;
+    position: fixed;
+    bottom: 2em;
+    left: -5em;
+    transition: left 200ms;
+    &.active {
+        left: 0;
+    }
 }

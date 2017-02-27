@@ -24,6 +24,12 @@ Editor.init = function(component) {
         $(this).attr('data-editor-id', id);
         config.selector = '[data-editor-id="'+id+'"]';
         
+        var STASH;
+
+        config.init_instance_callback = function(editor) {
+            STASH = editor.getContent();
+        }
+
         config.setup = function(editor) {
             editor.on('Change keyup', _.debounce(function() {
                 if (component) {
@@ -32,8 +38,14 @@ Editor.init = function(component) {
                     Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
                 }
             }));
+            editor.on('focus', function() {
+                STASH = editor.getContent();
+            });
             editor.on('blur', function() {
-                Cmint.app.snapshot();
+                if (component.config._content[contentProp] !== STASH) {
+                    Cmint.app.save();
+                    Cmint.app.snapshot();
+                }
             })
         }
 
@@ -41,7 +53,5 @@ Editor.init = function(component) {
         $(this).removeAttr('data-editor-id');
 
     })
-
-
 
 }

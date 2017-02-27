@@ -5,7 +5,6 @@ Drag.onRemove = function(element, container, source) {
         Drag.insertPlaceholder();
         $('.PLACEHOLDER').replaceWith(element);
         $(element).removeClass('gu-hide');
-        console.log(Cmint.app);
         var removeMe = Index.retrieveVueContext(Drag.draggedIndex, Cmint.app);
         Util.debug('removed component from stage at ' + removeMe.context[removeMe.key]._index);
         removeMe.context.splice(removeMe.key, 1);

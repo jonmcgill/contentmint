@@ -39,10 +39,10 @@
             ✓ tinymce inline editing
             ✓ tinymce editor synced with Vue data
             ✓ tinymce editing triggers field reprocessing
-              save button
-              undo button
+            ✓ save button
+            ✓ undo button
               get code button
-              autosave with notification
+            ✓ autosave with notification
               initial render transitions
               'a' tags need constant preventDefault handlers
               drag handles of some sort would be nice
@@ -71,7 +71,8 @@
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
-    <toolbar></toolbar>
+    <toolbar :changes="changes"></toolbar>
+    <div class="notification">Saved</div>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>

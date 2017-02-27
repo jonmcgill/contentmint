@@ -48,6 +48,7 @@ Vue.component('fields', {
                 setTimeout(function() {
                     Cmint.app.fieldsComponent = null;
                     Vue.nextTick(Cmint.app.snapshot);
+                    Cmint.app.save();
                 },200)
                 Util.debug('closed field wiget');
             },50);
