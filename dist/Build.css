@@ -1,4 +1,4 @@
-.cmint, .cmint .category-container button, .context-insert {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -105,7 +105,7 @@ body {
   right: 0em;
   background: #f2f2f2;
   border-left: 1px solid #ddd;
-  width: 28em;
+  width: 25em;
   z-index: 35; }
 
 .cmint .sidebar-top {
@@ -147,7 +147,7 @@ body {
   padding: 1em 2em;
   overflow-y: auto;
   position: absolute;
-  top: 8.58em;
+  top: 7.8em;
   bottom: 0;
   width: 100%; }
 
@@ -167,6 +167,7 @@ body {
   height: 8em;
   overflow: hidden;
   opacity: 0.7;
+  position: relative;
   cursor: grab;
   cursor: -webkit-grab;
   cursor: -moz-grab;
@@ -174,6 +175,16 @@ body {
   .thumbnail-component:hover {
     opacity: 1;
     box-shadow: 0 1px 7px #dedede; }
+  .thumbnail-component:after {
+    height: 20px;
+    background: linear-gradient(transparent, white);
+    background: -webkit-linear-gradient(transparent, white);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    content: ''; }
 
 .thumbnail-scale-wrap {
   transform: scale(0.7);
@@ -194,11 +205,13 @@ body {
   right: -30em;
   border-left: 1px solid #ddd;
   background: #f2f2f2;
-  width: 28em;
+  width: 25em;
   z-index: 40;
   transition: right 200ms; }
   .cmint.fields-container.active {
     right: 0; }
+  .cmint.fields-container textarea {
+    min-height: 7em; }
 
 .cmint .fields-top {
   padding: 2em;
@@ -573,3 +586,45 @@ body {
 
 .mce-tooltip {
   display: none !important; }
+
+#Toolbar {
+  position: fixed;
+  right: 26.4em;
+  bottom: 2em; }
+  #Toolbar button {
+    display: block;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    background: #1fb4fc;
+    cursor: pointer;
+    border: none;
+    margin-top: 0.5em;
+    position: relative; }
+    #Toolbar button:hover {
+      background: #47c1fd; }
+    #Toolbar button:hover:before {
+      content: 'Undo';
+      position: absolute;
+      left: -7em;
+      top: 0.5em;
+      background: #444;
+      color: white;
+      padding: 0.3em;
+      font-size: 0.9em;
+      border-radius: 3px;
+      width: 6em; }
+    #Toolbar button[disabled] {
+      opacity: 0.4;
+      color: #026b9f;
+      cursor: default; }
+      #Toolbar button[disabled]:hover {
+        background: #1fb4fc; }
+      #Toolbar button[disabled]:hover:before {
+        display: none; }
+  #Toolbar .toolbar-undo:hover:before {
+    content: 'Undo'; }
+  #Toolbar .toolbar-save:hover:before {
+    content: 'Save'; }
+  #Toolbar .toolbar-code:hover:before {
+    content: 'Get Code'; }

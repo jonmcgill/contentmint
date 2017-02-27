@@ -7,7 +7,7 @@
         right: 0em;
         background: $color-bg-lightgray;
         border-left: 1px solid #ddd;
-        width: 28em;
+        width: 25em;
         z-index: 35;
     }
 
@@ -23,8 +23,10 @@
             padding: 0.2em 0;
             margin-left: 2em;
             float: left;
+            @extend %cmint-type;
         }
         .username {
+            @extend %cmint-type;
             float: right;
             margin-right: 2em;
             background: #fafafa;
@@ -48,6 +50,7 @@
     .sidebar-sub {
         padding: 1em 0 1em;
         border-bottom: 1px solid $color-bd-light;
+        @extend %cmint-type;
         .component-categories {
             padding: 0 1em;
         }
@@ -59,7 +62,7 @@
         padding: 1em 2em;
         overflow-y: auto;
         position: absolute;
-        top: 8.58em;
+        top: 7.8em;
         bottom: 0;
         width: 100%;
     }

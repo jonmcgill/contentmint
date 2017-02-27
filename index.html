@@ -26,6 +26,8 @@
         Components
             ✓ modify root tags for 'wrap' and 'context' via render function
             ✓ placeholder for empty context regions
+              option: once this thing is staged, it cannot be removed but it can be copied
+                      and those copies can be moved
 
         Editing:
             ✓ action bar component
@@ -43,6 +45,7 @@
               autosave with notification
               initial render transitions
               'a' tags need constant preventDefault handlers
+              drag handles of some sort would be nice
 
         Application:
               global naming
@@ -53,7 +56,7 @@
               way to inform the editor how to clean up its code
               loading graphic
               transition effects
-              thumbnail styles need to be like stage
+            ✓ thumbnail styles need to be like stage
 
 -->
 <textarea style="display:none;" id="Data" class="cmint"></textarea>
@@ -68,6 +71,7 @@
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
+    <toolbar></toolbar>
 </div>
 
 <script src="https://unpkg.com/vue/dist/vue.js"></script>

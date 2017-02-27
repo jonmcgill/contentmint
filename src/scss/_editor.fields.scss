@@ -1,27 +1,36 @@
 .cmint {
 
     &.fields-container {
+
         position: fixed;
         top: 0;
         bottom: 0;
         right: -30em;
         border-left: 1px solid #ddd;
         background: $color-bg-lightgray;
-        width: 28em;
+        width: 25em;
         z-index: 40;
         transition: right 200ms;
+        
         &.active {
             right: 0;
         }
+
+        textarea {
+            min-height: 7em;
+        }
+
     }
 
     .fields-top {
+        @extend %cmint-type;
         padding: 2em;
         border-bottom: 1px solid $color-bd-light;
         height: 8em;
     }
 
     .fields-close-btn {
+        @extend %cmint-type;
         background: lighten($color-accent, 20%);
         outline: none;
         border: none;
@@ -41,12 +50,14 @@
     }
 
     .fields-header {
+        @extend %cmint-type;
         font-weight: bold;
         float: right;
         padding: 0.2em 0.8em;
     }
 
     .field-tokens {
+        @extend %cmint-type;
         color: $color-font-fade;
         padding: 0;
         clear: both;
@@ -81,6 +92,7 @@
     }
 
     .token-wrap span {
+        // @extend %cmint-type;
         font-size: 0.8em;
         background: #e5e5e5;
         padding: 3px 5px;
@@ -89,6 +101,7 @@
     }
 
     .field-list {
+        @extend %cmint-type;
         border-top: 1px solid $color-bd-lighter;
         top: 8em;
         bottom: 0;

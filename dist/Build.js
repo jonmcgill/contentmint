@@ -573,6 +573,14 @@ Vue.component('overlay', {
         })
     }
 })
+Vue.component('toolbar', {
+    template: '\
+        <div id="Toolbar">\
+            <button class="toolbar-undo" disabled="false"><i class="fa fa-undo"></i></button>\
+            <button class="toolbar-save"><i class="fa fa-save"></i></button>\
+            <button class="toolbar-code"><i class="fa fa-code"></i></button>\
+        </div>'
+})
 Cmint.createComponent({
     template: '\
         <div>\
@@ -616,14 +624,17 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
-    template: '<section data-edit="copy"></section>',
+    template: '<section data-edit="copy" :style="config._css"></section>',
     config: {
         _name: 'body-copy',
         _display: 'Body Copy',
         _category: 'Content',
         _tag: 'article',
         _content: {
-            copy: '<p>This is some lorem ipsum</p>'
+            copy: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent non lectus id quam congue egestas. Pellentesque ullamcorper pretium tortor vitae vehicula. Vivamus lacinia porttitor libero. Nulla vulputate vel libero id blandit.</p>'
+        },
+        _css: {
+            'line-height': '1.6'
         }
     }
 })
