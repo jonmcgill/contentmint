@@ -2,7 +2,7 @@ var Components = Components || {},
     Fields = Fields || {},
     Process = Process || {},
     Menus = Menus || {},
-    Editor = Editor || {},
+    Editor = Editor || {hooks:{}},
     Templates = Templates || {},
     Data = Data || {},
     Bus = Bus || new Vue();
@@ -228,6 +228,7 @@ var Cmint = (function() {
 
     function tokenize(input, component) {
         var output = input;
+        if (!component._tokens) return output;
         component._tokens.forEach(function(pair) {
             var token = Object.keys(pair)[0];
             var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
@@ -276,16 +277,29 @@ Vue.component('wrap', {
     props: ['config'],
     render: function(make) {
         var tag = this.config._tag || 'div';
-        return make(tag, {'class': {'Component': true}}, [
-            make(this.config._name, {props: {'config': this.config}})
-        ])
+        return make(tag,
+            {
+                'class': {
+                    'Component': true,
+                    'Deconstructed': this.showLayout
+                }
+            },
+            [
+                make(this.config._name, {props: {'config': this.config}})
+            ]
+        )
     },
     data: function(){return{
-        environment: null
+        environment: null,
     }},
     methods: {
         showFields: function() {
             this.$emit('showfields', this.config);
+        }
+    },
+    computed: {
+        showLayout: function() {
+            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     created: function() {
@@ -309,6 +323,7 @@ Vue.component('wrap', {
         }
     },
     mounted: function() {
+        var _this = this;
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
@@ -316,9 +331,14 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.runHook(this, 'editor');
         Editor.init(this);
     },
     updated: function() {
+        var _this = this;
+        this.$bus.$on('deconstruct', function() {
+            _this.deconstruct = !_this.deconstruct;
+        })
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
@@ -326,6 +346,7 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.runHook(this, 'editor');
         Editor.init(this);
     }
 })
@@ -348,6 +369,7 @@ Vue.component('context', {
         } else {
             output = this.children.map(function(child) {
                 return make('wrap', {
+                    class: { 'ShowLayout': this.showLayout },
                     props: { 'config': child },
                     key: child.id
                 })
@@ -361,6 +383,9 @@ Vue.component('context', {
     computed: {
         childNum: function() {
             return this.children.length === 0;
+        },
+        showLayout: function() {
+            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     mounted: function() {
@@ -603,18 +628,19 @@ Vue.component('toolbar', {
 })
 Cmint.createComponent({
     template: '\
-        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+        <a v-if="config._fields.output.link"\
+            :href="config._fields.output.link"\
+            target="_blank">\
             <img :src="config._fields.output.source" :style="config._css" \
-                 :data-src="config._fields.output.source2" /></a>\
+                 :data-src="config._fields.output.source2" data-hook="vertical-space" /></a>\
         <img v-else :src="config._fields.output.source" :style="config._css" \
-                 :data-src="config._fields.output.source2" />',
+                 :data-src="config._fields.output.source2" data-hook="vertical-space" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
         _category: 'Images',
         _css: {
             'width':'100%',
-            'max-width':'32em',
             'display': 'block',
             'margin':'0 auto'
         },
@@ -628,7 +654,7 @@ Cmint.createComponent({
                 link: ''
             },
             list: [
-                {   name: 'link-mailto',
+                {   name: 'link-choice',
                     result: 'link'      },
                 {   name: 'image-choice',
                     result: 'source'    }
@@ -637,14 +663,16 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
-    template: '<section data-edit="copy" :style="config._css"></section>',
+    template: '<div data-edit="copy"\
+                    data-hook="vertical-space"\
+                    style="color:#231f20; font-family:Arial, sans-serif; font-size:16px; text-align:left; line-height: 24px;"></div>',
     config: {
         _name: 'body-copy',
         _display: 'Body Copy',
         _category: 'Content',
         _tag: 'article',
         _content: {
-            copy: '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent non lectus id quam congue egestas. Pellentesque ullamcorper pretium tortor vitae vehicula. Vivamus lacinia porttitor libero. Nulla vulputate vel libero id blandit.</p>'
+            copy: '<span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent non lectus id quam congue egestas. Pellentesque ullamcorper pretium tortor vitae vehicula. Vivamus lacinia porttitor libero. Nulla vulputate vel libero id blandit.</span>'
         },
         _css: {
             'line-height': '1.6'
@@ -653,7 +681,7 @@ Cmint.createComponent({
 })
 Cmint.createComponent({
     template: '\
-        <div class="Container" style="border:1px solid black;padding:16px;">\
+        <div class="Container">\
             <context :children="config.container" data-context-name="container"></context>\
         </div>',
     config: {
@@ -664,12 +692,87 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
+    template: '\
+        <table cellpadding="0" cellspacing="0"\
+            :align="config._fields.output.alignment"\
+            :width="config._fields.output.width"\
+            style="background:#cb4f29;"\
+            data-hook="vertical-space">\
+            <tr>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+            <tr>\
+                <td width="20" height="25" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="25">\
+                    <div style="font-family:Arial, sans-serif; font-size:16px; font-weight:bold; text-align:center; line-height:14px; font-style: italic;">\
+                        <a :href="config._fields.output.link"\
+                            target="_blank"\
+                            style="color:#ffffff; text-decoration: none;"\
+                            v-html="config._fields.output.text"></a>\
+                    </div>\
+                </td>\
+                <td width="25" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+            <tr>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+        </table>',
+    config: {
+        _name: 'cta-button',
+        _display: 'Button',
+        _category: 'CTA',
+        _content: {
+            linktext: 'CTA Message Here'
+        },
+        _fields: {
+            list: [
+                {   name: 'alignment',
+                    result: 'alignment' },
+                {   name: 'plain-text',
+                    result: 'text' },
+                {   name: 'width',
+                    result: 'width' },
+                {   name: 'link-choice',
+                    result: 'link' }
+            ],
+            output: {
+                'link': 'http://www.reyrey.com',
+                'text': 'CTA Message Here',
+                'alignment': 'center',
+                'width': ''
+            }
+        }
+    }
+})
+Cmint.createComponent({
+    template: '<div data-edit="text"\
+                    data-hook="vertical-space"\
+                    style="font-size:23px; font-weight:bold; font-family:Arial; line-height:normal;"></div>',
+    config: {
+        _name: 'headline',
+        _display: 'Headline',
+        _category: 'Content',
+        _content: {
+            text: 'Update This Article Headline'
+        }
+    }
+})
+Cmint.createComponent({
     template: '<h3 class="thing" v-text="config._index + \' (\'+_uid+\')\'" :style="config.css"></h3>',
     config: {
         _name: 'thing',
         _display: 'Thing',
         _category: 'Content',
     }
+})
+Cmint.createProcess('align', function(input, component, field) {
+
+    return input;
+
 })
 Cmint.createProcess('mailto', function(inputs, component) {
 
@@ -687,13 +790,41 @@ Cmint.createProcess('mailto', function(inputs, component) {
 Cmint.createProcess('test', function(input) {
     return input + '?param=true';
 })
+Editor.hooks['vertical-space'] = {
+    
+    editor: function(elements) {
+        elements.each(function() {
+            $(this).css({
+                'margin-bottom': '24px'
+            })
+        });
+    }
+
+}
+Cmint.createMenu('alignment', {
+    'Default': 'center',
+    'Center': 'center',
+    'Left': ''
+})
 Cmint.createMenu('image-list', {
     'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-    'Random': 'https://unsplash.it/800/300',
+    'SED Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
+    'Random': 'http://placehold.it/800x300',
     'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
     'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
     'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
     'YoYo': 'http://mediad.publicbroadcasting.net/p/michigan/files/styles/x_large/public/yoyo_ma_trumpie_12.jpg'
+})
+Cmint.createField({
+    name: 'alignment',
+    config: {
+        type: 'field-dropdown',
+        display: 'Alignment',
+        label: 'Alignment',
+        input: 'alignment',
+        menu: 'alignment',
+        hook: 'align'
+    }
 })
 Cmint.createField({
     name: 'image-choice',
@@ -735,6 +866,21 @@ Cmint.createField({
     }
 })
 Cmint.createField({
+    name: 'link-choice',
+    config: {
+        type: 'field-choice',
+        display: 'Link Type',
+        label: 'Link Type',
+        input: 'selected-field',
+        choices: [
+            {   name: 'link-url',
+                result: 'link'    },
+            {   name: 'link-mailto',
+                result: 'link'   }
+        ]
+    }
+})
+Cmint.createField({
     name: 'link-mailto',
     config: {
         type: 'field-group',
@@ -760,15 +906,38 @@ Cmint.createField({
     name: 'link-url',
     config: {
         type: 'field-text',
-        display: 'Link',
+        display: 'Link URL',
         label: 'Link URL',
         input: 'link',
         help: 'Absolute path including http(s)://',
         check: /^https*:\/\/.+/g,
     }
 })
+Cmint.createField({
+    name: 'plain-text',
+    config: {
+        type: 'field-text',
+        display: 'Display Text',
+        label: 'Display Text',
+        input: 'text'
+    }
+})
+Cmint.createField({
+    name: 'width',
+    config: {
+        type: 'field-text',
+        display: 'Width',
+        label: 'Width',
+        input: 'width',
+        help: '1 - 550 (pixels)'
+    }
+})
 Cmint.createTemplate('test-template', [
     'body-copy', 'banner-image', 'container'  
+])
+
+Cmint.createTemplate('reynolds-email', [
+    'headline', 'body-copy', 'banner-image', 'container', 'cta-button'
 ])
 Vue.component('field-text', {
     props: ['field', 'component'],
@@ -856,7 +1025,7 @@ Vue.component('field-dropdown', {
         process: function(selection) {
             var output = Menus[this.field.menu][selection];
             if (this.field.hook) {
-                output = Process[this.field.hook](output);
+                output = Process[this.field.hook](output, this.component, this.field);
             }
             this.field.inputs[this.fields[this.field.name].input] = selection;
             this.selected = selection;
@@ -1278,6 +1447,65 @@ Drag.onRemove = function(element, container, source) {
     }
 
 }
+Editor.config = {
+    inline: true,
+    menubar: false,
+    insert_toolbar: false,
+    fixed_toolbar_container: '#EditorToolbar',
+    plugins: 'link lists paste textpattern autolink charmap',
+    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap',
+    forced_root_block: 'div'
+}
+
+Editor.init = function(component) {
+
+    if (!component.config._content) return;
+
+    $(component.$el).find('[data-edit]').each(function() {
+
+        var config = Util.copy(Editor.config);
+        var id = Util.genId(10);
+        var contentProp = $(this).attr('data-edit');
+
+        $(this).html(component.config._content[contentProp]);
+        
+        if (component.environment === 'components') return false;
+
+        $(this).attr('data-editor-id', id);
+        config.selector = '[data-editor-id="'+id+'"]';
+        
+        var STASH;
+
+        config.init_instance_callback = function(editor) {
+            STASH = editor.getContent();
+        }
+
+        config.setup = function(editor) {
+            editor.on('Change keyup', _.debounce(function() {
+                if (component) {
+                    component.config._content[contentProp] = editor.getContent();
+                    Bus.$emit('fieldProcessing');
+                    Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
+                }
+            }));
+            editor.on('focus', function() {
+                STASH = editor.getContent();
+            });
+            editor.on('blur', function() {
+                if (!component.config._content) return;
+                if (component.config._content[contentProp] !== STASH) {
+                    Cmint.app.save();
+                    Cmint.app.snapshot();
+                }
+            })
+        }
+
+        tinymce.init(config);
+        $(this).removeAttr('data-editor-id');
+
+    })
+
+}
 Cmint.actionBarHandler = function(component) {
     if (component.environment === 'components') return;
     var element = component.$el;
@@ -1358,6 +1586,23 @@ Cmint.load = function() {
 Cmint.refresh = function() {
     this.stage = Util.copy(this.stage);
 }
+Editor.runHook = function(component, event) {
+
+    var elements = $(component.$el).find('[data-hook]');
+
+    $(component.$el).find('[data-hook]').each(function() {
+
+        var hookName = $(this).attr('data-hook');
+        var scoped = elements.filter(function() {
+            return $(this).attr('data-hook') === hookName
+        }).map(function() {
+            return $(this).removeAttr('data-hook');
+        })
+        Editor.hooks[hookName][event](scoped);
+        Util.debug('running component hook for ' + component.config._name);
+    })
+
+}
 Cmint.save = function() {
     Bus.$emit('updateEditorData');
     this.saved = Util.copy(this.stage);
@@ -1422,63 +1667,6 @@ Cmint.watchOutputUpdates = function(fieldComponent) {
         }
     })
 }
-Editor.config = {
-    inline: true,
-    menubar: false,
-    insert_toolbar: false,
-    fixed_toolbar_container: '#EditorToolbar',
-    plugins: 'link lists paste textpattern autolink charmap',
-    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap'
-}
-
-Editor.init = function(component) {
-
-    if (!component.config._content) return;
-
-    $(component.$el).find('[data-edit]').each(function() {
-
-        var config = Util.copy(Editor.config);
-        var id = Util.genId(10);
-        var contentProp = $(this).attr('data-edit');
-
-        $(this).html(component.config._content[contentProp]);
-        
-        if (component.environment === 'components') return false;
-
-        $(this).attr('data-editor-id', id);
-        config.selector = '[data-editor-id="'+id+'"]';
-        
-        var STASH;
-
-        config.init_instance_callback = function(editor) {
-            STASH = editor.getContent();
-        }
-
-        config.setup = function(editor) {
-            editor.on('Change keyup', _.debounce(function() {
-                if (component) {
-                    component.config._content[contentProp] = editor.getContent();
-                    Bus.$emit('fieldProcessing');
-                    Util.debug('updated content "'+contentProp+'" for ' + component.config._name);
-                }
-            }));
-            editor.on('focus', function() {
-                STASH = editor.getContent();
-            });
-            editor.on('blur', function() {
-                if (component.config._content[contentProp] !== STASH) {
-                    Cmint.app.save();
-                    Cmint.app.snapshot();
-                }
-            })
-        }
-
-        tinymce.init(config);
-        $(this).removeAttr('data-editor-id');
-
-    })
-
-}
 $.getJSON('test/test-data.json', function(data) {
 
     Data = data;
@@ -1503,6 +1691,7 @@ $.getJSON('test/test-data.json', function(data) {
 
                 fieldsComponent: null,
                 focusedComponent: null,
+                showLayout: false,
                 
                 changes: null,
                 previous: null,
@@ -1527,6 +1716,9 @@ $.getJSON('test/test-data.json', function(data) {
                 var _this = this;
                 this.$bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.focusedComponent.config;
+                })
+                this.$bus.$on('showLayout', function() {
+                    _this.showLayout = !_this.showLayout;
                 })
 
                 Util.debug('mounted app');

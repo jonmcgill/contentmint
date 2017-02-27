@@ -1,17 +1,18 @@
 Cmint.createComponent({
     template: '\
-        <a v-if="config._fields.output.link" :href="config._fields.output.link">\
+        <a v-if="config._fields.output.link"\
+            :href="config._fields.output.link"\
+            target="_blank">\
             <img :src="config._fields.output.source" :style="config._css" \
-                 :data-src="config._fields.output.source2" /></a>\
+                 :data-src="config._fields.output.source2" data-hook="vertical-space" /></a>\
         <img v-else :src="config._fields.output.source" :style="config._css" \
-                 :data-src="config._fields.output.source2" />',
+                 :data-src="config._fields.output.source2" data-hook="vertical-space" />',
     config: {
         _name: 'banner-image',
         _display: 'Banner Image',
         _category: 'Images',
         _css: {
             'width':'100%',
-            'max-width':'32em',
             'display': 'block',
             'margin':'0 auto'
         },
@@ -25,7 +26,7 @@ Cmint.createComponent({
                 link: ''
             },
             list: [
-                {   name: 'link-mailto',
+                {   name: 'link-choice',
                     result: 'link'      },
                 {   name: 'image-choice',
                     result: 'source'    }

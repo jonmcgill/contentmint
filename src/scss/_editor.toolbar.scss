@@ -9,12 +9,12 @@
         border-radius: 50%;
         background: lighten($color-accent, 10%);
         cursor: pointer;
-        border: none;
+        border: 1px solid darken($color-accent, 20%);
         position: relative;
         outline: none;
         margin-left: 0.5em;
         &:hover {
-            background: lighten($color-accent, 18%);
+            background: lighten($color-accent, 20%);
         }
         &:hover:before {
             content: 'Undo';
@@ -55,7 +55,8 @@
 
 .notification {
     @extend %cmint-type;
-    background: orange;
+    background: black;
+    color: white;
     display: inline-block;
     padding: 0.5em 1em;
     position: fixed;

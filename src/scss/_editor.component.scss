@@ -1,4 +1,7 @@
 #Stage .Component {
+
+    transition: padding 200ms, background 200ms;
+
     &.active {
         position: relative;
         outline: 1px solid $color-accent;

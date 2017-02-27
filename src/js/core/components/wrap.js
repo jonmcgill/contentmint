@@ -2,16 +2,29 @@ Vue.component('wrap', {
     props: ['config'],
     render: function(make) {
         var tag = this.config._tag || 'div';
-        return make(tag, {'class': {'Component': true}}, [
-            make(this.config._name, {props: {'config': this.config}})
-        ])
+        return make(tag,
+            {
+                'class': {
+                    'Component': true,
+                    'Deconstructed': this.showLayout
+                }
+            },
+            [
+                make(this.config._name, {props: {'config': this.config}})
+            ]
+        )
     },
     data: function(){return{
-        environment: null
+        environment: null,
     }},
     methods: {
         showFields: function() {
             this.$emit('showfields', this.config);
+        }
+    },
+    computed: {
+        showLayout: function() {
+            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     created: function() {
@@ -35,6 +48,7 @@ Vue.component('wrap', {
         }
     },
     mounted: function() {
+        var _this = this;
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
@@ -42,9 +56,14 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.runHook(this, 'editor');
         Editor.init(this);
     },
     updated: function() {
+        var _this = this;
+        this.$bus.$on('deconstruct', function() {
+            _this.deconstruct = !_this.deconstruct;
+        })
         this.environment = $(this.$el).closest('#Components').length ? 'components' : 'stage';
         this.config._index = Index.getDomIndex(this.$el);
         Cmint.actionBarHandler(this);
@@ -52,6 +71,7 @@ Vue.component('wrap', {
         $('a').click(function(e) {
             e.preventDefault();
         })
+        Editor.runHook(this, 'editor');
         Editor.init(this);
     }
 })

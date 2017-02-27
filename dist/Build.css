@@ -97,6 +97,10 @@ body {
   transition: transform 200ms; }
   #Template.scale {
     transform: scale(0.85); }
+  #Template .Deconstructed {
+    padding: 10px;
+    background: rgba(69, 90, 100, 0.2);
+    border: 1px dashed black; }
 
 .cmint#Sidebar {
   position: fixed;
@@ -219,15 +223,17 @@ body {
   height: 8em; }
 
 .cmint .fields-close-btn {
-  background: #51c5fd;
+  background: #1fb4fc;
   outline: none;
-  border: none;
+  border: 1px solid #0279b3;
+  border-radius: 3px;
   padding: 0.4em 0.8em;
   font: 1em sans-serif;
   color: rgba(0, 0, 0, 0.5);
   cursor: pointer; }
   .cmint .fields-close-btn:hover {
-    color: rgba(0, 0, 0, 0.73); }
+    color: rgba(0, 0, 0, 0.73);
+    background: #51c5fd; }
   .cmint .fields-close-btn i {
     font-size: 0.8em;
     display: inline-block;
@@ -287,12 +293,17 @@ body {
 
 .cmint .field-wrap {
   margin-bottom: 2em; }
+  .cmint .field-wrap:after {
+    content: '';
+    display: table;
+    clear: both; }
   .cmint .field-wrap label {
     color: rgba(0, 0, 0, 0.5);
     display: block;
     margin-bottom: 0.3em; }
   .cmint .field-wrap input[type="text"], .cmint .field-wrap textarea {
     background: #fafafa;
+    font-size: 1em;
     font-family: sans-serif;
     border-radius: 3px;
     margin-bottom: 0.8em; }
@@ -314,10 +325,14 @@ body {
   border-top: 1px solid #ddd; }
 
 .cmint .field-selected-field-wrap .field-input-wrap,
-.cmint .field-selected-field-wrap .dropdown {
+.cmint .field-selected-field-wrap .dropdown,
+.cmint .field-selected-field-wrap .field-group-wrap {
   padding: 0;
   border: none;
   box-shadow: none; }
+
+.cmint .field-selected-field-wrap .field-group-wrap {
+  padding-top: 0.5em; }
 
 .cmint .field-choice-label {
   width: 50%;
@@ -483,17 +498,20 @@ body {
   .cmint .category-container:not(.active) .category-selected {
     border-bottom: 1px solid #cdcdcd; }
 
-#Stage .Component.active {
-  position: relative;
-  outline: 1px solid #039BE5;
-  box-shadow: 0 0 5px #039BE5; }
+#Stage .Component {
+  transition: padding 200ms, background 200ms; }
+  #Stage .Component.active {
+    position: relative;
+    outline: 1px solid #039BE5;
+    box-shadow: 0 0 5px #039BE5; }
 
 .context-insert {
   text-align: center;
-  background: #f2f2f2;
+  background: transparent;
   color: rgba(0, 0, 0, 0.5);
   padding: 0.5em 1em;
-  border: 1px dashed #cdcdcd; }
+  border: 1px dashed #cdcdcd;
+  transition: padding 200ms, background 200ms; }
   .context-insert.hide {
     opacity: 0;
     height: 0px;
@@ -602,12 +620,12 @@ body {
     border-radius: 50%;
     background: #1fb4fc;
     cursor: pointer;
-    border: none;
+    border: 1px solid #025780;
     position: relative;
     outline: none;
     margin-left: 0.5em; }
     #Toolbar button:hover {
-      background: #47c1fd; }
+      background: #51c5fd; }
     #Toolbar button:hover:before {
       content: 'Undo';
       position: absolute;
@@ -635,7 +653,8 @@ body {
     content: 'Get Code'; }
 
 .notification {
-  background: orange;
+  background: black;
+  color: white;
   display: inline-block;
   padding: 0.5em 1em;
   position: fixed;

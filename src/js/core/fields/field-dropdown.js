@@ -34,7 +34,7 @@ Vue.component('field-dropdown', {
         process: function(selection) {
             var output = Menus[this.field.menu][selection];
             if (this.field.hook) {
-                output = Process[this.field.hook](output);
+                output = Process[this.field.hook](output, this.component, this.field);
             }
             this.field.inputs[this.fields[this.field.name].input] = selection;
             this.selected = selection;

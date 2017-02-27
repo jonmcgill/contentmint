@@ -31,15 +31,17 @@
 
     .fields-close-btn {
         @extend %cmint-type;
-        background: lighten($color-accent, 20%);
+        background: lighten($color-accent, 10%);
         outline: none;
-        border: none;
+        border: 1px solid darken($color-accent, 10%);
+        border-radius: 3px;
         padding: 0.4em 0.8em;
         font: 1em sans-serif;
         color: $color-font-fade;
         cursor: pointer;
         &:hover {
             color: $color-font-dark;
+            background: lighten($color-accent, 20%);
         }
         i {
             font-size: 0.8em;
@@ -117,6 +119,12 @@
 
         margin-bottom: 2em;
 
+        &:after {
+            content: '';
+            display: table;
+            clear:both;
+        }
+
         label {
             color: $color-font-fade;
             display: block;
@@ -124,7 +132,7 @@
         }
         input[type="text"], textarea {
             background: #fafafa;
-            // font-size: 0.9em;
+            font-size: 1em;
             font-family: sans-serif;
             border-radius: 3px;
             margin-bottom: 0.8em;
@@ -149,10 +157,15 @@
         border-top: 1px solid #ddd;
     }
     .field-selected-field-wrap .field-input-wrap,
-    .field-selected-field-wrap .dropdown {
+    .field-selected-field-wrap .dropdown,
+    .field-selected-field-wrap .field-group-wrap {
         padding:0;
         border: none;
         box-shadow: none;
+    }
+
+    .field-selected-field-wrap .field-group-wrap {
+        padding-top: 0.5em;
     }
 
     .field-choice-label {

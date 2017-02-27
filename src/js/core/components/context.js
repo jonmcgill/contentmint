@@ -17,6 +17,7 @@ Vue.component('context', {
         } else {
             output = this.children.map(function(child) {
                 return make('wrap', {
+                    class: { 'ShowLayout': this.showLayout },
                     props: { 'config': child },
                     key: child.id
                 })
@@ -30,6 +31,9 @@ Vue.component('context', {
     computed: {
         childNum: function() {
             return this.children.length === 0;
+        },
+        showLayout: function() {
+            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     mounted: function() {

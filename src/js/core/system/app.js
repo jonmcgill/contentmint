@@ -22,6 +22,7 @@ $.getJSON('test/test-data.json', function(data) {
 
                 fieldsComponent: null,
                 focusedComponent: null,
+                showLayout: false,
                 
                 changes: null,
                 previous: null,
@@ -46,6 +47,9 @@ $.getJSON('test/test-data.json', function(data) {
                 var _this = this;
                 this.$bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.focusedComponent.config;
+                })
+                this.$bus.$on('showLayout', function() {
+                    _this.showLayout = !_this.showLayout;
                 })
 
                 Util.debug('mounted app');

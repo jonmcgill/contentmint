@@ -63,6 +63,7 @@ var Cmint = (function() {
 
     function tokenize(input, component) {
         var output = input;
+        if (!component._tokens) return output;
         component._tokens.forEach(function(pair) {
             var token = Object.keys(pair)[0];
             var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');

@@ -1,10 +1,11 @@
 .context-insert {
     @extend %cmint-type;
     text-align: center;
-    background: $color-bg-lightgray;
+    background: transparent;
     color: $color-font-fade;
     padding: 0.5em 1em;
     border: 1px dashed $color-bd-light;
+    transition: padding 200ms, background 200ms;
     &.hide {
         opacity: 0;
         height: 0px;

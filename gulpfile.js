@@ -35,8 +35,8 @@ var js_files = [
 
     './src/js/core/drag/drag.js',
     './src/js/core/drag/fn/*',
-    './src/js/core/system/fn/*',
     './src/js/core/system/editor.js',
+    './src/js/core/system/fn/*',
     './src/js/core/system/app.js'
     
 ];

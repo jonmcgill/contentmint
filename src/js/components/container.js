@@ -1,6 +1,6 @@
 Cmint.createComponent({
     template: '\
-        <div class="Container" style="border:1px solid black;padding:16px;">\
+        <div class="Container">\
             <context :children="config.container" data-context-name="container"></context>\
         </div>',
     config: {

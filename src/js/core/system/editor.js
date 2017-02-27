@@ -4,7 +4,8 @@ Editor.config = {
     insert_toolbar: false,
     fixed_toolbar_container: '#EditorToolbar',
     plugins: 'link lists paste textpattern autolink charmap',
-    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap'
+    toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap',
+    forced_root_block: 'div'
 }
 
 Editor.init = function(component) {
@@ -42,6 +43,7 @@ Editor.init = function(component) {
                 STASH = editor.getContent();
             });
             editor.on('blur', function() {
+                if (!component.config._content) return;
                 if (component.config._content[contentProp] !== STASH) {
                     Cmint.app.save();
                     Cmint.app.snapshot();
