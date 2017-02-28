@@ -223,7 +223,6 @@ var Cmint = (function() {
         return components.map(function(comp) {
             return Util.copy(Components[comp]);
         })
-        // return Util.jprs($('#AvailableComponents').text());
     }
 
     function tokenize(input, component) {
@@ -414,7 +413,7 @@ Vue.component('categories', {
     data: function(){return{
         toggle: false,
         selected: 'All',
-        categories: []
+        // categories: []
     }},
     methods: {
         select: function(item) {
@@ -443,17 +442,18 @@ Vue.component('categories', {
                 'fa-chevron-left': !this.toggle,
                 'fa-chevron-down': this.toggle
             }
+        },
+        categories: function() {
+            var categories = this.components.map(function(comp) {
+                return comp._category;
+            });
+            return categories.filter(function(cat, i) {
+                return categories.indexOf(cat) === i;
+            }).sort();
         }
     },
     mounted: function() {
         var _this = this;
-        _this.categories = _this.components.map(function(comp) {
-            return comp._category;
-        })
-        _this.categories = _this.categories.filter(function(cat, i) {
-            return _this.categories.indexOf(cat) === i;
-        }).sort();
-
         this.$bus.$on('closeCategoryList', function() {
             _this.toggle = false;
         })
@@ -495,15 +495,20 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
+            <button class="actionbar-new" @click="newComponent">\
+                <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
+            <custom-add v-if="newComp" :component="focused"></custom-add>\
         </div>',
     data: function(){return{
         top: '20px',
         left: '20px',
         display: 'block',
         isActive: false,
-        noFields: true
+        noFields: true,
+        newComp: false,
+        focused: false
     }},
     computed: {
         css: function() {
@@ -545,6 +550,14 @@ Vue.component('actionbar', {
             this.$bus.$emit('closeActionBar');
             Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
         },
+        newComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+            var clone = Util.copy(index.context[index.key]);
+            this.focused = clone;
+            this.newComp = !this.newComp;
+            // Cmint.saveCustomComponent('Test Custom Component', 'Custom', clone);
+        },
         callFields: function() {
             this.$bus.$emit('callComponentFields');
             this.$bus.$emit('closeActionBar');
@@ -566,10 +579,14 @@ Vue.component('actionbar', {
         this.$bus.$on('closeActionBar', function() {
             if (_this.isActive) {
                 _this.isActive = false;
+                _this.newComp = false;
                 setTimeout(function() {
                     _this.display = 'none';
                 }, 200)
             }
+        })
+        this.$bus.$on('closeNewComp', function() {
+            _this.newComp = false;
         })
     }
 })
@@ -630,6 +647,52 @@ Vue.component('toolbar', {
             this.contextActive = !this.contextActive;
             Bus.$emit('contextualize');
             Util.debug('contextualized clicked');
+        }
+    }
+})
+Vue.component('custom-add', {
+    props: ['component'],
+    template: '\
+        <div class="custom-add-wrap">\
+            <span>Custom Component Information</span>\
+            <input type="text" v-model="name" placeholder="Component name" />\
+            <input type="text" v-model="category" placeholder="Component category" />\
+            <button @click="addComponent">Save Component</button>\
+            <div class="nameError" v-if="nameError">{{nameError}}</div>\
+        </div>',
+    data: function() {return{
+        name: '',
+        category: '',
+        nameError: false
+    }},
+    methods: {
+        addComponent: function() {
+            var D = Cmint.app.Data;
+            var double = false;
+            var _this = this;
+            if (!D.customComponents[D.template]) {
+                D.customComponents[D.template] = [];
+            }
+            if (this.name === '') {
+                this.nameError = 'Name field is blank';
+                return;
+            }
+            Cmint.app.components.forEach(function(c) {
+                if (c._display === _this.name + ' (Custom)') {
+                    double = true;
+                }
+            })
+            if (!double) {
+                var comp = Util.copy(this.component);
+                comp._display = this.name + ' (Custom)';
+                comp._category = this.category || 'Custom';
+                Cmint.app.components.push(comp);
+                Util.debug('added "' + this.name + '" ('+this.category+') in template "'+D.template+'"');
+                this.$bus.$emit('closeNewComp');
+            } else {
+                this.nameError = 'Name already exists';
+                this.name = '';
+            }
         }
     }
 })
@@ -764,7 +827,7 @@ Cmint.createComponent({
         _display: 'Headline',
         _category: 'Content',
         _content: {
-            text: 'Update This Article Headline'
+            text: '<div>Update This Article Headline</div>'
         }
     }
 })
@@ -1622,6 +1685,23 @@ Cmint.save = function() {
 
     Util.debug('saved content');
 }
+Cmint.saveCustomComponent = function(name, category, data) {
+    
+    var D = Cmint.app.Data;
+
+    if (!D.customComponents[D.template]) {
+        D.customComponents[D.template] = [];
+    }
+
+    if (D.customComponents[D.template].indexOf(name) < 0) {
+        var comp = Util.copy(data);
+        comp._display = name;
+        comp._category = category || 'Custom';
+        Cmint.app.components.push(comp);
+        Util.debug('added custom component: ' + name + ' ('+category+') for template "'+D.template+'"');
+    } 
+
+}
 Cmint.showFields = function(component) {
     if (this.fieldsComponent) {
         this.fieldsComponent = null;
@@ -1680,16 +1760,26 @@ $.getJSON('test/test-data.json', function(data) {
 
     $.get('/templates/' + Data.template + '.html', function(markup) {
         
-        var stage = '<context id="Stage" data-context-name="stage" :children="stage"></context>';
+        var stage, templateComponents, customComponents = [];
+
+        stage = '<context id="Stage" data-context-name="stage" :children="stage"></context>';
         Data.markup = markup.replace(/\{\{\s*stage\s*\}\}/, stage);
         $('#Template').html(Data.markup);
+
+        if (Data.customComponents.hasOwnProperty(Data.template)) {
+            customComponents = Util.copy(Data.customComponents[Data.template]);
+        }
+
+        templateComponents = Cmint.setAvailableComponents(Templates[Data.template]).concat(customComponents);
+        
 
         Cmint.app = new Vue({
 
             el: '#App',
 
             data: {
-                components: Cmint.setAvailableComponents(Templates[Data.template]),
+                Data: Data,
+                components: templateComponents,
                 stage: [],
                 saved: Data.saved,
 

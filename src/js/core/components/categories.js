@@ -16,7 +16,7 @@ Vue.component('categories', {
     data: function(){return{
         toggle: false,
         selected: 'All',
-        categories: []
+        // categories: []
     }},
     methods: {
         select: function(item) {
@@ -45,17 +45,18 @@ Vue.component('categories', {
                 'fa-chevron-left': !this.toggle,
                 'fa-chevron-down': this.toggle
             }
+        },
+        categories: function() {
+            var categories = this.components.map(function(comp) {
+                return comp._category;
+            });
+            return categories.filter(function(cat, i) {
+                return categories.indexOf(cat) === i;
+            }).sort();
         }
     },
     mounted: function() {
         var _this = this;
-        _this.categories = _this.components.map(function(comp) {
-            return comp._category;
-        })
-        _this.categories = _this.categories.filter(function(cat, i) {
-            return _this.categories.indexOf(cat) === i;
-        }).sort();
-
         this.$bus.$on('closeCategoryList', function() {
             _this.toggle = false;
         })

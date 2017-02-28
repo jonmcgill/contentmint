@@ -19,6 +19,7 @@ var js_files = [
     './src/js/core/components/actionbar.js',
     './src/js/core/components/overlay.js',
     './src/js/core/components/toolbar.js',
+    './src/js/core/components/custom-add.js',
 
     './src/js/components/**/*',
     './src/js/processing/**/*',

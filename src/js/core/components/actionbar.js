@@ -5,15 +5,20 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
+            <button class="actionbar-new" @click="newComponent">\
+                <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
+            <custom-add v-if="newComp" :component="focused"></custom-add>\
         </div>',
     data: function(){return{
         top: '20px',
         left: '20px',
         display: 'block',
         isActive: false,
-        noFields: true
+        noFields: true,
+        newComp: false,
+        focused: false
     }},
     computed: {
         css: function() {
@@ -55,6 +60,14 @@ Vue.component('actionbar', {
             this.$bus.$emit('closeActionBar');
             Util.debug('copied ' + comp.config._name + '[' + comp.config._index + ']');
         },
+        newComponent: function() {
+            var comp = Cmint.app.focusedComponent;
+            var index = Index.retrieveVueContext(comp.config._index, Cmint.app);
+            var clone = Util.copy(index.context[index.key]);
+            this.focused = clone;
+            this.newComp = !this.newComp;
+            // Cmint.saveCustomComponent('Test Custom Component', 'Custom', clone);
+        },
         callFields: function() {
             this.$bus.$emit('callComponentFields');
             this.$bus.$emit('closeActionBar');
@@ -76,10 +89,14 @@ Vue.component('actionbar', {
         this.$bus.$on('closeActionBar', function() {
             if (_this.isActive) {
                 _this.isActive = false;
+                _this.newComp = false;
                 setTimeout(function() {
                     _this.display = 'none';
                 }, 200)
             }
+        })
+        this.$bus.$on('closeNewComp', function() {
+            _this.newComp = false;
         })
     }
 })

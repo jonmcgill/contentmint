@@ -4,16 +4,26 @@ $.getJSON('test/test-data.json', function(data) {
 
     $.get('/templates/' + Data.template + '.html', function(markup) {
         
-        var stage = '<context id="Stage" data-context-name="stage" :children="stage"></context>';
+        var stage, templateComponents, customComponents = [];
+
+        stage = '<context id="Stage" data-context-name="stage" :children="stage"></context>';
         Data.markup = markup.replace(/\{\{\s*stage\s*\}\}/, stage);
         $('#Template').html(Data.markup);
+
+        if (Data.customComponents.hasOwnProperty(Data.template)) {
+            customComponents = Util.copy(Data.customComponents[Data.template]);
+        }
+
+        templateComponents = Cmint.setAvailableComponents(Templates[Data.template]).concat(customComponents);
+        
 
         Cmint.app = new Vue({
 
             el: '#App',
 
             data: {
-                components: Cmint.setAvailableComponents(Templates[Data.template]),
+                Data: Data,
+                components: templateComponents,
                 stage: [],
                 saved: Data.saved,
 

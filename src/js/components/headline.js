@@ -7,7 +7,7 @@ Cmint.createComponent({
         _display: 'Headline',
         _category: 'Content',
         _content: {
-            text: 'Update This Article Headline'
+            text: '<div>Update This Article Headline</div>'
         }
     }
 })

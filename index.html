@@ -26,6 +26,7 @@
         Components
             ✓ modify root tags for 'wrap' and 'context' via render function
             ✓ placeholder for empty context regions
+            ✓ users can create custom components and save them to a template
               option: once this thing is staged, it cannot be removed but it can be copied
                       and those copies can be moved
 
@@ -46,7 +47,7 @@
               initial render transitions
               'a' tags need constant preventDefault handlers
               drag handles of some sort would be nice
-              deconstruct mode where components and contexts have padding, background, and borders
+            ✓ contextualized mode where components and contexts have padding, background, and borders
 
         Application:
               global naming
@@ -66,14 +67,12 @@
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <overlay></overlay>
     <div id="Template" :class="{ scale: !!fieldsComponent }"></div>
-    <!-- <div id="EditorToolbar"></div> -->
     <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
-    
     <div class="notification">Saved</div>
 </div>
 

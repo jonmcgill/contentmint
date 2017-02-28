@@ -1,4 +1,4 @@
-.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #Toolbar, .notification {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #ActionBar .custom-add-wrap, #Toolbar, .notification {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -528,7 +528,7 @@ body {
   border-radius: 3px; }
   #ActionBar.active {
     opacity: 1; }
-  #ActionBar button {
+  #ActionBar > button {
     display: block;
     background: #333;
     color: rgba(255, 255, 255, 0.6);
@@ -540,9 +540,9 @@ body {
     cursor: pointer;
     outline: none;
     position: relative; }
-    #ActionBar button:hover:after {
+    #ActionBar > button:hover:after {
       position: absolute;
-      width: 5em;
+      width: 6em;
       padding: 3px 8px;
       display: block;
       background: #333;
@@ -551,7 +551,7 @@ body {
       font-weight: normal;
       top: 3px;
       left: 40px; }
-    #ActionBar button:hover {
+    #ActionBar > button:hover {
       background: #5bc8fd;
       color: black; }
   #ActionBar .actionbar-copy:hover {
@@ -562,10 +562,46 @@ body {
     background: #E57373; }
     #ActionBar .actionbar-trash:hover:after {
       content: 'Remove'; }
+  #ActionBar .actionbar-new:hover:after {
+    content: 'Add Custom'; }
   #ActionBar .actionbar-fields:hover {
     background: #BCAAA4; }
     #ActionBar .actionbar-fields:hover:after {
       content: 'Settings'; }
+  #ActionBar .custom-add-wrap {
+    position: absolute;
+    left: 30px;
+    top: 65px;
+    width: 20em;
+    background: #333;
+    padding: 0.5em;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8em; }
+    #ActionBar .custom-add-wrap span {
+      display: block;
+      padding: 0.2em 0.5em 0.5em; }
+    #ActionBar .custom-add-wrap input {
+      margin: 0.5em;
+      width: 17.3em;
+      border: none; }
+      #ActionBar .custom-add-wrap input:focus {
+        outline: 2px solid #1fb4fc; }
+    #ActionBar .custom-add-wrap button {
+      width: 10em;
+      margin: 0.5em;
+      background: #1fb4fc;
+      color: rgba(0, 0, 0, 0.7);
+      padding: 0.4em 0.8em;
+      border: none;
+      cursor: pointer;
+      outline: none; }
+      #ActionBar .custom-add-wrap button:hover, #ActionBar .custom-add-wrap button:focus {
+        background: #51c5fd;
+        color: rgba(0, 0, 0, 0.9); }
+    #ActionBar .custom-add-wrap .nameError {
+      margin: 0.5em;
+      color: #ff6666;
+      font-style: italic; }
 
 #EditorToolbar {
   float: left;

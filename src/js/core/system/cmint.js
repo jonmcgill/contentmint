@@ -58,7 +58,6 @@ var Cmint = (function() {
         return components.map(function(comp) {
             return Util.copy(Components[comp]);
         })
-        // return Util.jprs($('#AvailableComponents').text());
     }
 
     function tokenize(input, component) {
