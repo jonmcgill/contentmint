@@ -2,7 +2,7 @@
 
     &#Sidebar {
         position: fixed;
-        top: 0;
+        top: 40px;
         bottom: 0;
         right: 0em;
         background: $color-bg-lightgray;
@@ -48,7 +48,8 @@
     }
 
     .sidebar-sub {
-        padding: 1em 0 1em;
+        padding: 16px 0 16px;
+        height: 70px;
         border-bottom: 1px solid #ccc;
         @extend %cmint-type;
         .component-categories {
@@ -63,7 +64,7 @@
         background: #e4e4e4;
         overflow-y: auto;
         position: absolute;
-        top: 7.85em;
+        top: 70px;
         bottom: 0;
         width: 100%;
     }

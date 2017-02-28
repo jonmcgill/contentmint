@@ -22,7 +22,7 @@ $.getJSON('test/test-data.json', function(data) {
 
                 fieldsComponent: null,
                 focusedComponent: null,
-                showLayout: false,
+                contextualize: false,
                 
                 changes: null,
                 previous: null,
@@ -48,8 +48,8 @@ $.getJSON('test/test-data.json', function(data) {
                 this.$bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.focusedComponent.config;
                 })
-                this.$bus.$on('showLayout', function() {
-                    _this.showLayout = !_this.showLayout;
+                this.$bus.$on('contextualize', function() {
+                    _this.contextualize = !_this.contextualize;
                 })
 
                 Util.debug('mounted app');

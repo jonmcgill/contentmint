@@ -1,4 +1,4 @@
-.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, .notification {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #Toolbar, .notification {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -92,19 +92,23 @@ body {
     opacity: 1; }
 
 #Template {
-  margin: 2em 30em 5em 5em;
+  margin: 70px 30em 5em 5em;
   transform: scale(1);
   transition: transform 200ms; }
   #Template.scale {
     transform: scale(0.85); }
-  #Template .Deconstructed {
-    padding: 10px;
-    background: rgba(69, 90, 100, 0.2);
+  #Template .Contextualized {
+    padding: 12px;
+    background: rgba(3, 155, 229, 0.5);
     border: 1px dashed black; }
+  #Template .Contextualized.active {
+    position: relative;
+    outline: 2px solid orange !important;
+    box-shadow: 0 0 16px orange !important; }
 
 .cmint#Sidebar {
   position: fixed;
-  top: 0;
+  top: 40px;
   bottom: 0;
   right: 0em;
   background: #f2f2f2;
@@ -141,7 +145,8 @@ body {
       color: inherit; }
 
 .cmint .sidebar-sub {
-  padding: 1em 0 1em;
+  padding: 16px 0 16px;
+  height: 70px;
   border-bottom: 1px solid #ccc; }
   .cmint .sidebar-sub .component-categories {
     padding: 0 1em; }
@@ -151,7 +156,7 @@ body {
   background: #e4e4e4;
   overflow-y: auto;
   position: absolute;
-  top: 7.85em;
+  top: 70px;
   bottom: 0;
   width: 100%; }
 
@@ -204,7 +209,7 @@ body {
 
 .cmint.fields-container {
   position: fixed;
-  top: 0;
+  top: 40px;
   bottom: 0;
   right: -30em;
   border-left: 1px solid #ddd;
@@ -286,13 +291,13 @@ body {
   top: 8em;
   bottom: 0;
   padding: 2em;
-  padding-bottom: 18em;
+  padding-bottom: 10em;
   position: absolute;
   width: 100%;
-  overflow-y: scroll; }
+  overflow-y: auto; }
 
 .cmint .field-wrap {
-  margin-bottom: 2em; }
+  margin-bottom: 1.5em; }
   .cmint .field-wrap:after {
     content: '';
     display: table;
@@ -319,10 +324,7 @@ body {
 .cmint .dropdown {
   background: #f8f8f8;
   padding: 0.8em;
-  border-left: 5px solid #888;
-  border-bottom: 2px solid #ddd;
-  border-right: 1px solid #ddd;
-  border-top: 1px solid #ddd; }
+  border: 1px solid #ccc; }
 
 .cmint .field-selected-field-wrap .field-input-wrap,
 .cmint .field-selected-field-wrap .dropdown,
@@ -502,8 +504,8 @@ body {
   transition: padding 200ms, background 200ms; }
   #Stage .Component.active {
     position: relative;
-    outline: 1px solid #039BE5;
-    box-shadow: 0 0 5px #039BE5; }
+    outline: 2px solid #039BE5;
+    box-shadow: 0 0 16px #039BE5; }
 
 .context-insert {
   text-align: center;
@@ -522,30 +524,28 @@ body {
   transition: opacity 200ms;
   margin-left: -44px;
   margin-top: -2px;
-  border: 1px solid #038acc;
-  border-top: 1px solid transparent;
+  border: 1px solid #333;
   border-radius: 3px; }
   #ActionBar.active {
     opacity: 1; }
   #ActionBar button {
     display: block;
-    background: #1fb4fc;
-    color: rgba(0, 0, 0, 0.8);
+    background: #333;
+    color: rgba(255, 255, 255, 0.6);
     border: none;
-    font-size: 0.85em;
+    font-size: 0.8em;
     font-weight: bold;
     width: 30px;
     padding: 0.7em 0;
     cursor: pointer;
     outline: none;
-    position: relative;
-    border-top: 1px solid #038acc; }
+    position: relative; }
     #ActionBar button:hover:after {
       position: absolute;
       width: 5em;
       padding: 3px 8px;
       display: block;
-      background: #444;
+      background: #333;
       border-radius: 3px;
       color: rgba(255, 255, 255, 0.9);
       font-weight: normal;
@@ -568,98 +568,104 @@ body {
       content: 'Settings'; }
 
 #EditorToolbar {
-  position: fixed;
-  top: 1em;
-  right: 26.3em;
-  overflow: hidden;
-  border-radius: 3px;
-  border: 1px solid #cdcdcd; }
+  float: left;
+  z-index: 500; }
   #EditorToolbar, #EditorToolbar * {
-    background: #f2f2f2; }
+    background: transparent; }
   #EditorToolbar > * {
     border-width: 0 !important; }
-  #EditorToolbar *[style~="width:"] {
-    width: 33px !important; }
   #EditorToolbar *.mce-btn {
-    display: block !important;
     margin: 0 !important;
     border: none !important;
-    height: 2.4em !important; }
+    line-height: 32px;
+    padding: 0 !important;
+    color: rgba(255, 255, 255, 0.4) !important; }
     #EditorToolbar *.mce-btn:hover,
     #EditorToolbar *.mce-btn:hover button {
-      background: #e5e5e5 !important; }
-    #EditorToolbar *.mce-btn:not(:last-child) {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important; }
+      background: #484848 !important; }
     #EditorToolbar *.mce-btn:hover i {
-      color: rgba(0, 0, 0, 0.9) !important;
-      background: #e5e5e5 !important; }
+      color: rgba(255, 255, 255, 0.9) !important; }
   #EditorToolbar i.mce-ico {
     font-size: 0.8em !important;
     text-align: center !important;
-    color: rgba(0, 0, 0, 0.9) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
     line-height: 2em; }
-  #EditorToolbar *.mce-container, #EditorToolbar *.mce-container-body {
-    padding: 0 !important;
-    margin: 0 !important;
-    position: relative !important; }
 
 *.mce-edit-focus {
   outline: none !important;
   border: none !important; }
 
-.mce-tooltip {
-  display: none !important; }
-
 #Toolbar {
   position: fixed;
-  right: 26.4em;
-  bottom: 2em; }
-  #Toolbar button {
-    width: 2.5em;
-    height: 2.5em;
-    border-radius: 50%;
-    background: #1fb4fc;
+  top: 0;
+  padding: 0 1em;
+  width: 100%;
+  z-index: 400;
+  background: #333;
+  color: white;
+  line-height: 40px;
+  height: 40px; }
+  #Toolbar .divider {
+    float: left;
+    display: inline-block;
+    padding: 0 0.2em;
+    color: rgba(255, 255, 255, 0.3); }
+  #Toolbar .right {
+    float: right;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9em;
+    -webkit-font-smoothing: antialiased; }
+    #Toolbar .right a {
+      color: #38bcfc;
+      text-decoration: none; }
+      #Toolbar .right a:hover {
+        text-decoration: underline; }
+    #Toolbar .right span {
+      margin-right: 1em; }
+      #Toolbar .right span:after {
+        content: '|';
+        margin-left: 1em; }
+  #Toolbar > button {
     cursor: pointer;
-    border: 1px solid #025780;
     position: relative;
     outline: none;
-    margin-left: 0.5em; }
-    #Toolbar button:hover {
-      background: #51c5fd; }
-    #Toolbar button:hover:before {
-      content: 'Undo';
-      position: absolute;
-      left: -2em;
-      top: 3em;
-      background: #444;
-      color: white;
-      padding: 0.3em;
-      font-size: 0.9em;
-      border-radius: 3px;
-      width: 6em; }
-    #Toolbar button[disabled] {
+    float: left;
+    padding: 3px;
+    line-height: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    -webkit-font-smoothing: antialiased;
+    color: rgba(255, 255, 255, 0.4);
+    font: 1em sans-serif;
+    font-size: 0.9em; }
+    #Toolbar > button.active, #Toolbar > button.active:hover {
+      color: #38bcfc; }
+    #Toolbar > button:after, #Toolbar > button.active:after, #Toolbar > button:hover:after {
+      content: ' |';
+      margin: 0 6px;
+      color: rgba(255, 255, 255, 0.4); }
+    #Toolbar > button i {
+      margin-right: 6px; }
+    #Toolbar > button:hover {
+      color: rgba(255, 255, 255, 0.8); }
+      #Toolbar > button:hover:after {
+        color: rgba(255, 255, 255, 0.4); }
+    #Toolbar > button[disabled] {
       opacity: 0.4;
-      color: #026b9f;
+      color: rgba(255, 255, 255, 0.2);
       cursor: default; }
-      #Toolbar button[disabled]:hover {
-        background: #1fb4fc; }
-      #Toolbar button[disabled]:hover:before {
-        display: none; }
-  #Toolbar .toolbar-undo:hover:before {
-    content: 'Undo'; }
-  #Toolbar .toolbar-save:hover:before {
-    content: 'Save'; }
-  #Toolbar .toolbar-code:hover:before {
-    content: 'Get Code'; }
 
 .notification {
-  background: black;
-  color: white;
+  background: #1fb4fc;
+  border: 1px solid #0279b3;
+  border-radius: 0 3px 3px 0;
+  color: rgba(0, 0, 0, 0.8);
   display: inline-block;
   padding: 0.5em 1em;
   position: fixed;
   bottom: 2em;
   left: -5em;
-  transition: left 200ms; }
+  transition: left 100ms; }
   .notification.active {
-    left: 0; }
+    left: -2px; }

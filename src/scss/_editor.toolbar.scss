@@ -1,69 +1,109 @@
 #Toolbar {
     position: fixed;
-    right: 26.4em;
-    bottom: 2em;
+    top: 0;
+    padding: 0 1em;
+    width: 100%;
+    z-index: 400;
+    background: #333;
+    color: white;
+    line-height: 40px;
+    height: 40px;
+    @extend %cmint-type;
 
-    button {
-        width: 2.5em;
-        height: 2.5em;
-        border-radius: 50%;
-        background: lighten($color-accent, 10%);
+    .divider {
+        float: left;
+        display: inline-block;
+        padding: 0 0.2em;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .right {
+        float: right;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9em;
+        -webkit-font-smoothing: antialiased;
+        a {
+            color: lighten($color-accent, 15%);
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+        span {
+            margin-right: 1em;
+            &:after {
+                content: '|';
+                margin-left: 1em;
+            }
+        }
+    }
+
+    & > button {
         cursor: pointer;
-        border: 1px solid darken($color-accent, 20%);
         position: relative;
         outline: none;
-        margin-left: 0.5em;
-        &:hover {
-            background: lighten($color-accent, 20%);
+        float: left;
+        padding: 3px;
+        line-height: 40px;
+        height: 40px;
+        background: none;
+        border: none;
+        -webkit-font-smoothing: antialiased;
+        color: rgba(255,255,255,0.4);
+        font: 1em sans-serif;
+        font-size: 0.9em;
+        &.active,
+        &.active:hover {
+            color: lighten($color-accent, 15%);
         }
-        &:hover:before {
-            content: 'Undo';
-            position: absolute;
-            left: -2em;
-            top: 3em;
-            background: #444;
-            color: white;
-            padding: 0.3em;
-            font-size: 0.9em;
-            border-radius: 3px;
-            width: 6em;
+        &:after,
+        &.active:after,
+        &:hover:after {
+            content: ' |';
+            margin: 0 6px;
+            color: rgba(255,255,255,0.4);
+        }
+        i {
+            margin-right: 6px;
+        }
+        &:hover {
+            color: rgba(255,255,255,0.8);
+            &:after {
+                color: rgba(255,255,255,0.4);
+            }
         }
         &[disabled] {
             opacity: 0.4;
-            color: darken($color-accent, 14%);
+            color: rgba(255,255,255,0.2);
             cursor: default;
-            &:hover {
-                background: lighten($color-accent, 10%);
-            }
-            &:hover:before {
-                display: none;
-            }
         }
     }
 
-    .toolbar-undo:hover:before {
-        content: 'Undo';
-    }
-    .toolbar-save:hover:before {
-        content: 'Save';
-    }
-    .toolbar-code:hover:before {
-        content: 'Get Code';
-    }
+    // .toolbar-undo:hover:before {
+    //     content: 'Undo';
+    // }
+    // .toolbar-save:hover:before {
+    //     content: 'Save';
+    // }
+    // .toolbar-code:hover:before {
+    //     content: 'Get Code';
+    // }
 
 }
 
 .notification {
     @extend %cmint-type;
-    background: black;
-    color: white;
+    background: lighten($color-accent, 10%);
+    border: 1px solid darken($color-accent, 10%);
+    border-radius: 0 3px 3px 0;
+    color: rgba(0,0,0,0.8);
     display: inline-block;
     padding: 0.5em 1em;
     position: fixed;
     bottom: 2em;
     left: -5em;
-    transition: left 200ms;
+    transition: left 100ms;
     &.active {
-        left: 0;
+        left: -2px;
     }
 }

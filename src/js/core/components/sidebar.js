@@ -2,13 +2,6 @@ Vue.component('sidebar', {
     props: ['user', 'name', 'components', 'fieldsComponent'],
     template: '\
         <aside id="Sidebar">\
-            <div class="sidebar-top">\
-                <span class="content-name">{{ name }}</span>\
-                <div class="username">\
-                    <i class="fa fa-user"></i>\
-                    <a :href="\'/\' + user">{{ user }}</a>\
-                </div>\
-            </div>\
             <div class="sidebar-sub">\
                 <categories :components="components"></categories>\
             </div>\

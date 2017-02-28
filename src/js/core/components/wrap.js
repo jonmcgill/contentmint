@@ -6,7 +6,7 @@ Vue.component('wrap', {
             {
                 'class': {
                     'Component': true,
-                    'Deconstructed': this.showLayout
+                    'Contextualized': this.contextualize
                 }
             },
             [
@@ -23,8 +23,8 @@ Vue.component('wrap', {
         }
     },
     computed: {
-        showLayout: function() {
-            return Cmint.app ? Cmint.app.showLayout : false
+        contextualize: function() {
+            return Cmint.app ? Cmint.app.contextualize : false
         }
     },
     created: function() {

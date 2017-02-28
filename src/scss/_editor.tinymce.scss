@@ -1,53 +1,42 @@
 #EditorToolbar {
-    position: fixed;
-    top: 1em;
-    right: 26.3em;
-    overflow: hidden;
-    border-radius: 3px;
-    border: 1px solid $color-bd-light;
+    float: left;
+    z-index: 500;
 
     &, & * {
-        background: $color-bg-lightgray;
+        background: transparent;
     }
 
     & > * {
         border-width: 0 !important;
     }
 
-    *[style~="width:"] {
-        width: 33px !important;
-    }
-
     *.mce-btn {
-        display: block !important;
         margin: 0 !important;
         border: none !important;
-        height: 2.4em !important;
+        line-height: 32px;
+        padding: 0 !important;
+        color: rgba(255,255,255,0.4) !important;
         &:hover,
         &:hover button {
-            background:darken($color-bg-lightgray,5%) !important;
-        }
-        &:not(:last-child) {
-            border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+            background: #484848 !important;
         }
         &:hover i {
-            color: rgba(0,0,0,0.9) !important;
-            background:darken($color-bg-lightgray,5%) !important;
+            color: rgba(255,255,255,0.9) !important;
         }
     }
 
     i.mce-ico {
         font-size: 0.8em !important;
         text-align: center !important;
-        color: rgba(0,0,0,0.9) !important;
+        color: rgba(255,255,255,0.5) !important;
         line-height: 2em;
     }
 
-    *.mce-container, *.mce-container-body {
-        padding: 0 !important;
-        margin: 0 !important;
-        position: relative !important;
-    }
+//     *.mce-container, *.mce-container-body {
+//         padding: 0 !important;
+//         margin: 0 !important;
+//         position: relative !important;
+//     }
 
 }
 
@@ -56,6 +45,6 @@
     border: none !important;
 }
 
-.mce-tooltip {
-    display: none !important;
-}
+// .mce-tooltip {
+//     display: none !important;
+// }

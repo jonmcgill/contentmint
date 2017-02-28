@@ -3,31 +3,29 @@
     transition: opacity 200ms;
     margin-left: -44px;
     margin-top: -2px;
-    border: 1px solid darken($color-accent, 5%);
-    border-top: 1px solid transparent;
+    border: 1px solid #333;
     border-radius: 3px;
     &.active {
         opacity: 1;
     }
     button {
         display: block;
-        background: lighten($color-accent, 10%);
-        color: rgba(0,0,0,0.8);
+        background: #333;
+        color: rgba(255,255,255,0.6);
         border: none;
-        font-size: 0.85em;
+        font-size: 0.8em;
         font-weight: bold;
         width: 30px;
         padding: 0.7em 0;
         cursor: pointer;
         outline: none;
         position: relative;
-        border-top: 1px solid darken($color-accent, 5%);
         &:hover:after {
             position: absolute;
             width: 5em;
             padding: 3px 8px;
             display: block;
-            background: #444;
+            background: #333;
             border-radius: 3px;
             color: rgba(255,255,255,0.9);
             font-weight: normal;

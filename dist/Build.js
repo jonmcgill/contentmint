@@ -281,7 +281,7 @@ Vue.component('wrap', {
             {
                 'class': {
                     'Component': true,
-                    'Deconstructed': this.showLayout
+                    'Contextualized': this.contextualize
                 }
             },
             [
@@ -298,8 +298,8 @@ Vue.component('wrap', {
         }
     },
     computed: {
-        showLayout: function() {
-            return Cmint.app ? Cmint.app.showLayout : false
+        contextualize: function() {
+            return Cmint.app ? Cmint.app.contextualize : false
         }
     },
     created: function() {
@@ -369,7 +369,6 @@ Vue.component('context', {
         } else {
             output = this.children.map(function(child) {
                 return make('wrap', {
-                    class: { 'ShowLayout': this.showLayout },
                     props: { 'config': child },
                     key: child.id
                 })
@@ -378,14 +377,14 @@ Vue.component('context', {
         if (!this.children.length) {
             output = [make('div', {'class':{'context-insert':true}},['Drag components here'])]
         }
-        return make(tag, {'class': {'Context': true}}, output)
+        return make(tag, {
+            'class': {
+                'Context': true
+            }}, output)
     },
     computed: {
         childNum: function() {
             return this.children.length === 0;
-        },
-        showLayout: function() {
-            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     mounted: function() {
@@ -464,13 +463,6 @@ Vue.component('sidebar', {
     props: ['user', 'name', 'components', 'fieldsComponent'],
     template: '\
         <aside id="Sidebar">\
-            <div class="sidebar-top">\
-                <span class="content-name">{{ name }}</span>\
-                <div class="username">\
-                    <i class="fa fa-user"></i>\
-                    <a :href="\'/\' + user">{{ user }}</a>\
-                </div>\
-            </div>\
             <div class="sidebar-sub">\
                 <categories :components="components"></categories>\
             </div>\
@@ -605,24 +597,39 @@ Vue.component('overlay', {
     }
 })
 Vue.component('toolbar', {
-    props: ['changes'],
+    props: ['changes', 'user', 'name'],
     template: '\
         <div id="Toolbar">\
-            <button class="toolbar-undo" @click="undoClick" v-if="changes">\
-                <i class="fa fa-undo"></i></button>\
-            <button class="toolbar-undo" @click="undoClick" v-else disabled>\
-                <i class="fa fa-undo"></i></button>\
-            <button class="toolbar-save" @click="saveClick">\
-                <i class="fa fa-save"></i></button>\
             <button class="toolbar-code">\
-                <i class="fa fa-code"></i></button>\
+                <i class="fa fa-code"></i>Get Code</button>\
+            <button class="toolbar-save" @click="saveClick">\
+                <i class="fa fa-save"></i>Save</button>\
+            <button :class="{\'toolbar-context\': true, active: contextActive }"\
+                @click="contextClick">\
+                <i class="fa fa-object-ungroup"></i>Context</button>\
+            <button class="toolbar-undo" @click="undoClick" v-if="changes">\
+                <i class="fa fa-undo"></i>Undo</button>\
+            <button class="toolbar-undo" @click="undoClick" v-else disabled>\
+                <i class="fa fa-undo"></i>Undo</button>\
+            <div id="EditorToolbar"></div>\
+            <div class="right">\
+                <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
+            </div>\
         </div>',
+    data: function(){return{
+        contextActive: false
+    }},
     methods: {
         undoClick: function() {
             Cmint.app.undo();
         },
         saveClick: function() {
             Cmint.app.save();
+        },
+        contextClick: function() {
+            this.contextActive = !this.contextActive;
+            Bus.$emit('contextualize');
+            Util.debug('contextualized clicked');
         }
     }
 })
@@ -1691,7 +1698,7 @@ $.getJSON('test/test-data.json', function(data) {
 
                 fieldsComponent: null,
                 focusedComponent: null,
-                showLayout: false,
+                contextualize: false,
                 
                 changes: null,
                 previous: null,
@@ -1717,8 +1724,8 @@ $.getJSON('test/test-data.json', function(data) {
                 this.$bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.focusedComponent.config;
                 })
-                this.$bus.$on('showLayout', function() {
-                    _this.showLayout = !_this.showLayout;
+                this.$bus.$on('contextualize', function() {
+                    _this.contextualize = !_this.contextualize;
                 })
 
                 Util.debug('mounted app');

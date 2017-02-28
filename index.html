@@ -63,16 +63,17 @@
 <textarea style="display:none;" id="Data" class="cmint"></textarea>
 <div id="Loading" class="cmint">LOADING</div>
 <div id="App" v-cloak>
+    <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <overlay></overlay>
     <div id="Template" :class="{ scale: !!fieldsComponent }"></div>
-    <div id="EditorToolbar"></div>
+    <!-- <div id="EditorToolbar"></div> -->
     <actionbar></actionbar>
     <sidebar :user="username"
              :name="contentName"
              :components="components"
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
-    <toolbar :changes="changes"></toolbar>
+    
     <div class="notification">Saved</div>
 </div>
 

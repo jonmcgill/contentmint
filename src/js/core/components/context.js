@@ -17,7 +17,6 @@ Vue.component('context', {
         } else {
             output = this.children.map(function(child) {
                 return make('wrap', {
-                    class: { 'ShowLayout': this.showLayout },
                     props: { 'config': child },
                     key: child.id
                 })
@@ -26,14 +25,14 @@ Vue.component('context', {
         if (!this.children.length) {
             output = [make('div', {'class':{'context-insert':true}},['Drag components here'])]
         }
-        return make(tag, {'class': {'Context': true}}, output)
+        return make(tag, {
+            'class': {
+                'Context': true
+            }}, output)
     },
     computed: {
         childNum: function() {
             return this.children.length === 0;
-        },
-        showLayout: function() {
-            return Cmint.app ? Cmint.app.showLayout : false
         }
     },
     mounted: function() {
