@@ -37,6 +37,8 @@ Cmint.init = function(data) {
                 
                 changes: null,
                 previous: null,
+
+                testdata: TESTDATA
             },
 
             methods: {

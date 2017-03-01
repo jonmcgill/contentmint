@@ -5,7 +5,8 @@ Editor.config = {
     fixed_toolbar_container: '#EditorToolbar',
     plugins: 'link lists paste textpattern autolink charmap',
     toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap',
-    forced_root_block: 'div'
+    forced_root_block: 'div',
+    force_hex_style_colors: true
 }
 
 Editor.init = function(component) {
@@ -29,6 +30,11 @@ Editor.init = function(component) {
 
         config.init_instance_callback = function(editor) {
             STASH = editor.getContent();
+            editor.on('PostProcess', function(e) {
+                Editor.postProcesses.forEach(function(fn) {
+                    fn(e);
+                })
+            })
         }
 
         config.setup = function(editor) {

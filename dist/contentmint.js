@@ -9321,7 +9321,10 @@ var Components = Components || {},
     Fields = Fields || {},
     Process = Process || {},
     Menus = Menus || {},
-    Editor = Editor || {hooks:{}},
+    Editor = Editor || {
+        hooks: {},
+        postProcesses: []
+    },
     Templates = Templates || {},
     Data = Data || {},
     Bus = Bus || new Vue();
@@ -9651,16 +9654,6 @@ Vue.component('wrap', {
         })
         Editor.runHook(this, 'editor');
         Editor.init(this);
-        if (this.config._transferRoot) {
-            var base = $(this.$el).children().first()[0];
-            console.log(this.$el);
-            var attrs = base.attributes;
-            for (var i = 0; i < attrs.length; i++) {
-                $(this.$el).attr(attrs[i].name, attrs[i].value);
-            }
-            $(base).children().unwrap();
-            console.log(this.$el);
-        }
     },
     updated: function() {
         var _this = this;
@@ -9678,6 +9671,75 @@ Vue.component('wrap', {
         Editor.init(this);
     }
 })
+
+/**
+
+    Unfortunately, I did not take advantage of slots when I originally designed the component system.
+    Most of it will have to be redone, including the Indexing which is going to be painful and terrible.
+
+    This new system uses wrapper and contextual components as insubstantial wrappers around actual
+    components. I ran into a problem when I needed to override component and context root tags, so this
+    is necessary to ensure the dev can create components like tables, for instance.
+
+**/
+var TESTDATA = {
+    name: 'test',
+    tags: {
+        root: 'table',
+        cell: 'td'
+    },
+    children: {
+        cell: [{
+            name: 'testing',
+            tags: {
+                root: 'p'
+            }
+        }]
+    }
+}
+
+Vue.component('wrapper', {
+    props: ['config'],
+    render: function(make) {
+        return make(this.config.tags.root, {'class': {'Component': true}}, this.$slots.default)
+    }
+})
+Vue.component('contextual', {
+    props: ['tag', 'children'],
+    render: function(make) {
+        return make(this.tag,
+            // options
+            {
+                'class': {'Context': true}
+            },
+            // children
+            this.children.map(function(child) {
+                return make(child.name,
+                    { props: { 'config': child } }
+                );
+            })
+        )
+    }
+})
+Vue.component('testing', {
+    props: ['config'],
+    template: '\
+        <wrapper :config="config">\
+            This is some paragraph text.\
+        </wrapper>',
+})
+Vue.component('test', {
+    props: ['config'],
+    template: '\
+        <wrapper :config="config" cellpadding="10" cellspacing="10" border="1">\
+            <tr>\
+                <contextual :tag="config.tags.cell" :children="config.children.cell"></contextual>\
+            </tr>\
+        </wrapper>'
+})
+
+
+
 Vue.component('context', {
     props: ['children', 'thumbnails', 'tag', 'insert'],
     render: function(make) {
@@ -10541,7 +10603,8 @@ Editor.config = {
     fixed_toolbar_container: '#EditorToolbar',
     plugins: 'link lists paste textpattern autolink charmap',
     toolbar: 'undo redo bold italic alignleft aligncenter link bullist numlist superscript charmap',
-    forced_root_block: 'div'
+    forced_root_block: 'div',
+    force_hex_style_colors: true
 }
 
 Editor.init = function(component) {
@@ -10565,6 +10628,11 @@ Editor.init = function(component) {
 
         config.init_instance_callback = function(editor) {
             STASH = editor.getContent();
+            editor.on('PostProcess', function(e) {
+                Editor.postProcesses.forEach(function(fn) {
+                    fn(e);
+                })
+            })
         }
 
         config.setup = function(editor) {
@@ -10632,6 +10700,9 @@ Cmint.actionBarHandler = function(component) {
 }
 Cmint.createComponentHook = function(name, fns) {
     Editor.hooks[name] = fns;
+}
+Cmint.createEditorPostProcess = function(fn) {
+    Editor.postProcesses.push(fn);
 }
 Cmint.fireDocHandlers = function() {
     $(document).on({
@@ -10814,6 +10885,8 @@ Cmint.init = function(data) {
                 
                 changes: null,
                 previous: null,
+
+                testdata: TESTDATA
             },
 
             methods: {

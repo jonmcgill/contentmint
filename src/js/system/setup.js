@@ -2,7 +2,10 @@ var Components = Components || {},
     Fields = Fields || {},
     Process = Process || {},
     Menus = Menus || {},
-    Editor = Editor || {hooks:{}},
+    Editor = Editor || {
+        hooks: {},
+        postProcesses: []
+    },
     Templates = Templates || {},
     Data = Data || {},
     Bus = Bus || new Vue();

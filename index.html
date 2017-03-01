@@ -10,55 +10,25 @@
 <!--
     
     Implemetation:
+    
+        Refactor: (this is going to suck)
+            wrap and context need to use slots
+            component data should be cleaned up (which touches everything)
+            Index functions will need a big facelift
 
       ✓ Fields:
-            ✓ dropdown
-            ✓ fieldchoice
-            ✓ fieldgroup
-            ✓ menu system
-            ✓ tokenizing
-            ✓ show available tokens
-            ✓ process hooks
-            ✓ field input regex checks
-            ✓ field input error message
-            ✓ run field processes when tokenable data updates
         
-        Components
-            ✓ modify root tags for 'wrap' and 'context' via render function
-            ✓ placeholder for empty context regions
-            ✓ users can create custom components and save them to a template
-              option: once this thing is staged, it cannot be removed but it can be copied
-                      and those copies can be moved
+      ✓ Components:
 
         Editing:
-            ✓ action bar component
-            ✓ sidebar thumbnail styles
-            ✓ how to indicate active component state
-            ✓ trash component structure
-            ✓ copy component structure
-            ✓ determine what can happen during field editting
-            ✓ tinymce inline editing
-            ✓ tinymce editor synced with Vue data
-            ✓ tinymce editing triggers field reprocessing
-            ✓ save button
-            ✓ undo button
-              get code button
-            ✓ autosave with notification
-              initial render transitions
-              'a' tags need constant preventDefault handlers
-              drag handles of some sort would be nice
-            ✓ contextualized mode where components and contexts have padding, background, and borders
+            hooks for code cleanup
+            hooks for 
+            initial render transitions
+            drag handles of some sort would be nice
 
         Application:
-              global naming
-            ✓ loading templates
-            ✓ sidebar component
-            ✓ sidebar categories component
-            ✓ sidebar fields component
-              way to inform the editor how to clean up its code
-              loading graphic
-              transition effects
-            ✓ thumbnail styles need to be like stage
+            global naming
+            loading graphic
 
 -->
 <textarea style="display:none;" id="Data" class="cmint"></textarea>
@@ -74,6 +44,7 @@
              :fieldsComponent="fieldsComponent" class="cmint"></sidebar>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     <div class="notification">Saved</div>
+    <test :config="testdata"></test>
 </div>
 
 <script src="vendor/tinymce/tinymce.min.js"></script>
@@ -95,8 +66,12 @@ Cmint.createMenu('alignment', {
 })
 Cmint.createMenu('image-list', {
     'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
-    'SED Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
-    'Random': 'http://placehold.it/800x300',
+    'Computer': 'http://www.imakenews.com/rbm/sed_computer.jpg',
+    'Dayton Fountain': 'http://www.imakenews.com/rbm/sed_ru_fountain.jpg',
+    'Instructor': 'http://www.imakenews.com/rbm/sed_instructor.jpg',
+    'Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
+    'Students': 'http://www.imakenews.com/rbm/sed_students.jpg',
+    'Mouse': 'http://www.imakenews.com/rbm/sed_mouse.jpg',
     'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
     'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
     'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
@@ -253,12 +228,23 @@ Cmint.createComponentHook('anchor-css', {
         })
     }
 })
+Cmint.createEditorPostProcess(function(e) {
+    $(e.target.bodyElement).find('a').each(function() {
+        var attrs = this.attributes;
+        if (!attrs.style) {
+            this.setAttribute('style', 'color:#0b4b87;');
+        } else {
+            this.attributes.style = this.attributes.style + 'color:#0b4b87';
+        }
+        this.setAttribute('target', '_blank');
+    })
+})
 
 //  COMPONENTS
 //=============================================================================
 Cmint.createComponent({
     template: '\
-        <table border="0" cellpadding="5" cellspacing="5" align="center" width="100%">\
+        <table border="0" cellpadding="5" cellspacing="5" align="center" width="100%" data-hook="vertical-space">\
             <tr>\
                 <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Date</td>\
                 <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Course Name</td>\
@@ -309,11 +295,13 @@ Cmint.createComponent({
 
 Cmint.createComponent({
     template: '\
-        <div data-hook="anchor-css">\
+        <div>\
             <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="date"></td>\
             <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="name"></td>\
             <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="id"></td>\
-            <td style="border: 1px solid black;text-align:center;font-family:Arial;"><a :href="config._fields.output.register">Register</a></td>\
+            <td style="border: 1px solid black;text-align:center;font-family:Arial;">\
+                <a :href="config._fields.output.register" style="color:#0b4b87;text-decoration:none;" target="_blank">Register</a>\
+            </td>\
         </div>\
     ',
     config: {
@@ -384,7 +372,7 @@ Cmint.createComponent({
 
 Cmint.createComponent({
     template: '<div data-edit="copy"\
-                    data-hook="vertical-space, anchor-css"\
+                    data-hook="vertical-space"\
                     style="color:#231f20; font-family:Arial, sans-serif; font-size:16px; text-align:left; line-height: 24px;"></div>',
     config: {
         _name: 'body-copy',
