@@ -4,14 +4,15 @@
   "description": "WYSIWYG HTML Content Editing",
   "main": "app.js",
   "scripts": {
-    "dev": "gulp dev"
+    "dev": "gulp dev",
+    "build": "gulp build"
   },
   "keywords": [
     "WYSIWYG",
     "editing",
     "editor",
     "HTML",
-    "editor"
+    "drag and drop"
   ],
   "author": "jonmcgill",
   "license": "ISC",

@@ -2,8 +2,8 @@
 <html>
 <head>
 <title>Sandbox</title>
-<link rel="stylesheet" type="text/css" href="dist/build.css">
-<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="dist/contentmint.css">
+<link rel="stylesheet" type="text/css" href="vendor/font-awesome/css/font-awesome.min.css">
 </head>
 <body>
 
@@ -76,9 +76,418 @@
     <div class="notification">Saved</div>
 </div>
 
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
-<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
-<script src="dist/build.js"></script>
+<script src="vendor/tinymce/tinymce.min.js"></script>
+<script src="dist/contentmint.js"></script>
+<script type="text/javascript">
+
+//  TEMPLATES
+//=============================================================================
+Cmint.createTemplate('email', [
+    'headline', 'body-copy', 'banner-image', 'course-table', 'container', 'cta-button'
+])
+
+//  MENUS
+//=============================================================================
+Cmint.createMenu('alignment', {
+    'Default': 'center',
+    'Center': 'center',
+    'Left': ''
+})
+Cmint.createMenu('image-list', {
+    'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+    'SED Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
+    'Random': 'http://placehold.it/800x300',
+    'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
+    'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
+    'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
+    'YoYo': 'http://mediad.publicbroadcasting.net/p/michigan/files/styles/x_large/public/yoyo_ma_trumpie_12.jpg'
+})
+
+//  FIELDS
+//=============================================================================
+Cmint.createField({
+    name: 'alignment',
+    config: {
+        type: 'field-dropdown',
+        display: 'Alignment',
+        label: 'Alignment',
+        input: 'alignment',
+        menu: 'alignment',
+        hook: 'align'
+    }
+})
+Cmint.createField({
+    name: 'image-choice',
+    config: {
+        type: 'field-choice',
+        display: 'Image Input Type',
+        label: 'Image Input Type',
+        input: 'selected-field',
+        choices: [
+            {   name: 'image-source',
+                result: 'source'    },
+            {   name: 'image-presets',
+                result: 'source'   },
+            {   name: 'image-choice',
+                result: 'source'    }
+        ]
+    }
+})
+Cmint.createField({
+    name: 'image-presets',
+    config: {
+        type: 'field-dropdown',
+        display: 'Preset Images',
+        label: 'Image List',
+        input: 'selected-image',
+        menu: 'image-list'
+    }
+})
+Cmint.createField({
+    name: 'image-source',
+    config: {
+        type: 'field-text',
+        display: 'Image URL',
+        label: 'Image URL Address',
+        input: 'url',
+        help: 'Absolute path including http(s)://',
+        check: /^https*:\/\/.+(\.[a-zA-Z]+)$/g,
+        hook: 'test'
+    }
+})
+Cmint.createField({
+    name: 'link-choice',
+    config: {
+        type: 'field-choice',
+        display: 'Link Type',
+        label: 'Link Type',
+        input: 'selected-field',
+        choices: [
+            {   name: 'link-url',
+                result: 'link'    },
+            {   name: 'link-mailto',
+                result: 'link'   }
+        ]
+    }
+})
+Cmint.createField({
+    name: 'link-mailto',
+    config: {
+        type: 'field-group',
+        display: 'Email Link',
+        hook: 'mailto',
+        label: 'Email Link',
+        input: [
+            { name: 'to', 
+              label: 'The email sendee', 
+              type: 'input' },
+            { name: 'subject', 
+              label: 'The email subject line', 
+              type: 'input' },
+            { name: 'body', 
+              label: 'The body of your email', 
+              type: 'textarea' }
+        ],
+    }
+})
+Cmint.createField({
+    name: 'link-url',
+    config: {
+        type: 'field-text',
+        display: 'Link URL',
+        label: 'Link URL',
+        input: 'link',
+        help: 'Absolute path including http(s)://',
+        check: /^https*:\/\/.+/g,
+    }
+})
+Cmint.createField({
+    name: 'plain-text',
+    config: {
+        type: 'field-text',
+        display: 'Display Text',
+        label: 'Display Text',
+        input: 'text'
+    }
+})
+Cmint.createField({
+    name: 'width',
+    config: {
+        type: 'field-text',
+        display: 'Width',
+        label: 'Width',
+        input: 'width',
+        help: '1 - 550 (pixels)'
+    }
+})
+
+//  PROCESSING
+//=============================================================================
+Cmint.createProcess('align', function(input, component, field) {
+    return input;
+})
+Cmint.createProcess('mailto', function(inputs, component) {
+    var output = 'mailto:';
+    output += Cmint.tokenize(inputs.to.value, component) + '?';
+    output += 'Subject=' + encode(Cmint.tokenize(inputs.subject.value, component)) + '&';
+    output += 'Body=' + encode(Cmint.tokenize(inputs.body.value, component));
+    function encode(val) { return encodeURIComponent(val); }
+    return output;
+})
+Cmint.createProcess('test', function(input) {
+    return input + '?param=true';
+})
+
+Cmint.createComponentHook('vertical-space', {
+    editor: function(element) {
+        $(element).css({
+            'margin-bottom': '24px'
+        });
+    }
+})
+Cmint.createComponentHook('anchor-css', {
+    editor: function(element) {
+        $(element).find('a').css({
+            'color': 'red',
+            'text-decoration': 'none'
+        })
+    }
+})
+
+//  COMPONENTS
+//=============================================================================
+Cmint.createComponent({
+    template: '\
+        <table border="0" cellpadding="5" cellspacing="5" align="center" width="100%">\
+            <tr>\
+                <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Date</td>\
+                <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Course Name</td>\
+                <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Course ID</td>\
+                <td style="background:#222222;color:white;font-family:Arial;text-align:center;">Register</td>\
+            </tr>\
+            <context\
+                :children="config.rows"\
+                :tag="config._tags.rows"\
+                :insert="config._tags.rowInsert"\
+                data-context-name="rows"></context>\
+        </table>',
+    config: {
+        _name: 'course-table',
+        _display: 'Course Table',
+        _category: 'Content',
+        _rootTag: 'table',
+        _transferRoot: true,
+        _tags: {
+            rows: 'tbody',
+            rowInsert: 'tr'
+        },
+        rows: [{
+            _name: 'course-row',
+            _display: 'Course Row',
+            _category: 'Content',
+            _rootTag: 'tr',
+            _transferRoot: true,
+            _content: {
+                date: '2/17/2017',
+                name: 'Contact Management Basics',
+                id: 'CM101',
+            },
+            _tokens: [
+                { 'date': 'date' },
+                { 'name': 'name' },
+                { 'id': 'id' }
+            ],
+            _fields: {
+                output: {
+                    register: '#'
+                },
+                list: [{name: 'link-mailto', result: 'register'}]
+            }
+        }]
+    }
+})
+
+Cmint.createComponent({
+    template: '\
+        <div data-hook="anchor-css">\
+            <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="date"></td>\
+            <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="name"></td>\
+            <td style="border: 1px solid black;text-align:center;font-family:Arial;" data-edit="id"></td>\
+            <td style="border: 1px solid black;text-align:center;font-family:Arial;"><a :href="config._fields.output.register">Register</a></td>\
+        </div>\
+    ',
+    config: {
+        _name: 'course-row',
+        _display: 'Course Row',
+        _category: 'Content',
+        _tag: 'tr',
+        _transferRoot: true,
+        _content: {
+            date: '2/17/2017',
+            name: 'Contact Management Basics',
+            id: 'CM101',
+        },
+        _tokens: [
+            { 'date': 'date' },
+            { 'name': 'name' },
+            { 'id': 'id' }
+        ],
+        _fields: {
+            output: {
+                register: '#'
+            },
+            list: [{name: 'link-mailto', result: 'register'}]
+        }
+    }
+})
+
+Cmint.createComponent({
+    template: '\
+        <a v-if="config._fields.output.link" :href="config._fields.output.link" target="_blank">\
+            <img :src="config._fields.output.source"\
+                :style="config._css" \
+                :data-src="config._fields.output.source2"\
+                data-hook="vertical-space" />\
+        </a>\
+        <img v-else\
+            :src="config._fields.output.source"\
+            :style="config._css" \
+            :data-src="config._fields.output.source2"\
+            data-hook="vertical-space" />',
+    config: {
+        _name: 'banner-image',
+        _display: 'Banner Image',
+        _category: 'Images',
+        _css: {
+            'width':'100%',
+            'display': 'block',
+            'margin':'0 auto'
+        },
+        _tokens: [
+            { 'url': 'link' },
+            { 'source': 'source' }
+        ],
+        _fields: {
+            output: {
+                source: 'http://placehold.it/800x300',
+                link: ''
+            },
+            list: [
+                {   name: 'link-choice',
+                    result: 'link'      },
+                {   name: 'image-choice',
+                    result: 'source'    }
+            ]
+        }
+    }
+})
+
+Cmint.createComponent({
+    template: '<div data-edit="copy"\
+                    data-hook="vertical-space, anchor-css"\
+                    style="color:#231f20; font-family:Arial, sans-serif; font-size:16px; text-align:left; line-height: 24px;"></div>',
+    config: {
+        _name: 'body-copy',
+        _display: 'Body Copy',
+        _category: 'Content',
+        _tag: 'article',
+        _content: {
+            copy: '<span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent non lectus id quam congue egestas. Pellentesque ullamcorper pretium tortor vitae vehicula. Vivamus lacinia porttitor libero. Nulla vulputate vel libero id blandit.</span>'
+        },
+        _css: {
+            'line-height': '1.6'
+        }
+    }
+})
+Cmint.createComponent({
+    template: '\
+        <div class="Container">\
+            <context :children="config.container" data-context-name="container"></context>\
+        </div>',
+    config: {
+        _name: 'container',
+        _display: 'Container',
+        _category: 'Layout',
+        container: []
+    }
+})
+Cmint.createComponent({
+    template: '\
+        <table cellpadding="0" cellspacing="0"\
+            :align="config._fields.output.alignment"\
+            :width="config._fields.output.width"\
+            style="background:#cb4f29;"\
+            data-hook="vertical-space">\
+            <tr>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+            <tr>\
+                <td width="20" height="25" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="25">\
+                    <div style="font-family:Arial, sans-serif; font-size:16px; font-weight:bold; text-align:center; line-height:14px; font-style: italic;">\
+                        <a :href="config._fields.output.link"\
+                            target="_blank"\
+                            style="color:#ffffff; text-decoration: none;"\
+                            v-html="config._fields.output.text"></a>\
+                    </div>\
+                </td>\
+                <td width="25" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+            <tr>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+                <td width="20" height="16" style="font-size:10px; line-height:10px;">&nbsp;</td>\
+            </tr>\
+        </table>',
+    config: {
+        _name: 'cta-button',
+        _display: 'Button',
+        _category: 'CTA',
+        _content: {
+            linktext: 'CTA Message Here'
+        },
+        _fields: {
+            list: [
+                {   name: 'alignment',
+                    result: 'alignment' },
+                {   name: 'plain-text',
+                    result: 'text' },
+                {   name: 'width',
+                    result: 'width' },
+                {   name: 'link-choice',
+                    result: 'link' }
+            ],
+            output: {
+                'link': 'http://www.reyrey.com',
+                'text': 'CTA Message Here',
+                'alignment': 'center',
+                'width': ''
+            }
+        }
+    }
+})
+Cmint.createComponent({
+    template: '<div data-edit="text"\
+                    data-hook="vertical-space"\
+                    style="font-size:23px; font-weight:bold; font-family:Arial; line-height:normal;"></div>',
+    config: {
+        _name: 'headline',
+        _display: 'Headline',
+        _category: 'Content',
+        _content: {
+            text: '<div>Update This Article Headline</div>'
+        }
+    }
+})
+
+// INIT
+//=============================================================================
+// For this example we're just grabbing some nearby json. How you choose to get
+// your data to contentmint is up to you.
+$.getJSON('example/test-data.json', function(data) {
+    Cmint.init(data);
+})
+
+</script>
