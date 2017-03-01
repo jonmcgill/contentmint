@@ -1,0 +1,1 @@
+Cmint.Util.runTests();

@@ -4,6 +4,9 @@ var gulp = require('gulp'),
     plumber = require('gulp-plumber'),
     server = require('live-server');
 
+function p(path) {
+    return './src/refactored/' + path + '.js';
+}
 
 var js_files = [
     
@@ -41,9 +44,36 @@ var js_files = [
     
 ];
 
+var refactored_files = [
+    
+    p('system/Cmint.Setup'),
+    p('system/Cmint.G'),
+    p('system/Bus/Bus.setup'),
+    p('system/Util/Util.test'),
+    p('system/Sync/Sync.fn'),
+    p('system/Sync/Sync.getStagePosition'),
+
+    p('system/Cmint.Init')
+
+];
+
+var js_vendor = [
+    './vendor/jquery/jquery-3.1.1.min.js', './vendor/lodash/lodash.js',
+    './vendor/dragula/dragula.min.js', './vendor/vue/vue.js',
+]
+
 gulp.task('build', function() {
     gulp.src(js_files)
         .pipe(concat('contentmint.js'))
+        .pipe(gulp.dest('dist/'));
+})
+
+gulp.task('build-ref', function() {
+    gulp.src(js_vendor)
+        .pipe(concat('vendor.js'))
+        .pipe(gulp.dest('dist/'));
+    gulp.src(refactored_files)
+        .pipe(concat('refactored.js'))
         .pipe(gulp.dest('dist/'));
 })
 
@@ -56,6 +86,25 @@ gulp.task('dev', function() {
     gulp.watch('src/js/**/*.js', function() {
         return gulp.src(js_files)
             .pipe(concat('contentmint.js'))
+            .pipe(gulp.dest('dist/'));
+    })
+    gulp.watch('src/scss/**/*.scss', function() {
+        return gulp.src('src/scss/**/*.scss')
+            .pipe(plumber())
+            .pipe(sass())
+            .pipe(gulp.dest('dist/'))
+    })
+})
+
+gulp.task('dev-ref', function() {
+    server.start({
+        host: 'localhost',
+        port: 3000,
+        watch: ['dist/**/*', 'index.html', 'example.html']
+    })
+    gulp.watch('src/refactored/**/*.js', function() {
+        return gulp.src(refactored_files)
+            .pipe(concat('refactored.js'))
             .pipe(gulp.dest('dist/'));
     })
     gulp.watch('src/scss/**/*.scss', function() {
