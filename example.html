@@ -6,11 +6,10 @@
 <link rel="stylesheet" type="text/css" href="vendor/font-awesome/css/font-awesome.min.css">
 </head>
 <body>
-<textarea style="display:none;" id="Data" class="cmint"></textarea>
 
 
 <div id="App" v-cloak>
-    
+    <context :containers="stage" data-context="stage"></context>
 </div>
 
 
@@ -18,5 +17,16 @@
 <script src="dist/vendor.js"></script>
 <script src="dist/refactored.js"></script>
 <script type="text/javascript">
+    Cmint.createComponent({
+        template: '<comp :config="config">Lorem Ipsum Headingum</comp>',
+        config: {
+            name: 'heading',
+            display: 'Heading',
+            category: 'Content',
+            tags: { root: 'h1' },
+            content: { text: 'Lorem Ipsum Headingum' }
+        }
+    })
 
+    Cmint.Init();
 </script>

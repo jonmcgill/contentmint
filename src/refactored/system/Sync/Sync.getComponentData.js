@@ -11,7 +11,11 @@ Cmint.Sync.getComponentData = function(position, environment) {
     position.shift();
 
     position.forEach(function(key, i) {
-        data = data[key];
+        if (typeof(key) === 'string') {
+            data = data.contexts[key];
+        } else {
+            data = data[key];
+        }
     })
 
     return data;
@@ -20,13 +24,15 @@ Cmint.Sync.getComponentData = function(position, environment) {
 
 Cmint.Util.test('Cmint.Sync.getComponentData', function() {
 
-    var environment = {foo: [ 
-        null,
-        { bar: [
-            null,
-            { baz: 'tada'}
-        ]}
-    ]}
+    var environment = {
+        foo: [ null, {
+            contexts: {
+                bar: [ null, { 
+                    baz: 'tada'
+                }]
+            }
+        }]
+    }
     var position = ['foo', 1, 'bar', 1];
     var expected = { baz: 'tada' };
     var got = Cmint.Sync.getComponentData(position, environment.foo);

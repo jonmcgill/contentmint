@@ -14,6 +14,8 @@ Cmint.Sync.getVmContextData = function(position, context) {
     var output,
         _context = context;
 
+    position.shift();
+
     position.forEach(function(key, i) {
         if (i === (position.length - 1)) {
             output = {
@@ -21,6 +23,9 @@ Cmint.Sync.getVmContextData = function(position, context) {
                 index: key
             }
         } else {
+            if (typeof(key) === 'string') {
+                _context = _context.contexts;
+            }
             _context = _context[key]; 
         }
     })
@@ -33,17 +38,19 @@ Cmint.Util.test('Cmint.Sync.getVmContextData', function() {
 
     var context = {
         foo: [null, {
-            bar: [null, {
-                baz: 'tada'
+            contexts: {
+                bar: [null, {
+                    baz: 'tada'
+                }]
             }
-        ]}
-    ]}
+        }]
+    }
     var position = ['foo', 1, 'bar', 1];
     var expected = { 
         context: [null, {baz: 'tada'}],
         index: 1
     }
-    var got = Cmint.Sync.getVmContextData(position, context);
+    var got = Cmint.Sync.getVmContextData(position, context.foo);
     var result = _.isEqual(got, expected);
 
     return [result, expected, got];

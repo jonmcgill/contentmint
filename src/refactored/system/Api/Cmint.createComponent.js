@@ -30,7 +30,7 @@
         }
     }
 */
-Cmint.createComponent(options) {
+Cmint.createComponent = function(options) {
     if (!options.template) console.error('All components need a template');
     if (!options.config) console.error('All components need config options');
     if (Cmint.Instance.Components[name]) {

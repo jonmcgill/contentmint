@@ -114,7 +114,7 @@ Cmint.Util.copyObject = function(obj) {
 // Allows us to log lots of stuff to the console for debugging purposes and then
 // remove it all
 Cmint.Util.debug = function(message) {
-    if (Cmint.G.debug_on) {
+    if (Cmint.G.config.debug_on) {
         console.log('DEBUG: ' + message);
     }
 }
@@ -239,7 +239,11 @@ Cmint.Sync.getComponentData = function(position, environment) {
     position.shift();
 
     position.forEach(function(key, i) {
-        data = data[key];
+        if (typeof(key) === 'string') {
+            data = data.contexts[key];
+        } else {
+            data = data[key];
+        }
     })
 
     return data;
@@ -248,13 +252,15 @@ Cmint.Sync.getComponentData = function(position, environment) {
 
 Cmint.Util.test('Cmint.Sync.getComponentData', function() {
 
-    var environment = {foo: [ 
-        null,
-        { bar: [
-            null,
-            { baz: 'tada'}
-        ]}
-    ]}
+    var environment = {
+        foo: [ null, {
+            contexts: {
+                bar: [ null, { 
+                    baz: 'tada'
+                }]
+            }
+        }]
+    }
     var position = ['foo', 1, 'bar', 1];
     var expected = { baz: 'tada' };
     var got = Cmint.Sync.getComponentData(position, environment.foo);
@@ -279,6 +285,8 @@ Cmint.Sync.getVmContextData = function(position, context) {
     var output,
         _context = context;
 
+    position.shift();
+
     position.forEach(function(key, i) {
         if (i === (position.length - 1)) {
             output = {
@@ -286,6 +294,9 @@ Cmint.Sync.getVmContextData = function(position, context) {
                 index: key
             }
         } else {
+            if (typeof(key) === 'string') {
+                _context = _context.contexts;
+            }
             _context = _context[key]; 
         }
     })
@@ -298,17 +309,19 @@ Cmint.Util.test('Cmint.Sync.getVmContextData', function() {
 
     var context = {
         foo: [null, {
-            bar: [null, {
-                baz: 'tada'
+            contexts: {
+                bar: [null, {
+                    baz: 'tada'
+                }]
             }
-        ]}
-    ]}
+        }]
+    }
     var position = ['foo', 1, 'bar', 1];
     var expected = { 
         context: [null, {baz: 'tada'}],
         index: 1
     }
-    var got = Cmint.Sync.getVmContextData(position, context);
+    var got = Cmint.Sync.getVmContextData(position, context.foo);
     var result = _.isEqual(got, expected);
 
     return [result, expected, got];
@@ -320,9 +333,7 @@ Cmint.Sync.insertVmContextData = function(position, data, environment) {
 
     var context = environment,
         currentContext = Cmint.Sync.getVmContextData(position, context);
-
         currentContext.context.splice(currentContext.index, 0, data);
-
     return environment;
 
 }
@@ -331,27 +342,256 @@ Cmint.Util.test('Cmint.Sync.insertVmContextData', function() {
 
     var context = {
         foo: [
-            { biz: 'boo' },
-            { bar: [
+            { contexts: { biz: { bal: 'boo' }}},
+            { contexts: { bar: [
                 { buz: 'byz' },
                 { baz: 'tada' }
-            ]}
+            ]}}
         ]}
     var position = ['foo', 1, 'bar', 2];
     var data = { beez: 'bundle' };
-    var expected = {
-        foo: [
-            { biz: 'boo' },
-            { bar: [
-                { buz: 'byz' },
-                { baz: 'tada' },
-                { beez: 'bundle' }
-            ]}
-        ]}
-    var got = Cmint.Sync.insertVmContextData(position, data, context);
+    var expected = [
+        { contexts: { biz: { bal: 'boo' }}},
+        { contexts: { bar: [
+            { buz: 'byz' },
+            { baz: 'tada' },
+            { beez: 'bundle' }
+        ]}}
+    ]
+    var got = Cmint.Sync.insertVmContextData(position, data, context.foo);
     var result = _.isEqual(expected, got);
 
     return [result, expected, got];
 
 })
+// Creates a component and stores confit in Components
+// Note: your template root element must always be <comp></comp>
+// The <comp> component is the meta wrapper that handles all component logic.
+// All component markup will be passed via slot.
+//
+/*  Available config options
+    {
+        name: 'machine-name', (required)
+        display: 'Display Name', (required)
+        category: 'Category Name', (required)
+        tags: {
+            root: 'h1' (overrides <comp> default div),
+            other: 'main' (for context components in template)
+        },
+        contexts: {
+            'left-column': [] (for nested components)
+        },
+        content: {
+            'article': 'Lorem ipsum' (for data-edit that triggers tinymce)
+        },
+        hooks: ['name'], (runs on mount and receives component root element)
+        tokens: [
+            { 'token name': 'content or fields.output key name' }
+        ],
+        fields: {
+            output: {
+                'resultKey': 'value from post-processed field input'
+            },
+            list: [{ name: 'fieldname', result: 'output-key'}]
+        }
+    }
+*/
+Cmint.createComponent = function(options) {
+    if (!options.template) console.error('All components need a template');
+    if (!options.config) console.error('All components need config options');
+    if (Cmint.Instance.Components[name]) {
+        console.error('Component "'+options.config.name+'" already exists')
+    } else {
+        if (!options.config.index) options.config.index = [];
+        Cmint.Instance.Components[name] = options.config;
+        Vue.component(options.config.name, {
+            props: ['config'],
+            template: options.template
+        })
+    }
+}
+// Creates a component hook function
+// Component hooks fire when a component is mounted or updated by Vue.
+// Hook types can be 'Local' or 'Global'. Local hooks need to be referenced
+// in the component config and will onyl run on that component. Global
+// hooks will run on every single component.
+// Component hooks take the components root element.
+Cmint.createComponentHook = function(name, type, fn) {
+    if (Cmint.Instance.Hooks[type][name]) {
+        console.error(type + ' component hook "'+name+'" already exists');
+    } else {
+        Cmint.Instance.Hooks[type][name] = fn;
+    }
+}
+// Creates a tinymce editor post process.
+// These will run on a tinymce editor instance after it has updated.
+// Takes 'rootElem' of the inline editor (e.target)
+Cmint.createEditorPostProcess = function(fn) {
+    Cmint.Instance.Editor.PostProcesses.push(fn);
+}
+// Creates a new field instance
+// Input = {
+//     name: 'machine-name',
+//     config: {
+//          type: 'field-type', (required)
+//          display: 'Appears in Dropdowns', (required)
+//          label: 'Appears above field', (required)
+//          help: 'Help text appears under the field',
+//          check: /.*/g, used to check text fields
+//          input: 'name of input key stored in component data', (required)
+//              * field-text, field-choice, field-dropdown = String
+//              * field-group = array [{name, label, type}]
+//          choices: [{name, result}]
+//              * field-choice - field definitions like in a component
+//          hook: 'name' of field hook to run before sending to output,
+//          menu: 'name' of a menu
+//     }   
+// }
+Cmint.createField = function(options) {
+
+    if (!options.name) console.error('You must give all created fields a name');
+    if (!options.config.type) console.error('You must give all created fields a field type');
+    if (!options.config.label) console.error('You must give all created fields a label');
+    if (!options.config.input) console.error('You must associate all created fields with an input');
+    
+    if (Cmint.Instance.Fields.List[options.name]) {
+        console.error('Field "'+options.name+'" already exists');
+    } else {
+        Cmint.Instance.Fields.List[options.name] = options.config;
+    } 
+
+}
+// Field processes will take field inputs after they have been run
+// through the token system, mutate the value in some way, and return
+// it to be stored in the field output.
+// Keep in mind that some fields may use tokens based on content regions
+// so every time tinymce triggers a change these processes will run.
+Cmint.createFieldProcess = function(name, fn) {
+    if (Cmint.Instance.Fields.Processes[name]) {
+        console.error('Field process "'+name+'" already exists')
+    } else {
+        Cmint.Instance.Fields.Processes[name] = fn;
+    }
+}
+// Defines a menu for dropdown fields.
+// Each key is mapped to a value that will be inserted into a field input.
+Cmint.createMenu = function(name, map) {
+    
+    if (Cmint.Instance.Menus[name]) {
+        console.error('Menu "' + name + '" already exists');
+    } else {
+        Cmint.Instance.Menus[name] = map;
+    }
+
+}
+// Defines a template and assigns path and components
+// options = {
+//     path: '/path/to/template.html',
+//     components: ['names', 'of', 'components']   
+// }
+Cmint.createTemplate = function(name, options) {
+
+    if (Cmint.Instance.Templates[name]) {
+        console.error('Template "' + name + '" already exists');
+    } else {
+        if (!options.path) {
+            console.error('Need path for tempalte "' + name + '"');
+        }
+        if (!options.components) {
+            console.error('No components defined for template "' + name +'"');
+        }
+        Cmint.Instance.Templates[name] = options;
+    }
+
+}
+// Once someone is done editing content, your application will probably
+// want to do something with all of the data via an ajax request to some route.
+// Use this function to add a button to the toolbar that carries out 
+// whatever you need it to carry out.
+/* Options are:
+    {
+        text: 'button text',
+        icon: 'fa-class' (uses font-awesome iconography),
+        callback: function() {
+            ** sky's the limit **
+        }
+    }
+*/
+Cmint.createToolbarButton = function(options) {
+    Cmint.Instance.Toolbar.push(options)
+}
+// The <comp> component is the meta component wrapper for all user defined
+// components.
+Vue.component('comp', {
+
+    props: ['config'],
+
+    render: function(make) {
+        var classes = {};
+        var tag = this.config.tags && this.config.tags.root
+            ? this.config.tags.root
+            : 'div';
+        classes[Cmint.G.name.component] = true;
+
+        return make(
+            tag, { 'class': classes },
+            this.$slots.default
+        )
+    },
+
+    mounted: function() {
+        Cmint.Util.debug('mounted <comp> "' + this.config.name + '"');
+    }
+})
+// Meta component for contextual regions that nest <comp> instances
+Vue.component('context', {
+
+    props: ['tag', 'containers'],
+
+    render: function(make) {
+        var classes = {};
+        var tag = this.tag || 'div';
+        classes[Cmint.G.name.context] = true;
+        return make(
+            tag, { 'class': classes },
+            this.containers.map(function(component) {
+                return make(
+                    component.name, { props: { 'config': component }}
+                )
+            })
+        )
+    }
+
+})
 Cmint.Util.runTests();
+
+Cmint.Init = function() {
+
+
+    Cmint.App = new Vue({
+
+        el: '#App',
+
+        data: {
+            
+            stage: [{
+            name: 'heading',
+            display: 'Heading',
+            category: 'Content',
+            tags: { root: 'h1' },
+            content: { text: 'Lorem Ipsum Headingum' }
+        }],
+
+            components: [],
+        
+        },
+
+        methods: {},
+
+        mounted: function() {
+            Cmint.Util.debug('mounted application');
+        }
+
+    })
+
+}

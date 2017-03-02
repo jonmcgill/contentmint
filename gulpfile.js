@@ -50,12 +50,17 @@ var refactored_files = [
     p('system/Cmint.G'),
     p('system/Bus/Bus.setup'),
     p('system/Util/*'),
+
     p('system/Sync/Sync.fn'),
     p('system/Sync/Sync.getStagePosition'),
     p('system/Sync/Sync.getComponentData'),
     p('system/Sync/Sync.getVmContextData'),
     p('system/Sync/Sync.insertVmContextData'),
+
     p('system/Api/*'),
+
+    p('components/meta/meta.comp'),
+    p('components/meta/meta.context'),
 
     p('system/Cmint.Init')
 
