@@ -33,11 +33,22 @@ var Cmint = Cmint || (function() {
         Instance: {
             Components: {},
             Data: null,
-            Fields: {},
-            Hooks: {},
+            Editor: {
+                Config: null,
+                PostProcesses: [],
+                Types: {}
+            },
+            Fields: {
+                List: {},
+                Processes: {}
+            },
+            Hooks: {
+                Local: {},
+                Global: {}
+            },
             Menus: {},
-            Processes: {},
-            Templates: {}
+            Templates: {},
+            Toolbar: []
         },
 
         // API that manages interaction between DOM and Vue instance data.

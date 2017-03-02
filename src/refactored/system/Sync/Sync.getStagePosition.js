@@ -41,8 +41,10 @@ Cmint.Util.test('Cmint.Sync.getStagePosition', function() {
     context.append(compChild);
     stage.append(compParent);
 
-    var expects = ['stage', 0, 'foo', 0];
-    
-    return _.isEqual(Cmint.Sync.getStagePosition(compChild[0]), expects) ? 'Passed' : 'Failed';
+    var expected = ['stage', 0, 'foo', 0];
+    var got = Cmint.Sync.getStagePosition(compChild[0]);
+    var result = _.isEqual(expected, got);
+
+    return [result, expected, got];
 
 })

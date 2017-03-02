@@ -33,11 +33,22 @@ var Cmint = Cmint || (function() {
         Instance: {
             Components: {},
             Data: null,
-            Fields: {},
-            Hooks: {},
+            Editor: {
+                Config: null,
+                PostProcesses: [],
+                Types: {}
+            },
+            Fields: {
+                List: {},
+                Processes: {}
+            },
+            Hooks: {
+                Local: {},
+                Global: {}
+            },
             Menus: {},
-            Processes: {},
-            Templates: {}
+            Templates: {},
+            Toolbar: []
         },
 
         // API that manages interaction between DOM and Vue instance data.
@@ -88,6 +99,25 @@ Object.defineProperties(Vue.prototype, {
         }
     }
 })
+// Returns boolean if a (element) contains b (element). This is used in our
+// dragging feature because dragula does not like it when you drag a component
+// into itself.
+Cmint.Util.contains = function(a, b) {
+    return a.contains ?
+        a != b && a.contains(b) :
+        !!(a.compareDocumentPosition(b) & 16);
+}
+// Quick and dirty way to copy object literals
+Cmint.Util.copyObject = function(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+// Allows us to log lots of stuff to the console for debugging purposes and then
+// remove it all
+Cmint.Util.debug = function(message) {
+    if (Cmint.G.debug_on) {
+        console.log('DEBUG: ' + message);
+    }
+}
 Cmint.Util.Tests = [];
 
 Cmint.Util.test = function(name, fn) {
@@ -97,10 +127,26 @@ Cmint.Util.test = function(name, fn) {
     })
 }
 
+Cmint.Util.formatTestResult = function(result) {
+    if (typeof(result) === 'object') {
+        return JSON.stringify(result);
+    } else {
+        return result;
+    }
+}
+
 Cmint.Util.runTests = function() {
     Cmint.Util.Tests.forEach(function(test) {
         var result = test.fn();
-        console.log('TEST: ' + test.name + ' --> ' + result);
+        if (result[0]) {
+            console.log('TEST: ' + test.name + ' -- Passed');
+        } else {
+            var expected = Cmint.Util.formatTestResult(result[1]);
+            var got = Cmint.Util.formatTestResult(result[2]);
+            console.error('TEST: ' + test.name + ' -- Failed');
+            console.error('=> expected ' + expected);
+            console.error('=> returned ' + got);
+        }
     })
 }
 Cmint.Sync.fn = (function() {
@@ -173,9 +219,139 @@ Cmint.Util.test('Cmint.Sync.getStagePosition', function() {
     context.append(compChild);
     stage.append(compParent);
 
-    var expects = ['stage', 0, 'foo', 0];
-    
-    return _.isEqual(Cmint.Sync.getStagePosition(compChild[0]), expects) ? 'Passed' : 'Failed';
+    var expected = ['stage', 0, 'foo', 0];
+    var got = Cmint.Sync.getStagePosition(compChild[0]);
+    var result = _.isEqual(expected, got);
+
+    return [result, expected, got];
+
+})
+// Returns a copy of component data from the main Vue instance when given
+// an array path that mirrors the location of the component in a nested data
+// tree (from getStagePosition)
+// position = array path to data object
+// environment = array of component objects (stage or thumbnails)
+Cmint.Sync.getComponentData = function(position, environment) {
+
+    var data = Cmint.Util.copyObject(environment);
+
+    // remove the first item since that is provided by the environment
+    position.shift();
+
+    position.forEach(function(key, i) {
+        data = data[key];
+    })
+
+    return data;
+
+}
+
+Cmint.Util.test('Cmint.Sync.getComponentData', function() {
+
+    var environment = {foo: [ 
+        null,
+        { bar: [
+            null,
+            { baz: 'tada'}
+        ]}
+    ]}
+    var position = ['foo', 1, 'bar', 1];
+    var expected = { baz: 'tada' };
+    var got = Cmint.Sync.getComponentData(position, environment.foo);
+    var result = _.isEqual(expected, got);
+
+    return [result, expected, got];
+
+})
+// Whereas getComponentData returns a copy of the component object
+// data, this function returns the actual Vm context and position for
+// a given component. The Vm data is returned by reference so that it
+// can be mutated (mostly for drag and drop scenarios)
+// position = path array mirroring data location
+// context = an array of component data objects
+// -->
+// {
+//   context: the array housing the component data,
+//   index: the index of the component data
+// }
+Cmint.Sync.getVmContextData = function(position, context) {
+
+    var output,
+        _context = context;
+
+    position.forEach(function(key, i) {
+        if (i === (position.length - 1)) {
+            output = {
+                context: _context,
+                index: key
+            }
+        } else {
+            _context = _context[key]; 
+        }
+    })
+
+    return output;
+
+}
+
+Cmint.Util.test('Cmint.Sync.getVmContextData', function() {
+
+    var context = {
+        foo: [null, {
+            bar: [null, {
+                baz: 'tada'
+            }
+        ]}
+    ]}
+    var position = ['foo', 1, 'bar', 1];
+    var expected = { 
+        context: [null, {baz: 'tada'}],
+        index: 1
+    }
+    var got = Cmint.Sync.getVmContextData(position, context);
+    var result = _.isEqual(got, expected);
+
+    return [result, expected, got];
+
+})
+// Takes data and inserts it into the spot that the position points to within
+// a given environment.
+Cmint.Sync.insertVmContextData = function(position, data, environment) {
+
+    var context = environment,
+        currentContext = Cmint.Sync.getVmContextData(position, context);
+
+        currentContext.context.splice(currentContext.index, 0, data);
+
+    return environment;
+
+}
+
+Cmint.Util.test('Cmint.Sync.insertVmContextData', function() {
+
+    var context = {
+        foo: [
+            { biz: 'boo' },
+            { bar: [
+                { buz: 'byz' },
+                { baz: 'tada' }
+            ]}
+        ]}
+    var position = ['foo', 1, 'bar', 2];
+    var data = { beez: 'bundle' };
+    var expected = {
+        foo: [
+            { biz: 'boo' },
+            { bar: [
+                { buz: 'byz' },
+                { baz: 'tada' },
+                { beez: 'bundle' }
+            ]}
+        ]}
+    var got = Cmint.Sync.insertVmContextData(position, data, context);
+    var result = _.isEqual(expected, got);
+
+    return [result, expected, got];
 
 })
 Cmint.Util.runTests();
