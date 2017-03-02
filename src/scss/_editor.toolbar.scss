@@ -38,7 +38,8 @@
         }
     }
 
-    .cmint-btn-toolbar > button {
+    .cmint-btn-toolbar > button,
+    & > button {
         cursor: pointer;
         position: relative;
         outline: none;

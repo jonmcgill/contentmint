@@ -52,7 +52,7 @@ Cmint.createToolbarButton({
     text: 'Undo',
     btnClasses: { 'toolbar-undo': true },
     iconClasses: { 'fa': true, 'fa-undo': true },
-    disable: true,
+    disable: null,
     callback: function() {
         Cmint.Util.debug('Reverting most recent change');
     }

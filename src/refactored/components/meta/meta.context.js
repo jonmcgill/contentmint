@@ -1,7 +1,7 @@
 // Meta component for contextual regions that nest <comp> instances
 Vue.component('context', {
 
-    props: ['tag', 'containers'],
+    props: ['tag', 'containers', 'thumbnails'],
 
     render: function(make) {
         var classes = {};

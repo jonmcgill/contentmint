@@ -660,7 +660,8 @@ body {
       #Toolbar .right span:after {
         content: '|';
         margin-left: 1em; }
-  #Toolbar .cmint-btn-toolbar > button {
+  #Toolbar .cmint-btn-toolbar > button,
+  #Toolbar > button {
     cursor: pointer;
     position: relative;
     outline: none;
@@ -674,15 +675,21 @@ body {
     color: rgba(255, 255, 255, 0.4);
     font: 1em sans-serif;
     font-size: 0.9em; }
-    #Toolbar .cmint-btn-toolbar > button.active, #Toolbar .cmint-btn-toolbar > button.active:hover {
+    #Toolbar .cmint-btn-toolbar > button.active, #Toolbar .cmint-btn-toolbar > button.active:hover,
+    #Toolbar > button.active,
+    #Toolbar > button.active:hover {
       color: #38bcfc; }
-    #Toolbar .cmint-btn-toolbar > button i {
+    #Toolbar .cmint-btn-toolbar > button i,
+    #Toolbar > button i {
       margin-right: 6px; }
-    #Toolbar .cmint-btn-toolbar > button:hover {
+    #Toolbar .cmint-btn-toolbar > button:hover,
+    #Toolbar > button:hover {
       color: rgba(255, 255, 255, 0.8); }
-      #Toolbar .cmint-btn-toolbar > button:hover:after {
+      #Toolbar .cmint-btn-toolbar > button:hover:after,
+      #Toolbar > button:hover:after {
         color: rgba(255, 255, 255, 0.4); }
-    #Toolbar .cmint-btn-toolbar > button[disabled] {
+    #Toolbar .cmint-btn-toolbar > button[disabled],
+    #Toolbar > button[disabled] {
       opacity: 0.4;
       color: rgba(255, 255, 255, 0.2);
       cursor: default; }

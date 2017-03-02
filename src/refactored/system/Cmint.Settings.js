@@ -9,7 +9,8 @@ Cmint.Settings = {
         component: 'Component',
         context: 'Context',
         dataHook: 'data-hook',
-        dataContext: 'data-context'
+        dataContext: 'data-context',
+        dataDisable: 'data-disable'
     },
 
     class: {
@@ -19,7 +20,8 @@ Cmint.Settings = {
 
     attr: {
         dataContext: '[data-context]',
-        dataHook: '[data-hook]'
+        dataHook: '[data-hook]',
+        dataDisable: '[data-disable]'
     }
 
 }

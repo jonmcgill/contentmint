@@ -79,7 +79,8 @@ Cmint.Settings = {
         component: 'Component',
         context: 'Context',
         dataHook: 'data-hook',
-        dataContext: 'data-context'
+        dataContext: 'data-context',
+        dataDisable: 'data-disable'
     },
 
     class: {
@@ -89,7 +90,8 @@ Cmint.Settings = {
 
     attr: {
         dataContext: '[data-context]',
-        dataHook: '[data-hook]'
+        dataHook: '[data-hook]',
+        dataDisable: '[data-disable]'
     }
 
 }
@@ -563,7 +565,7 @@ Cmint.createToolbarButton({
     text: 'Undo',
     btnClasses: { 'toolbar-undo': true },
     iconClasses: { 'fa': true, 'fa-undo': true },
-    disable: true,
+    disable: null,
     callback: function() {
         Cmint.Util.debug('Reverting most recent change');
     }
@@ -594,7 +596,7 @@ Vue.component('comp', {
 // Meta component for contextual regions that nest <comp> instances
 Vue.component('context', {
 
-    props: ['tag', 'containers'],
+    props: ['tag', 'containers', 'thumbnails'],
 
     render: function(make) {
         var classes = {};
@@ -620,7 +622,7 @@ Vue.component('toolbar', {
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
                 <button :class="btn.btnClasses"\
                     @click="btn.callback($el, btn)"\
-                    :data-disable="btn.disable || null">\
+                    :'+Cmint.Settings.name.dataDisable+'="btn.hasOwnProperty(\'disable\') || null">\
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
@@ -638,7 +640,7 @@ Vue.component('toolbar', {
     methods: {
 
         disable: function(value) {
-            var disablers = $(this.$el).find('[data-disable]');
+            var disablers = $(this.$el).find(Cmint.Settings.attr.dataDisable);
             if (value) {
                 disablers.attr('disabled', true);
             } else {
@@ -651,8 +653,43 @@ Vue.component('toolbar', {
     mounted: function() {
 
         var _this = this;
+        _this.disable(true);
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
+        })
+
+    }
+
+})
+Vue.component('sidebar', {
+
+    props: ['components'],
+
+    template: '\
+        <aside id="Sidebar">\
+            <div class="sidebar-sub">\
+                \
+            </div>\
+            <div class="sidebar-main">\
+                <context id="Components"\
+                    data-context="components"\
+                    :thumbnails="true"\
+                    :containers="components"></context>\
+            </div>\
+        </aside>',
+
+    data: function(){return{
+
+        componentList: this.components
+
+    }},
+
+    mounted: function() {
+
+        var _this = this;
+
+        _this.$bus.$on('filteredCategories', function(filtered) {
+            _this.componentList = filtered;
         })
 
     }

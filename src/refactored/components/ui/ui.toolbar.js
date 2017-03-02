@@ -7,7 +7,7 @@ Vue.component('toolbar', {
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
                 <button :class="btn.btnClasses"\
                     @click="btn.callback($el, btn)"\
-                    :data-disable="btn.disable || null">\
+                    :'+Cmint.Settings.name.dataDisable+'="btn.hasOwnProperty(\'disable\') || null">\
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
@@ -25,7 +25,7 @@ Vue.component('toolbar', {
     methods: {
 
         disable: function(value) {
-            var disablers = $(this.$el).find('[data-disable]');
+            var disablers = $(this.$el).find(Cmint.Settings.attr.dataDisable);
             if (value) {
                 disablers.attr('disabled', true);
             } else {
@@ -38,6 +38,7 @@ Vue.component('toolbar', {
     mounted: function() {
 
         var _this = this;
+        _this.disable(true);
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
         })
