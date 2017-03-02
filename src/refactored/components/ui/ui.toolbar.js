@@ -5,11 +5,12 @@ Vue.component('toolbar', {
     template: '\
         <div id="Toolbar">\
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
-                <button :class="btn.btnClasses" @click="btn.callback()" :data-disable="btn.disable || null">\
+                <button :class="btn.btnClasses"\
+                    @click="btn.callback($el, btn)"\
+                    :data-disable="btn.disable || null">\
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
-            <div id="EditorToolbar"></div>\
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
@@ -17,7 +18,6 @@ Vue.component('toolbar', {
 
     data: function(){return{
 
-        contextActive: false,
         toolbarButtons: Cmint.Ui.Toolbar
 
     }},

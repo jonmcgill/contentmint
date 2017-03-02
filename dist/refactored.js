@@ -519,7 +519,7 @@ Cmint.createTemplate = function(name, options) {
         btnClasses: { 'toolbar-save': true }
         iconClasses: {'fa': true, 'fa-save': true },
         disable: true,                                  
-        callback: function() {
+        callback: function(toolbar, config) { // toolbar = DOM, config = these options
             ** sky's the limit **
         }
     }
@@ -529,6 +529,10 @@ Cmint.createTemplate = function(name, options) {
 
     * Note 2: if you'd like the button to look different, just add a class and style it yourself.
       If you want to use the theme's version, assign 'toolbar-btn-fancy' as true in btnClasses.
+
+    * Note 3: if the button toggles state rather than just performing an action, you can toggle
+      the active statue of the button by adding 'active' to the list of btnClasses. Then, in the
+      click callback, you can do config.btnClasses.active = !config.btnClasses.active
 
 */
 Cmint.createToolbarButton = function(options) {
@@ -540,16 +544,17 @@ Cmint.createToolbarButton({
     text: 'Save',
     btnClasses: { 'toolbar-save': true },
     iconClasses: { 'fa': true, 'fa-save': true },
-    callback: function() {
+    callback: function(button) {
         Cmint.Util.debug('content saved');
     }
 })
 
 Cmint.createToolbarButton({
     text: 'Context',
-    btnClasses: { 'toolbar-context': true },
+    btnClasses: { 'toolbar-context': true, 'active': false },
     iconClasses: { 'fa': true, 'fa-object-ungroup': true },
-    callback: function() {
+    callback: function(toolbar, config) {
+        config.btnClasses.active = !config.btnClasses.active;
         Cmint.Util.debug('Contextualizing stage components');
     }
 })
@@ -613,11 +618,12 @@ Vue.component('toolbar', {
     template: '\
         <div id="Toolbar">\
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
-                <button :class="btn.btnClasses" @click="btn.callback()" :data-disable="btn.disable || null">\
+                <button :class="btn.btnClasses"\
+                    @click="btn.callback($el, btn)"\
+                    :data-disable="btn.disable || null">\
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
-            <div id="EditorToolbar"></div>\
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
@@ -625,7 +631,6 @@ Vue.component('toolbar', {
 
     data: function(){return{
 
-        contextActive: false,
         toolbarButtons: Cmint.Ui.Toolbar
 
     }},
