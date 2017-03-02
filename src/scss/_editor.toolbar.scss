@@ -38,14 +38,15 @@
         }
     }
 
-    & > button {
+    .cmint-btn-toolbar > button {
         cursor: pointer;
         position: relative;
         outline: none;
         float: left;
-        padding: 3px;
-        line-height: 40px;
-        height: 40px;
+        // height: 20px;
+        line-height: 20px;
+        margin: 6px 4px;
+        padding: 6px 10px;
         background: none;
         border: none;
         -webkit-font-smoothing: antialiased;
@@ -55,13 +56,6 @@
         &.active,
         &.active:hover {
             color: lighten($color-accent, 15%);
-        }
-        &:after,
-        &.active:after,
-        &:hover:after {
-            content: ' |';
-            margin: 0 6px;
-            color: rgba(255,255,255,0.4);
         }
         i {
             margin-right: 6px;
@@ -76,6 +70,15 @@
             opacity: 0.4;
             color: rgba(255,255,255,0.2);
             cursor: default;
+        }
+    }
+
+    button.toolbar-btn-fancy {
+        background: lighten($color-accent, 10%);
+        color: $color-font-fade;
+        &:hover {
+            background: lighten($color-accent, 20%);
+            color: $color-font-dark;
         }
     }
 

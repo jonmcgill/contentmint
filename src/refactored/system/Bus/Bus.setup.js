@@ -3,7 +3,7 @@
 Object.defineProperties(Vue.prototype, {
     $bus: {
         get: function() {
-            return Bus;
+            return Cmint.Bus;
         }
     }
 })

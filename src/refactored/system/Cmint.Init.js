@@ -10,14 +10,20 @@ Cmint.Init = function() {
         data: {
             
             stage: [{
-            name: 'heading',
-            display: 'Heading',
-            category: 'Content',
-            tags: { root: 'h1' },
-            content: { text: 'Lorem Ipsum Headingum' }
-        }],
+                name: 'heading',
+                display: 'Heading',
+                category: 'Content',
+                tags: { root: 'h1' },
+                content: { text: 'Lorem Ipsum Headingum' }
+            }],
 
             components: [],
+
+            changes: 0,
+
+            username: 'mcgilljo',
+
+            contentName: 'My Content Name'
         
         },
 

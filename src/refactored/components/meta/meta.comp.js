@@ -9,7 +9,7 @@ Vue.component('comp', {
         var tag = this.config.tags && this.config.tags.root
             ? this.config.tags.root
             : 'div';
-        classes[Cmint.G.name.component] = true;
+        classes[Cmint.Settings.name.component] = true;
 
         return make(
             tag, { 'class': classes },

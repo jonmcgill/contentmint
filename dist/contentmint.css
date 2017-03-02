@@ -660,36 +660,38 @@ body {
       #Toolbar .right span:after {
         content: '|';
         margin-left: 1em; }
-  #Toolbar > button {
+  #Toolbar .cmint-btn-toolbar > button {
     cursor: pointer;
     position: relative;
     outline: none;
     float: left;
-    padding: 3px;
-    line-height: 40px;
-    height: 40px;
+    line-height: 20px;
+    margin: 6px 4px;
+    padding: 6px 10px;
     background: none;
     border: none;
     -webkit-font-smoothing: antialiased;
     color: rgba(255, 255, 255, 0.4);
     font: 1em sans-serif;
     font-size: 0.9em; }
-    #Toolbar > button.active, #Toolbar > button.active:hover {
+    #Toolbar .cmint-btn-toolbar > button.active, #Toolbar .cmint-btn-toolbar > button.active:hover {
       color: #38bcfc; }
-    #Toolbar > button:after, #Toolbar > button.active:after, #Toolbar > button:hover:after {
-      content: ' |';
-      margin: 0 6px;
-      color: rgba(255, 255, 255, 0.4); }
-    #Toolbar > button i {
+    #Toolbar .cmint-btn-toolbar > button i {
       margin-right: 6px; }
-    #Toolbar > button:hover {
+    #Toolbar .cmint-btn-toolbar > button:hover {
       color: rgba(255, 255, 255, 0.8); }
-      #Toolbar > button:hover:after {
+      #Toolbar .cmint-btn-toolbar > button:hover:after {
         color: rgba(255, 255, 255, 0.4); }
-    #Toolbar > button[disabled] {
+    #Toolbar .cmint-btn-toolbar > button[disabled] {
       opacity: 0.4;
       color: rgba(255, 255, 255, 0.2);
       cursor: default; }
+  #Toolbar button.toolbar-btn-fancy {
+    background: #1fb4fc;
+    color: rgba(0, 0, 0, 0.5); }
+    #Toolbar button.toolbar-btn-fancy:hover {
+      background: #51c5fd;
+      color: rgba(0, 0, 0, 0.73); }
 
 .notification {
   background: #1fb4fc;

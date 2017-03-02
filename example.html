@@ -9,6 +9,7 @@
 
 
 <div id="App" v-cloak>
+    <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <context :containers="stage" data-context="stage"></context>
 </div>
 
@@ -17,6 +18,16 @@
 <script src="dist/vendor.js"></script>
 <script src="dist/refactored.js"></script>
 <script type="text/javascript">
+
+    Cmint.createToolbarButton({
+        text: 'Get Code',
+        btnClasses: { 'toolbar-code':true, 'toolbar-btn-fancy': true },
+        iconClasses: { 'fa': true, 'fa-code': true },
+        callback: function() {
+            Cmint.Util.debug('get content code');
+        }
+    })
+
     Cmint.createComponent({
         template: '<comp :config="config">Lorem Ipsum Headingum</comp>',
         config: {

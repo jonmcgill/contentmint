@@ -6,7 +6,7 @@ Vue.component('context', {
     render: function(make) {
         var classes = {};
         var tag = this.tag || 'div';
-        classes[Cmint.G.name.context] = true;
+        classes[Cmint.Settings.name.context] = true;
         return make(
             tag, { 'class': classes },
             this.containers.map(function(component) {

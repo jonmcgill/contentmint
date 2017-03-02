@@ -47,7 +47,7 @@ var js_files = [
 var refactored_files = [
     
     p('system/Cmint.Setup'),
-    p('system/Cmint.G'),
+    p('system/Cmint.Settings'),
     p('system/Bus/Bus.setup'),
     p('system/Util/*'),
 
@@ -61,6 +61,7 @@ var refactored_files = [
 
     p('components/meta/meta.comp'),
     p('components/meta/meta.context'),
+    p('components/ui/ui.toolbar'),
 
     p('system/Cmint.Init')
 
@@ -105,7 +106,7 @@ gulp.task('dev', function() {
     })
 })
 
-gulp.task('dev-ref', function() {
+gulp.task('dev-ref', ['build-ref'], function() {
     server.start({
         host: 'localhost',
         port: 3000,

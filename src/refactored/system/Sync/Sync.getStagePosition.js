@@ -14,9 +14,9 @@ Cmint.Sync.getStagePosition = function(element, position) {
 
     // Setup
     position = position || [];
-    parentContext = $(element).closest(Cmint.G.class.context);
-    parentComponent = $(element).parent().closest(Cmint.G.class.component);
-    name = parentContext.attr(Cmint.G.name.dataContext);
+    parentContext = $(element).closest(Cmint.Settings.class.context);
+    parentComponent = $(element).parent().closest(Cmint.Settings.class.component);
+    name = parentContext.attr(Cmint.Settings.name.dataContext);
     index = Cmint.Sync.fn.getContainerPosition(element, parentContext);
 
     position.unshift(index);
@@ -32,10 +32,10 @@ Cmint.Sync.getStagePosition = function(element, position) {
 
 Cmint.Util.test('Cmint.Sync.getStagePosition', function() {
 
-    var stage = $('<div class="'+Cmint.G.name.context+'" '+Cmint.G.name.dataContext+'="stage"></div>');
-    var compParent = $('<div class="'+Cmint.G.name.component+'"></div>');
-    var context = $('<div class="'+Cmint.G.name.context+'" '+Cmint.G.name.dataContext+'="foo"></div>');
-    var compChild = $('<div class="'+Cmint.G.name.component+'"></div>');
+    var stage = $('<div class="'+Cmint.Settings.name.context+'" '+Cmint.Settings.name.dataContext+'="stage"></div>');
+    var compParent = $('<div class="'+Cmint.Settings.name.component+'"></div>');
+    var context = $('<div class="'+Cmint.Settings.name.context+'" '+Cmint.Settings.name.dataContext+'="foo"></div>');
+    var compChild = $('<div class="'+Cmint.Settings.name.component+'"></div>');
 
     compParent.append(context);
     context.append(compChild);

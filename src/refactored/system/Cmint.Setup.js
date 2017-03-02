@@ -26,7 +26,7 @@ var Cmint = Cmint || (function() {
         Fields: {},
 
         // Global settings and names
-        G: {},
+        Settings: {},
 
         // Stores Data and functionality defined in the 
         // project instance via the Cmint API.
@@ -58,7 +58,9 @@ var Cmint = Cmint || (function() {
         Sync: {},
 
         // API for managing miscellaneous application features
-        Ui: {},
+        Ui: {
+            Toolbar: []
+        },
 
         // Helper functions
         Util: {}

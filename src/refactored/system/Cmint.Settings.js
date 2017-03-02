@@ -1,7 +1,8 @@
-Cmint.G = {
+Cmint.Settings = {
 
     config: {
-        debug_on: true
+        debug: true,
+        tests: true
     },
 
     name: {

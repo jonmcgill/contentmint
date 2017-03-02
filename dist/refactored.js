@@ -26,7 +26,7 @@ var Cmint = Cmint || (function() {
         Fields: {},
 
         // Global settings and names
-        G: {},
+        Settings: {},
 
         // Stores Data and functionality defined in the 
         // project instance via the Cmint API.
@@ -58,7 +58,9 @@ var Cmint = Cmint || (function() {
         Sync: {},
 
         // API for managing miscellaneous application features
-        Ui: {},
+        Ui: {
+            Toolbar: []
+        },
 
         // Helper functions
         Util: {}
@@ -66,10 +68,11 @@ var Cmint = Cmint || (function() {
     }
 
 })();
-Cmint.G = {
+Cmint.Settings = {
 
     config: {
-        debug_on: true
+        debug: true,
+        tests: true
     },
 
     name: {
@@ -95,7 +98,7 @@ Cmint.G = {
 Object.defineProperties(Vue.prototype, {
     $bus: {
         get: function() {
-            return Bus;
+            return Cmint.Bus;
         }
     }
 })
@@ -114,7 +117,7 @@ Cmint.Util.copyObject = function(obj) {
 // Allows us to log lots of stuff to the console for debugging purposes and then
 // remove it all
 Cmint.Util.debug = function(message) {
-    if (Cmint.G.config.debug_on) {
+    if (Cmint.Settings.config.debug) {
         console.log('DEBUG: ' + message);
     }
 }
@@ -136,18 +139,20 @@ Cmint.Util.formatTestResult = function(result) {
 }
 
 Cmint.Util.runTests = function() {
-    Cmint.Util.Tests.forEach(function(test) {
-        var result = test.fn();
-        if (result[0]) {
-            console.log('TEST: ' + test.name + ' -- Passed');
-        } else {
-            var expected = Cmint.Util.formatTestResult(result[1]);
-            var got = Cmint.Util.formatTestResult(result[2]);
-            console.error('TEST: ' + test.name + ' -- Failed');
-            console.error('=> expected ' + expected);
-            console.error('=> returned ' + got);
-        }
-    })
+    if (Cmint.Settings.config.tests) {
+        Cmint.Util.Tests.forEach(function(test) {
+            var result = test.fn();
+            if (result[0]) {
+                console.log('TEST: ' + test.name + ' -- Passed');
+            } else {
+                var expected = Cmint.Util.formatTestResult(result[1]);
+                var got = Cmint.Util.formatTestResult(result[2]);
+                console.error('TEST: ' + test.name + ' -- Failed');
+                console.error('=> expected ' + expected);
+                console.error('=> returned ' + got);
+            }
+        })
+    }
 }
 Cmint.Sync.fn = (function() {
     
@@ -192,9 +197,9 @@ Cmint.Sync.getStagePosition = function(element, position) {
 
     // Setup
     position = position || [];
-    parentContext = $(element).closest(Cmint.G.class.context);
-    parentComponent = $(element).parent().closest(Cmint.G.class.component);
-    name = parentContext.attr(Cmint.G.name.dataContext);
+    parentContext = $(element).closest(Cmint.Settings.class.context);
+    parentComponent = $(element).parent().closest(Cmint.Settings.class.component);
+    name = parentContext.attr(Cmint.Settings.name.dataContext);
     index = Cmint.Sync.fn.getContainerPosition(element, parentContext);
 
     position.unshift(index);
@@ -210,10 +215,10 @@ Cmint.Sync.getStagePosition = function(element, position) {
 
 Cmint.Util.test('Cmint.Sync.getStagePosition', function() {
 
-    var stage = $('<div class="'+Cmint.G.name.context+'" '+Cmint.G.name.dataContext+'="stage"></div>');
-    var compParent = $('<div class="'+Cmint.G.name.component+'"></div>');
-    var context = $('<div class="'+Cmint.G.name.context+'" '+Cmint.G.name.dataContext+'="foo"></div>');
-    var compChild = $('<div class="'+Cmint.G.name.component+'"></div>');
+    var stage = $('<div class="'+Cmint.Settings.name.context+'" '+Cmint.Settings.name.dataContext+'="stage"></div>');
+    var compParent = $('<div class="'+Cmint.Settings.name.component+'"></div>');
+    var context = $('<div class="'+Cmint.Settings.name.context+'" '+Cmint.Settings.name.dataContext+'="foo"></div>');
+    var compChild = $('<div class="'+Cmint.Settings.name.component+'"></div>');
 
     compParent.append(context);
     context.append(compChild);
@@ -511,15 +516,53 @@ Cmint.createTemplate = function(name, options) {
 /* Options are:
     {
         text: 'button text',
-        icon: 'fa-class' (uses font-awesome iconography),
+        btnClasses: { 'toolbar-save': true }
+        iconClasses: {'fa': true, 'fa-save': true },
+        disable: true,                                  
         callback: function() {
             ** sky's the limit **
         }
     }
+
+    * Note 1: if 'disable' is set to true, the button's disable attribute can be toggled 
+      by emitting 'toolbar-disabler' with a value of true or false
+
+    * Note 2: if you'd like the button to look different, just add a class and style it yourself.
+      If you want to use the theme's version, assign 'toolbar-btn-fancy' as true in btnClasses.
+
 */
 Cmint.createToolbarButton = function(options) {
-    Cmint.Instance.Toolbar.push(options)
+    Cmint.Ui.Toolbar.push(options)
 }
+
+// Default buttons
+Cmint.createToolbarButton({
+    text: 'Save',
+    btnClasses: { 'toolbar-save': true },
+    iconClasses: { 'fa': true, 'fa-save': true },
+    callback: function() {
+        Cmint.Util.debug('content saved');
+    }
+})
+
+Cmint.createToolbarButton({
+    text: 'Context',
+    btnClasses: { 'toolbar-context': true },
+    iconClasses: { 'fa': true, 'fa-object-ungroup': true },
+    callback: function() {
+        Cmint.Util.debug('Contextualizing stage components');
+    }
+})
+
+Cmint.createToolbarButton({
+    text: 'Undo',
+    btnClasses: { 'toolbar-undo': true },
+    iconClasses: { 'fa': true, 'fa-undo': true },
+    disable: true,
+    callback: function() {
+        Cmint.Util.debug('Reverting most recent change');
+    }
+})
 // The <comp> component is the meta component wrapper for all user defined
 // components.
 Vue.component('comp', {
@@ -531,7 +574,7 @@ Vue.component('comp', {
         var tag = this.config.tags && this.config.tags.root
             ? this.config.tags.root
             : 'div';
-        classes[Cmint.G.name.component] = true;
+        classes[Cmint.Settings.name.component] = true;
 
         return make(
             tag, { 'class': classes },
@@ -551,7 +594,7 @@ Vue.component('context', {
     render: function(make) {
         var classes = {};
         var tag = this.tag || 'div';
-        classes[Cmint.G.name.context] = true;
+        classes[Cmint.Settings.name.context] = true;
         return make(
             tag, { 'class': classes },
             this.containers.map(function(component) {
@@ -560,6 +603,53 @@ Vue.component('context', {
                 )
             })
         )
+    }
+
+})
+Vue.component('toolbar', {
+
+    props: ['changes', 'user', 'name'],
+
+    template: '\
+        <div id="Toolbar">\
+            <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
+                <button :class="btn.btnClasses" @click="btn.callback()" :data-disable="btn.disable || null">\
+                    <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
+                </button>\
+            </div>\
+            <div id="EditorToolbar"></div>\
+            <div class="right">\
+                <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
+            </div>\
+        </div>',
+
+    data: function(){return{
+
+        contextActive: false,
+        toolbarButtons: Cmint.Ui.Toolbar
+
+    }},
+
+    methods: {
+
+        disable: function(value) {
+            var disablers = $(this.$el).find('[data-disable]');
+            if (value) {
+                disablers.attr('disabled', true);
+            } else {
+                disablers.removeAttr('disabled');
+            }
+        }
+
+    },
+
+    mounted: function() {
+
+        var _this = this;
+        _this.$bus.$on('toolbar-disabler', function(value) {
+            _this.disable(value);
+        })
+
     }
 
 })
@@ -575,14 +665,20 @@ Cmint.Init = function() {
         data: {
             
             stage: [{
-            name: 'heading',
-            display: 'Heading',
-            category: 'Content',
-            tags: { root: 'h1' },
-            content: { text: 'Lorem Ipsum Headingum' }
-        }],
+                name: 'heading',
+                display: 'Heading',
+                category: 'Content',
+                tags: { root: 'h1' },
+                content: { text: 'Lorem Ipsum Headingum' }
+            }],
 
             components: [],
+
+            changes: 0,
+
+            username: 'mcgilljo',
+
+            contentName: 'My Content Name'
         
         },
 
