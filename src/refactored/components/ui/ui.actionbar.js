@@ -10,7 +10,7 @@ Vue.component('actionbar', {
                 <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
-            <custom-add v-if="newComp" :component="focused"></custom-add>\
+            <custom v-if="newComp" :component="focused"></custom>\
         </div>',
 
     data: function() {

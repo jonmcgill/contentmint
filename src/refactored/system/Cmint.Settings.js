@@ -29,6 +29,7 @@ Cmint.Settings = {
     id: {
         components: '#Components',
         stage: '#Stage',
+        actionbar: '#ActionBar'
     },
 
     attr: {

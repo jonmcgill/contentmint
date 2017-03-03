@@ -67,6 +67,7 @@ var refactored_files = [
     p('components/ui/ui.toolbar'),
     p('components/ui/ui.sidebar'),
     p('components/ui/ui.categories'),
+    p('components/ui/ui.custom'),
     p('components/ui/ui.actionbar'),
     p('components/misc/misc.template'),
 

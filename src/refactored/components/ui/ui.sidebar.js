@@ -14,15 +14,14 @@ Vue.component('sidebar', {
                 <context id="Components"\
                     data-context="components"\
                     :thumbnails="true"\
-                    :contexts="components"></context>\
+                    :contexts="componentList"></context>\
             </div>\
         </aside>',
 
     data: function(){return{
 
-        componentList: this.components,
-
         isActive: false,
+        componentList: this.components
 
     }},
 
@@ -35,7 +34,10 @@ Vue.component('sidebar', {
                 classes['fa-bars'] = true;
             }
             return classes;
-        }
+        },
+        // componentList: function() {
+        //     return this.components;
+        // }
     },
 
     methods: {
@@ -55,7 +57,13 @@ Vue.component('sidebar', {
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            console.log(_this.componentList);
             Cmint.Ui.componentList = _this.componentList;
+        })
+
+        _this.$bus.$on('updateComponentList', function(listing) {
+
+            _this.componentList = listing;
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {

@@ -9,10 +9,30 @@ Cmint.Init = function() {
 
         data: {
 
-            // User Data
+            // User Data for testing
             template: '<div class="template-test">{{ stage }}</div>',
+            templateName: 'test-template',
             username: 'mcgilljo',
             contentName: 'My Content Name',
+            // For testing = UserData.customComponents['templateName']
+            customComponents: [
+                {
+                    name: 'container',
+                    display: 'My Component',
+                    category: 'Blocks',
+                    contexts: {
+                        container: [
+                            {
+                                name: 'heading',
+                                display: 'Heading',
+                                category: 'Content',
+                                tags: { root: 'h1' },
+                                content: { text: 'Custom Article Title in Container' }
+                            }
+                        ]
+                    }
+                }
+            ],
             
             // Contexts
             stage: [],
@@ -49,13 +69,16 @@ Cmint.Init = function() {
 
         methods: {
 
+            // callFields: null
             save: Cmint.AppFn.save,
             snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo
+            undo: Cmint.AppFn.undo,
+            mergeCustom: Cmint.AppFn.mergeCustomComponents
 
         },
 
         mounted: function() {
+            this.mergeCustom();
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
             Cmint.Drag.init();

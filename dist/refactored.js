@@ -101,6 +101,7 @@ Cmint.Settings = {
     id: {
         components: '#Components',
         stage: '#Stage',
+        actionbar: '#ActionBar'
     },
 
     attr: {
@@ -823,15 +824,14 @@ Vue.component('sidebar', {
                 <context id="Components"\
                     data-context="components"\
                     :thumbnails="true"\
-                    :contexts="components"></context>\
+                    :contexts="componentList"></context>\
             </div>\
         </aside>',
 
     data: function(){return{
 
-        componentList: this.components,
-
         isActive: false,
+        componentList: this.components
 
     }},
 
@@ -844,7 +844,10 @@ Vue.component('sidebar', {
                 classes['fa-bars'] = true;
             }
             return classes;
-        }
+        },
+        // componentList: function() {
+        //     return this.components;
+        // }
     },
 
     methods: {
@@ -864,7 +867,13 @@ Vue.component('sidebar', {
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            console.log(_this.componentList);
             Cmint.Ui.componentList = _this.componentList;
+        })
+
+        _this.$bus.$on('updateComponentList', function(listing) {
+
+            _this.componentList = listing;
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {
@@ -944,6 +953,62 @@ Vue.component('categories', {
     }
 
 })
+Vue.component('custom', {
+    
+    props: ['component'],
+
+    template: '\
+        <div class="custom-add-wrap">\
+            <span>Custom Component Information</span>\
+            <input type="text" v-model="name" placeholder="Component name" />\
+            <input type="text" v-model="category" placeholder="Component category" />\
+            <button @click="addComponent">Save Component</button>\
+            <div class="nameError" v-if="nameError">{{nameError}}</div>\
+        </div>',
+
+    data: function() {return{
+        name: '',
+        category: '',
+        nameError: false
+    }},
+
+    methods: {
+        addComponent: function() {
+            // var D = Cmint.app.Data;
+            var double = false;
+            var _this = this;
+            if (!Cmint.App.customComponents) {
+                Cmint.App.customComponents = [];
+            }
+            if (this.name === '') {
+                this.nameError = 'Name field is blank';
+                return;
+            }
+            Cmint.App.components.forEach(function(component) {
+                if (component.display === _this.name) {
+                    double = true;
+                }
+            })
+            if (!double) {
+                var comp = Cmint.Util.copyObject(this.component);
+                comp.display = this.name;
+                comp.category = this.category || 'Custom';
+                Cmint.App.components.push(comp);
+                Cmint.Util.debug('added "' + this.name + '" ('+this.category+') in template "'+Cmint.App.templateName+'"');
+                this.$bus.$emit('updateComponentList', Cmint.App.components);
+                this.$bus.$emit('closeNewComp');
+            } else {
+                this.nameError = 'Name already exists';
+                this.name = '';
+            }
+        }
+    },
+
+    mounted: function() {
+        console.log('mounted new component modal')
+    }
+
+})
 Vue.component('actionbar', {
 
     template: '\
@@ -956,7 +1021,7 @@ Vue.component('actionbar', {
                 <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
-            <custom-add v-if="newComp" :component="focused"></custom-add>\
+            <custom v-if="newComp" :component="focused"></custom>\
         </div>',
 
     data: function() {
@@ -1428,6 +1493,16 @@ Cmint.Drag.init = function() {
     })
 
 }
+Cmint.AppFn.mergeCustomComponents = function() {
+    
+    if (this.customComponents.length > 0) {
+
+        this.components = this.components.concat(this.customComponents);
+        Cmint.Bus.$emit('updateComponentList', this.components);
+
+    }
+
+}
 Cmint.AppFn.save = function() {
     
     Cmint.Bus.$emit('updateEditorData');
@@ -1498,10 +1573,30 @@ Cmint.Init = function() {
 
         data: {
 
-            // User Data
+            // User Data for testing
             template: '<div class="template-test">{{ stage }}</div>',
+            templateName: 'test-template',
             username: 'mcgilljo',
             contentName: 'My Content Name',
+            // For testing = UserData.customComponents['templateName']
+            customComponents: [
+                {
+                    name: 'container',
+                    display: 'My Component',
+                    category: 'Blocks',
+                    contexts: {
+                        container: [
+                            {
+                                name: 'heading',
+                                display: 'Heading',
+                                category: 'Content',
+                                tags: { root: 'h1' },
+                                content: { text: 'Custom Article Title in Container' }
+                            }
+                        ]
+                    }
+                }
+            ],
             
             // Contexts
             stage: [],
@@ -1538,13 +1633,16 @@ Cmint.Init = function() {
 
         methods: {
 
+            // callFields: null
             save: Cmint.AppFn.save,
             snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo
+            undo: Cmint.AppFn.undo,
+            mergeCustom: Cmint.AppFn.mergeCustomComponents
 
         },
 
         mounted: function() {
+            this.mergeCustom();
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
             Cmint.Drag.init();

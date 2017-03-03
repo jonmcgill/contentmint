@@ -15,9 +15,11 @@ Vue.component('sidebar', {
                 \
             </div>\
         </aside>',
-    data: function() {return{
-        componentList: this.components
-    }},
+    computer: {
+        componentList: function() {
+            return this.components;
+        }
+    },
     mounted: function() {
         Cmint.componentList = this.componentList;
         var _this = this;
