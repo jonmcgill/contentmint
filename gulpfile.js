@@ -56,6 +56,7 @@ var refactored_files = [
     p('system/Sync/Sync.getComponentData'),
     p('system/Sync/Sync.getVmContextData'),
     p('system/Sync/Sync.insertVmContextData'),
+    p('system/Ui/Ui.actionbarHandler'),
 
     p('system/Api/*'),
 
@@ -64,10 +65,13 @@ var refactored_files = [
     p('components/ui/ui.toolbar'),
     p('components/ui/ui.sidebar'),
     p('components/ui/ui.categories'),
+    p('components/ui/ui.actionbar'),
     p('components/misc/misc.template'),
 
     p('system/Editor/Editor.config'),
     p('system/Editor/Editor.init'),
+
+    p('system/Ui/Ui.documentHandler'),
 
     p('system/Cmint.Init')
 

@@ -16,11 +16,15 @@ Cmint.Settings = {
 
     class: {
         component: '.Component',
-        context: '.Context'
+        context: '.Context',
+        categories: '.category-container',
+        fieldchoice: '.field-choice-wrap',
+        dropdown: '.dropdown'
     },
 
     id: {
-        components: '#Components'
+        components: '#Components',
+        stage: '#Stage',
     },
 
     attr: {

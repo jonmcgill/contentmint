@@ -31,6 +31,8 @@ Cmint.Init = function() {
 
             contentName: 'My Content Name',
 
+            activeComponent: null,
+
             fieldsComponent: null,
 
             template: '<div class="template-test">{{ stage }}</div>'
@@ -40,6 +42,7 @@ Cmint.Init = function() {
         methods: {},
 
         mounted: function() {
+            Cmint.Ui.documentHandler();
             Cmint.Util.debug('mounted application');
         }
 

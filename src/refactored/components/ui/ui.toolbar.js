@@ -11,6 +11,7 @@ Vue.component('toolbar', {
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
+            <div id="EditorToolbar"></div>\
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
@@ -64,6 +65,11 @@ Vue.component('toolbar', {
 
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
+        })
+
+        _this.$bus.$on('showToolbar', function() {
+            _this.isActive = true;
+            this.$bus.$emit('toggleToolbar', true);
         })
 
         _this.$bus.$on('toggleSidebar', function(sidebarState) {

@@ -10,7 +10,7 @@ var Cmint = Cmint || (function() {
         // API methods for main vue instance
         AppFn: {},
 
-        // Manages application events
+        // Global event bus
         Bus: new Vue(),
 
         // Manages drag and drop with dragula.js
@@ -59,7 +59,8 @@ var Cmint = Cmint || (function() {
 
         // API for managing miscellaneous application features
         Ui: {
-            Toolbar: []
+            Toolbar: [],
+            Actionbar: []
         },
 
         // Helper functions

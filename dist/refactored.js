@@ -10,7 +10,7 @@ var Cmint = Cmint || (function() {
         // API methods for main vue instance
         AppFn: {},
 
-        // Manages application events
+        // Global event bus
         Bus: new Vue(),
 
         // Manages drag and drop with dragula.js
@@ -59,7 +59,8 @@ var Cmint = Cmint || (function() {
 
         // API for managing miscellaneous application features
         Ui: {
-            Toolbar: []
+            Toolbar: [],
+            Actionbar: []
         },
 
         // Helper functions
@@ -86,11 +87,15 @@ Cmint.Settings = {
 
     class: {
         component: '.Component',
-        context: '.Context'
+        context: '.Context',
+        categories: '.category-container',
+        fieldchoice: '.field-choice-wrap',
+        dropdown: '.dropdown'
     },
 
     id: {
-        components: '#Components'
+        components: '#Components',
+        stage: '#Stage',
     },
 
     attr: {
@@ -390,6 +395,51 @@ Cmint.Util.test('Cmint.Sync.insertVmContextData', function() {
     return [result, expected, got];
 
 })
+Cmint.Ui.actionbarHandler = function(component) {
+
+    if (component.environment === 'components') return;
+
+    var element = component.$el,
+        $el = $(element);
+
+    $el.unbind();
+
+    $el.click(function(e) {
+
+        var nearestComponent = $(e.target).closest(Cmint.Settings.class.component);
+
+        if (nearestComponent[0] === element && !nearestComponent.hasClass('active')) {
+
+            Cmint.App.activeComponent = component;
+
+            setTimeout(function() {
+                var offset = $el.offset();
+                var output = {};
+                output.top = offset.top + 'px';
+                output.left = offset.left + 'px';
+                output.handle = offset.left + $el.width() + 'px';
+
+                if($('#ActionBar.active').length) {
+                    Cmint.Bus.$emit('closeActionBar');
+                    setTimeout(function() {
+                        Cmint.Bus.$emit('getComponentCoordinates', output, component);
+                        setTimeout(function() {
+                            Cmint.Bus.$emit('openActionBar', component);
+                        }, 100);                                        
+                    },200)
+                } else {
+                    Cmint.Bus.$emit('getComponentCoordinates', output, component);
+                    setTimeout(function() {
+                        Cmint.Bus.$emit('openActionBar', component);
+                    }, 100); 
+                }
+            }, 50);
+
+        }
+
+    })
+
+}
 // Creates a component and stores confit in Components
 // Note: your template root element must always be <comp></comp>
 // The <comp> component is the meta wrapper that handles all component logic.
@@ -614,10 +664,23 @@ Vue.component('comp', {
 
     mounted: function() {
         $el = $(this.$el);
+
+        // Is the component staged, or in the component sidebar?
         this.environment = $el.closest(Cmint.Settings.id.components).length
             ? 'components'
             : 'stage';
+
+        // Get the component's position in data from its position in DOM
+        this.config.index = Cmint.Sync.getStagePosition(this.$el);
+        
+        // Run component hooks
+
+        // Run editor initiation
         Cmint.Editor.init(this);
+
+        // Run actionbar handler
+        Cmint.Ui.actionbarHandler(this);
+
         Cmint.Util.debug('mounted <comp> "' + this.config.name + '"');
     }
 })
@@ -678,6 +741,7 @@ Vue.component('toolbar', {
                     <i :class="btn.iconClasses"></i><span>{{ btn.text }}</span>\
                 </button>\
             </div>\
+            <div id="EditorToolbar"></div>\
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
@@ -731,6 +795,11 @@ Vue.component('toolbar', {
 
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
+        })
+
+        _this.$bus.$on('showToolbar', function() {
+            _this.isActive = true;
+            this.$bus.$emit('toggleToolbar', true);
         })
 
         _this.$bus.$on('toggleSidebar', function(sidebarState) {
@@ -878,6 +947,119 @@ Vue.component('categories', {
     }
 
 })
+Vue.component('actionbar', {
+
+    template: '\
+        <div id="ActionBar" :style="css" :class="{active: isActive, cmint: true}">\
+            <button class="actionbar-copy" @click="copyComponent">\
+                <i class="fa fa-clone"></i></button>\
+            <button class="actionbar-trash" @click="trashComponent">\
+                <i class="fa fa-trash-o"></i></button>\
+            <button class="actionbar-new" @click="newComponent">\
+                <i class="fa fa-plus"></i></button>\
+            <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
+                <i class="fa fa-cog"></i></button>\
+            <custom-add v-if="newComp" :component="focused"></custom-add>\
+        </div>',
+
+    data: function() {
+        return {
+            top: '20px',
+            left: '20px',
+            display: 'block',
+            isActive: false,
+            noFields: true,
+            newComp: false,
+            focused: false 
+        }
+    },
+
+    computed: {
+        css: function() {
+            return {
+                'display': this.display,
+                'top': this.top,
+                'left': this.left,
+                'position': 'absolute'
+            }
+        }
+    },
+
+    methods: {
+
+        trashComponent: function() {
+            var comp = Cmint.App.activeComponent;
+            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+
+            position.context.splice(position.index, 1);
+
+            // Vue.nextTick(Cmint.app.refresh);
+            // Vue.nextTick(Drag.updateContainers);
+            // Vue.nextTick(Cmint.app.snapshot);
+            // Cmint.app.save();
+
+            this.$bus.$emit('closeActionBar');
+            Cmint.Util.debug('trashed ' + comp.config.name + '[' + comp.config.index + ']');
+        },
+
+        copyComponent: function() {
+            var comp = Cmint.App.activeComponent;
+            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+            var clone = Cmint.Util.copyObject(position.context[position.index])
+
+            position.context.splice(position.index + 1, 0, clone);
+
+            // Vue.nextTick(Cmint.app.refresh);
+            // Vue.nextTick(Drag.updateContainers);
+            // Vue.nextTick(Cmint.app.snapshot);
+            // Cmint.app.save();
+
+            this.$bus.$emit('closeActionBar');
+            Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
+        },
+
+        newComponent: function() {
+            var comp = Cmint.App.activeComponent;
+            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+            var clone = Cmint.Util.copyObject(position.context[position.index]);
+            this.focused = clone;
+            this.newComp = !this.newComp;
+        },
+
+        callFields: function() {
+            this.$bus.$emit('callComponentFields');
+            this.$bus.$emit('closeActionBar');
+        }
+    },
+
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('getComponentCoordinates', function(spot, component) {
+            _this.top = spot.top;
+            _this.left = spot.left;
+            _this.hasFields = component.fields;
+            _this.display = 'block';
+        })
+        this.$bus.$on('openActionBar', function(component) {
+            _this.noFields = component.config.fields === undefined;
+            _this.isActive = true;
+            Cmint.Util.debug('component in focus: ' + this.hasFields);
+        })
+        this.$bus.$on('closeActionBar', function() {
+            if (_this.isActive) {
+                _this.isActive = false;
+                _this.newComp = false;
+                setTimeout(function() {
+                    _this.display = 'none';
+                }, 200)
+            }
+        })
+        this.$bus.$on('closeNewComp', function() {
+            _this.newComp = false;
+        })
+    }
+
+})
 Vue.component('content-template', {
 
     props: ['fieldsComponent', 'template', 'stage'],
@@ -947,6 +1129,7 @@ Cmint.Editor.init = function(component) {
                 }
             }));
             editor.on('focus', function() {
+                Cmint.Bus.$emit('showToolbar');
                 stash = editor.getContent();
             });
             editor.on('blur', function() {
@@ -960,6 +1143,44 @@ Cmint.Editor.init = function(component) {
         }
 
         tinymce.init(config);
+
+    })
+
+}
+Cmint.Ui.documentHandler = function() {
+
+    $(document).on({
+
+        'click': function(e) {
+
+            var $target = $(e.target);
+            var isComponent = $target.closest(Cmint.Settings.class.component).length;
+            var isInStage = $target.closest(Cmint.Settings.id.stage).length;
+            var isActionBar = $target.closest(Cmint.Settings.id.actionbar).length;
+            var categoryList = $target.closest(Cmint.Settings.class.categories).length;
+            var fieldChoice = $target.closest(Cmint.Settings.class.fieldchoice).length;
+            var dropdown = $target.closest(Cmint.Settings.class.dropdown).length; 
+
+            if (isComponent && isInStage) {
+                var component = $target.closest(Cmint.Settings.class.component);
+                if (!component.hasClass('active')) {
+                    $(Cmint.Settings.class.component + '.active').removeClass('active');
+                    component.addClass('active');
+                }
+            } else {
+                $(Cmint.Settings.class.component + '.active').removeClass('active');
+                if (!isActionBar) {
+                    Cmint.Bus.$emit('closeActionBar');
+                }
+            }
+
+            if (!categoryList) { Cmint.Bus.$emit('closeCategoryList'); }
+
+            if (!fieldChoice) { Cmint.Bus.$emit('closeFieldChoice'); }
+
+            if (!dropdown) { Cmint.Bus.$emit('closeDropdown'); }
+
+        }
 
     })
 
@@ -997,6 +1218,8 @@ Cmint.Init = function() {
 
             contentName: 'My Content Name',
 
+            activeComponent: null,
+
             fieldsComponent: null,
 
             template: '<div class="template-test">{{ stage }}</div>'
@@ -1006,6 +1229,7 @@ Cmint.Init = function() {
         methods: {},
 
         mounted: function() {
+            Cmint.Ui.documentHandler();
             Cmint.Util.debug('mounted application');
         }
 

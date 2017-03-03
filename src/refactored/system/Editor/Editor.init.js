@@ -42,6 +42,7 @@ Cmint.Editor.init = function(component) {
                 }
             }));
             editor.on('focus', function() {
+                Cmint.Bus.$emit('showToolbar');
                 stash = editor.getContent();
             });
             editor.on('blur', function() {
