@@ -8,7 +8,7 @@ Vue.component('sidebar', {
                 <i :class="handleClasses"></i>\
             </div>\
             <div class="sidebar-sub">\
-                \
+                <categories :components="components"></categories>\
             </div>\
             <div class="sidebar-main">\
                 <context id="Components"\

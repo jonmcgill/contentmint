@@ -64,6 +64,7 @@ var refactored_files = [
     p('components/ui/ui.toolbar'),
     p('components/ui/ui.sidebar'),
     p('components/ui/ui.categories'),
+    p('components/misc/misc.template'),
 
     p('system/Cmint.Init')
 

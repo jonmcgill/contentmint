@@ -29,7 +29,11 @@ Cmint.Init = function() {
 
             username: 'mcgilljo',
 
-            contentName: 'My Content Name'
+            contentName: 'My Content Name',
+
+            fieldsComponent: null,
+
+            template: '<div class="template-test">{{ stage }}</div>'
         
         },
 

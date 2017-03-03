@@ -11,7 +11,10 @@
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
-    <context :containers="stage" data-context="stage"></context>
+    <content-template 
+        :fieldsComponent="fieldsComponent" 
+        :template="template"
+        :stage="stage"></content-template>
 </div>
 
 
