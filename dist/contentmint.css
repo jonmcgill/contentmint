@@ -110,11 +110,34 @@ body {
   position: fixed;
   top: 40px;
   bottom: 0;
-  right: 0em;
+  right: -360px;
+  transition: right 200ms;
   background: #f2f2f2;
   border-left: 1px solid #ddd;
-  width: 25em;
+  width: 360px;
   z-index: 35; }
+  .cmint#Sidebar .cmint-sidebar-handle {
+    cursor: pointer;
+    position: absolute;
+    width: 32px;
+    height: 26px;
+    left: -32px;
+    background: transparent;
+    transition: background 200ms;
+    color: #039BE5; }
+    .cmint#Sidebar .cmint-sidebar-handle i {
+      font-size: 0.8em;
+      line-height: 22px;
+      margin-left: 9px;
+      margin-top: 2px; }
+
+.cmint#Sidebar.active {
+  right: 0px; }
+  .cmint#Sidebar.active .cmint-sidebar-handle {
+    background: #f2f2f2;
+    border-left: 1px solid #cdcdcd;
+    border-bottom: 1px solid #cdcdcd;
+    color: rgba(0, 0, 0, 0.5); }
 
 .cmint .sidebar-top {
   padding: 1em 0 1em; }
@@ -632,7 +655,8 @@ body {
 
 #Toolbar {
   position: fixed;
-  top: 0;
+  top: -50px;
+  transition: top 200ms;
   padding: 0 1em;
   width: 100%;
   z-index: 400;
@@ -640,6 +664,22 @@ body {
   color: white;
   line-height: 40px;
   height: 40px; }
+  #Toolbar .cmint-toolbar-handle {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    transition: top 200ms;
+    cursor: pointer;
+    width: 30px;
+    color: #039BE5; }
+    #Toolbar .cmint-toolbar-handle i {
+      font-size: 0.9em;
+      margin-left: 8px; }
+  #Toolbar.active {
+    top: 0; }
+    #Toolbar.active .cmint-toolbar-handle {
+      color: rgba(255, 255, 255, 0.4);
+      top: 0; }
   #Toolbar .divider {
     float: left;
     display: inline-block;
@@ -649,6 +689,7 @@ body {
     float: right;
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9em;
+    margin-right: 2em;
     -webkit-font-smoothing: antialiased; }
     #Toolbar .right a {
       color: #38bcfc;

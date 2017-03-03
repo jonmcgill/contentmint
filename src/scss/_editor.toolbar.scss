@@ -1,6 +1,7 @@
 #Toolbar {
     position: fixed;
-    top: 0;
+    top: -50px;
+    transition: top 200ms;
     padding: 0 1em;
     width: 100%;
     z-index: 400;
@@ -9,6 +10,28 @@
     line-height: 40px;
     height: 40px;
     @extend %cmint-type;
+
+    .cmint-toolbar-handle {
+        position: absolute;
+        right: 0;
+        top: 50px;
+        transition: top 200ms;
+        cursor: pointer;
+        width: 30px;
+        color: $color-accent;
+        i {
+            font-size: 0.9em;
+            margin-left: 8px;
+        }
+    }
+
+    &.active {
+        top: 0;
+        .cmint-toolbar-handle {
+            color: rgba(255,255,255,0.4);
+            top: 0;
+        }
+    }
 
     .divider {
         float: left;
@@ -21,6 +44,7 @@
         float: right;
         color: rgba(255,255,255,0.8);
         font-size: 0.9em;
+        margin-right: 2em;
         -webkit-font-smoothing: antialiased;
         a {
             color: lighten($color-accent, 15%);

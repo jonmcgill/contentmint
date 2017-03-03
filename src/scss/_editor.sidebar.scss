@@ -4,11 +4,38 @@
         position: fixed;
         top: 40px;
         bottom: 0;
-        right: 0em;
+        right: -360px;
+        transition: right 200ms;
         background: $color-bg-lightgray;
         border-left: 1px solid #ddd;
-        width: 25em;
+        width: 360px;
         z-index: 35;
+        .cmint-sidebar-handle {
+            cursor: pointer;
+            position: absolute;
+            width: 32px;
+            height: 26px;
+            left: -32px;
+            background: transparent;
+            transition: background 200ms;
+            color: $color-accent;
+            i {
+                font-size: 0.8em;
+                line-height: 22px;
+                margin-left: 9px;
+                margin-top: 2px;
+            }
+        }
+    }
+
+    &#Sidebar.active {
+        right: 0px;
+        .cmint-sidebar-handle {
+            background: $color-bg-lightgray;
+            border-left: 1px solid $color-bd-light;
+            border-bottom: 1px solid $color-bd-light;
+            color: $color-font-fade;
+        }
     }
 
     .sidebar-top {

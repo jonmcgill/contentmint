@@ -3,7 +3,7 @@ Vue.component('toolbar', {
     props: ['changes', 'user', 'name'],
 
     template: '\
-        <div id="Toolbar">\
+        <div id="Toolbar" :class="{active:isActive}">\
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
                 <button :class="btn.btnClasses"\
                     @click="btn.callback($el, btn)"\
@@ -14,15 +14,37 @@ Vue.component('toolbar', {
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
+            <div class="cmint-toolbar-handle" @click="toggle">\
+                <i :class="handleClasses"></i>\
+            </div>\
         </div>',
 
     data: function(){return{
 
-        toolbarButtons: Cmint.Ui.Toolbar
+        toolbarButtons: Cmint.Ui.Toolbar,
+
+        isActive: false
 
     }},
 
+    computed: {
+        handleClasses: function() {
+            var classes = {fa:true};
+            if (this.isActive) {
+                classes['fa-close'] = true;
+            } else {
+                classes['fa-cog'] = true;
+            }
+            return classes;
+        }
+    },
+
     methods: {
+
+        toggle: function() {
+            this.isActive = !this.isActive;
+            this.$bus.$emit('toggleToolbar', this.isActive);
+        },
 
         disable: function(value) {
             var disablers = $(this.$el).find(Cmint.Settings.attr.dataDisable);
@@ -39,8 +61,15 @@ Vue.component('toolbar', {
 
         var _this = this;
         _this.disable(true);
+
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
+        })
+
+        _this.$bus.$on('toggleSidebar', function(sidebarState) {
+            if (sidebarState) {
+                _this.isActive = true;
+            }
         })
 
     }

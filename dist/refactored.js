@@ -596,19 +596,43 @@ Vue.component('comp', {
 // Meta component for contextual regions that nest <comp> instances
 Vue.component('context', {
 
-    props: ['tag', 'containers', 'thumbnails'],
+    props: ['tag', 'insert', 'containers', 'thumbnails'],
 
     render: function(make) {
+
         var classes = {};
         var tag = this.tag || 'div';
+        var insertTag = this.insert || 'div';
+        var output;
+
         classes[Cmint.Settings.name.context] = true;
+
+        if (this.thumbnails) {
+            output = this.containers.map(function(child) {
+                return make('div', {'class': {'thumbnail': true}}, [
+                    make('span', {'class': {'thumbnail-name': true}}, [child.display]),
+                    make('div', {'class': {'thumbnail-component': true}}, [
+                        make('div', {'class': {'thumbnail-scale-wrap': true}}, [
+                            make(child.name, {props:{ 'config': child }})
+                        ])
+                    ])
+                ])
+            })
+        } else {
+            output = this.containers.map(function(child) {
+                return make(child.name, {
+                    props: { 'config': child },
+                    key: child.id
+                })
+            })
+        }
+        if (!this.containers.length) {
+            output = [make(insertTag, {'class':{'context-insert':true}},['Drag components here'])]
+        }
+
         return make(
             tag, { 'class': classes },
-            this.containers.map(function(component) {
-                return make(
-                    component.name, { props: { 'config': component }}
-                )
-            })
+            output
         )
     }
 
@@ -618,7 +642,7 @@ Vue.component('toolbar', {
     props: ['changes', 'user', 'name'],
 
     template: '\
-        <div id="Toolbar">\
+        <div id="Toolbar" :class="{active:isActive}">\
             <div v-for="btn in toolbarButtons" class="cmint-btn-toolbar">\
                 <button :class="btn.btnClasses"\
                     @click="btn.callback($el, btn)"\
@@ -629,15 +653,37 @@ Vue.component('toolbar', {
             <div class="right">\
                 <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
             </div>\
+            <div class="cmint-toolbar-handle" @click="toggle">\
+                <i :class="handleClasses"></i>\
+            </div>\
         </div>',
 
     data: function(){return{
 
-        toolbarButtons: Cmint.Ui.Toolbar
+        toolbarButtons: Cmint.Ui.Toolbar,
+
+        isActive: false
 
     }},
 
+    computed: {
+        handleClasses: function() {
+            var classes = {fa:true};
+            if (this.isActive) {
+                classes['fa-close'] = true;
+            } else {
+                classes['fa-cog'] = true;
+            }
+            return classes;
+        }
+    },
+
     methods: {
+
+        toggle: function() {
+            this.isActive = !this.isActive;
+            this.$bus.$emit('toggleToolbar', this.isActive);
+        },
 
         disable: function(value) {
             var disablers = $(this.$el).find(Cmint.Settings.attr.dataDisable);
@@ -654,8 +700,15 @@ Vue.component('toolbar', {
 
         var _this = this;
         _this.disable(true);
+
         _this.$bus.$on('toolbar-disabler', function(value) {
             _this.disable(value);
+        })
+
+        _this.$bus.$on('toggleSidebar', function(sidebarState) {
+            if (sidebarState) {
+                _this.isActive = true;
+            }
         })
 
     }
@@ -666,7 +719,10 @@ Vue.component('sidebar', {
     props: ['components'],
 
     template: '\
-        <aside id="Sidebar">\
+        <aside id="Sidebar" :class="{active:isActive}">\
+            <div class="cmint-sidebar-handle" @click="toggle">\
+                <i :class="handleClasses"></i>\
+            </div>\
             <div class="sidebar-sub">\
                 \
             </div>\
@@ -680,16 +736,47 @@ Vue.component('sidebar', {
 
     data: function(){return{
 
-        componentList: this.components
+        componentList: this.components,
+
+        isActive: false,
 
     }},
 
+    computed: {
+        handleClasses: function() {
+            var classes = {fa:true};
+            if (this.isActive) {
+                classes['fa-close'] = true;
+            } else {
+                classes['fa-bars'] = true;
+            }
+            return classes;
+        }
+    },
+
+    methods: {
+
+        toggle: function() {
+            this.isActive = !this.isActive;
+            this.$bus.$emit('toggleSidebar', this.isActive);
+        }
+
+    },
+
     mounted: function() {
+
+        this.handleClasses['fa-close'] = true;
 
         var _this = this;
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+        })
+
+        _this.$bus.$on('toggleToolbar', function(toolbarState) {
+            if (!toolbarState) {
+                _this.isActive = false;
+            }
         })
 
     }
@@ -714,7 +801,13 @@ Cmint.Init = function() {
                 content: { text: 'Lorem Ipsum Headingum' }
             }],
 
-            components: [],
+            components: [{
+                name: 'heading',
+                display: 'Heading',
+                category: 'Content',
+                tags: { root: 'h1' },
+                content: { text: 'Lorem Ipsum Headingum' }
+            }],
 
             changes: 0,
 
