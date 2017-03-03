@@ -46,7 +46,7 @@ Vue.component('actionbar', {
 
             // Vue.nextTick(Cmint.app.refresh);
             // Vue.nextTick(Drag.updateContainers);
-            // Vue.nextTick(Cmint.app.snapshot);
+            Vue.nextTick(Cmint.App.snapshot);
             // Cmint.app.save();
 
             this.$bus.$emit('closeActionBar');
@@ -62,7 +62,7 @@ Vue.component('actionbar', {
 
             // Vue.nextTick(Cmint.app.refresh);
             // Vue.nextTick(Drag.updateContainers);
-            // Vue.nextTick(Cmint.app.snapshot);
+            Vue.nextTick(Cmint.App.snapshot);
             // Cmint.app.save();
 
             this.$bus.$emit('closeActionBar');

@@ -5,6 +5,7 @@
     margin-top: -2px;
     border: 1px solid #333;
     border-radius: 3px;
+    z-index: 9000;
     &.active {
         opacity: 1;
     }

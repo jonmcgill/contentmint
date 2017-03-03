@@ -8,9 +8,14 @@ Cmint.Init = function() {
         el: '#App',
 
         data: {
-            
-            stage: [],
 
+            // User Data
+            template: '<div class="template-test">{{ stage }}</div>',
+            username: 'mcgilljo',
+            contentName: 'My Content Name',
+            
+            // Contexts
+            stage: [],
             components: [
                 {
                     name: 'heading',
@@ -29,26 +34,30 @@ Cmint.Init = function() {
                 }
             ],
 
+            // Global items used by other components
+            activeComponent: null,
+            fieldsComponent: null,
             componentList: null,
 
+            // Introspection
+            contextualize: false,
             changes: 0,
-
-            username: 'mcgilljo',
-
-            contentName: 'My Content Name',
-
-            activeComponent: null,
-
-            fieldsComponent: null,
-
-            template: '<div class="template-test">{{ stage }}</div>'
+            previous: null,
+            saved: []
         
         },
 
-        methods: {},
+        methods: {
+
+            save: Cmint.AppFn.save,
+            snapshot: Cmint.AppFn.snapshot,
+            undo: Cmint.AppFn.undo
+
+        },
 
         mounted: function() {
             Cmint.Ui.documentHandler();
+            Cmint.Ui.contextualize();
             Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }

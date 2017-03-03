@@ -8,6 +8,7 @@ Cmint.Settings = {
     name: {
         component: 'Component',
         context: 'Context',
+        contextualize: 'Contextualized',
         dataHook: 'data-hook',
         dataContext: 'data-context',
         dataDisable: 'data-disable',
@@ -21,7 +22,8 @@ Cmint.Settings = {
         categories: '.category-container',
         fieldchoice: '.field-choice-wrap',
         dropdown: '.dropdown',
-        placeholder: '.cmint-placeholder'
+        placeholder: '.cmint-placeholder',
+        notification: '.cmint-notification'
     },
 
     id: {

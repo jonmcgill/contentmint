@@ -80,6 +80,7 @@ Cmint.Settings = {
     name: {
         component: 'Component',
         context: 'Context',
+        contextualize: 'Contextualized',
         dataHook: 'data-hook',
         dataContext: 'data-context',
         dataDisable: 'data-disable',
@@ -93,7 +94,8 @@ Cmint.Settings = {
         categories: '.category-container',
         fieldchoice: '.field-choice-wrap',
         dropdown: '.dropdown',
-        placeholder: '.cmint-placeholder'
+        placeholder: '.cmint-placeholder',
+        notification: '.cmint-notification'
     },
 
     id: {
@@ -414,51 +416,6 @@ Cmint.Sync.removeVmContextData = function(vmData) {
     vmData.context.splice(vmData.index, 1);
 
 }
-Cmint.Ui.actionbarHandler = function(component) {
-
-    if (component.environment === 'components') return;
-
-    var element = component.$el,
-        $el = $(element);
-
-    $el.unbind();
-
-    $el.click(function(e) {
-
-        var nearestComponent = $(e.target).closest(Cmint.Settings.class.component);
-
-        if (nearestComponent[0] === element && !nearestComponent.hasClass('active')) {
-
-            Cmint.App.activeComponent = component;
-
-            setTimeout(function() {
-                var offset = $el.offset();
-                var output = {};
-                output.top = offset.top + 'px';
-                output.left = offset.left + 'px';
-                output.handle = offset.left + $el.width() + 'px';
-
-                if($('#ActionBar.active').length) {
-                    Cmint.Bus.$emit('closeActionBar');
-                    setTimeout(function() {
-                        Cmint.Bus.$emit('getComponentCoordinates', output, component);
-                        setTimeout(function() {
-                            Cmint.Bus.$emit('openActionBar', component);
-                        }, 100);                                        
-                    },200)
-                } else {
-                    Cmint.Bus.$emit('getComponentCoordinates', output, component);
-                    setTimeout(function() {
-                        Cmint.Bus.$emit('openActionBar', component);
-                    }, 100); 
-                }
-            }, 50);
-
-        }
-
-    })
-
-}
 // Creates a component and stores confit in Components
 // Note: your template root element must always be <comp></comp>
 // The <comp> component is the meta wrapper that handles all component logic.
@@ -635,7 +592,7 @@ Cmint.createToolbarButton({
     btnClasses: { 'toolbar-save': true },
     iconClasses: { 'fa': true, 'fa-save': true },
     callback: function(button) {
-        Cmint.Util.debug('content saved');
+        Cmint.App.save();
     }
 })
 
@@ -645,6 +602,7 @@ Cmint.createToolbarButton({
     iconClasses: { 'fa': true, 'fa-object-ungroup': true },
     callback: function(toolbar, config) {
         config.btnClasses.active = !config.btnClasses.active;
+        Cmint.Bus.$emit('contextualize');
         Cmint.Util.debug('Contextualizing stage components');
     }
 })
@@ -655,7 +613,7 @@ Cmint.createToolbarButton({
     iconClasses: { 'fa': true, 'fa-undo': true },
     disable: null,
     callback: function() {
-        Cmint.Util.debug('Reverting most recent change');
+        Cmint.App.undo();
     }
 })
 
@@ -670,6 +628,7 @@ Vue.component('comp', {
             ? this.config.tags.root
             : 'div';
         classes[Cmint.Settings.name.component] = true;
+        classes[Cmint.Settings.name.contextualize] = this.contextualize;
 
         return make(
             tag, { 'class': classes },
@@ -680,6 +639,12 @@ Vue.component('comp', {
     data: function(){return{
         environment: null
     }},
+
+    computed: {
+        contextualize: function() {
+            return Cmint.App ? Cmint.App.contextualize : false;
+        }
+    },
 
     methods: {
 
@@ -785,7 +750,6 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-
         isActive: false
 
     }},
@@ -825,7 +789,7 @@ Vue.component('toolbar', {
         var _this = this;
         _this.disable(true);
 
-        _this.$bus.$on('toolbar-disabler', function(value) {
+        _this.$bus.$on('toolbarDisabler', function(value) {
             _this.disable(value);
         })
 
@@ -1028,7 +992,7 @@ Vue.component('actionbar', {
 
             // Vue.nextTick(Cmint.app.refresh);
             // Vue.nextTick(Drag.updateContainers);
-            // Vue.nextTick(Cmint.app.snapshot);
+            Vue.nextTick(Cmint.App.snapshot);
             // Cmint.app.save();
 
             this.$bus.$emit('closeActionBar');
@@ -1044,7 +1008,7 @@ Vue.component('actionbar', {
 
             // Vue.nextTick(Cmint.app.refresh);
             // Vue.nextTick(Drag.updateContainers);
-            // Vue.nextTick(Cmint.app.snapshot);
+            Vue.nextTick(Cmint.App.snapshot);
             // Cmint.app.save();
 
             this.$bus.$emit('closeActionBar');
@@ -1168,14 +1132,68 @@ Cmint.Editor.init = function(component) {
             editor.on('blur', function() {
                 if (!component.config.content) return;
                 if (component.config.content[contentKey] !== stash) {
-                    // Cmint.app.save();
-                    // Cmint.app.snapshot();
+                    Cmint.App.save();
+                    Cmint.App.snapshot();
                 }
             })
             $this.removeAttr('data-temp');
         }
 
         tinymce.init(config);
+
+    })
+
+}
+Cmint.Ui.actionbarHandler = function(component) {
+
+    if (component.environment === 'components') return;
+
+    var element = component.$el,
+        $el = $(element);
+
+    $el.unbind();
+
+    $el.click(function(e) {
+
+        var nearestComponent = $(e.target).closest(Cmint.Settings.class.component);
+
+        if (nearestComponent[0] === element && !nearestComponent.hasClass('active')) {
+
+            Cmint.App.activeComponent = component;
+
+            setTimeout(function() {
+                var offset = $el.offset();
+                var output = {};
+                output.top = offset.top + 'px';
+                output.left = offset.left + 'px';
+                output.handle = offset.left + $el.width() + 'px';
+
+                if($('#ActionBar.active').length) {
+                    Cmint.Bus.$emit('closeActionBar');
+                    setTimeout(function() {
+                        Cmint.Bus.$emit('getComponentCoordinates', output, component);
+                        setTimeout(function() {
+                            Cmint.Bus.$emit('openActionBar', component);
+                        }, 100);                                        
+                    },200)
+                } else {
+                    Cmint.Bus.$emit('getComponentCoordinates', output, component);
+                    setTimeout(function() {
+                        Cmint.Bus.$emit('openActionBar', component);
+                    }, 100); 
+                }
+            }, 50);
+
+        }
+
+    })
+
+}
+Cmint.Ui.contextualize = function() {
+
+    Cmint.Bus.$on('contextualize', function() {
+
+        Cmint.App.contextualize = !Cmint.App.contextualize;
 
     })
 
@@ -1308,21 +1326,18 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Sync.insertVmContextData(Cmint.Drag.dropIndex, Cmint.Drag.dragData, Cmint.App.stage);
         // Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Cmint.Drag.fn.updateContainers);
-        // Vue.nextTick(Cmint.app.snapshot);
-        // Cmint.app.save();
+        Vue.nextTick(Cmint.App.snapshot);
         Cmint.Util.debug('dropped new component "'+Cmint.Drag.dragData.name+'" in stage at [' + Cmint.Drag.dropIndex + ']');
+        Cmint.App.save();
     }
 
     if (Cmint.Drag.dropReordered) {
 
         Cmint.Drag.fn.insertPlaceholder();
-
         Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
         Cmint.Util.debug('dropped reordered component at [' + Cmint.Drag.dropIndex + ']');
-
         Cmint.Drag.fn.replacePlaceholder(element);
         Cmint.Util.debug('replaced placeholder with dropped element');
-
         Cmint.Drag.dropVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dropIndex, Cmint.App.stage);
 
         dragVm = Cmint.Drag.dragVmContextData;
@@ -1342,8 +1357,8 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Sync.rearrangeVmContextData(dragVm, dropVm);
         // Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Cmint.Drag.updateContainers);
-        // Vue.nextTick(Cmint.app.snapshot);
-        // Cmint.app.save();
+        Vue.nextTick(Cmint.App.snapshot);
+        Cmint.App.save();
         // Util.debug('refreshing and updating containers')
 
     }
@@ -1361,7 +1376,8 @@ Cmint.Drag.onRemove = function(element, container, source) {
         Cmint.Sync.removeVmContextData(Cmint.Drag.dragVmContextData);
 
         // Vue.nextTick(Cmint.app.refresh);
-        // Vue.nextTick(Cmint.app.snapshot);
+        Vue.nextTick(Cmint.App.save);
+        Vue.nextTick(Cmint.App.snapshot);
 
     }
 
@@ -1412,6 +1428,65 @@ Cmint.Drag.init = function() {
     })
 
 }
+Cmint.AppFn.save = function() {
+    
+    Cmint.Bus.$emit('updateEditorData');
+
+    this.saved = Cmint.Util.copyObject(this.stage);
+    var $notify = $(Cmint.Settings.class.notification);
+    $notify.addClass('active');
+    setTimeout(function() {
+        $notify.removeClass('active');
+    }, 2500);
+
+    Cmint.Util.debug('content saved');
+
+}
+// Keeps track of changes made within in the editor as a whole. Note, this does
+// not keep track of every tinymce editor instance change, only events directly related
+// to components within the system. If you unfocuse an editor instance, that is
+// technically a component change since its data is being updated.
+Cmint.AppFn.snapshot = function() {
+
+    this.changes++;
+
+    var shot = Cmint.Util.copyObject(this.stage);
+    Cmint.Util.debug('took project snapshot (changes: ' + this.changes + ')');
+
+    if (!this.previous) {
+        this.previous = {
+            snapshot: shot,
+            prior: {
+                snapshot: [],
+                prior: null
+            }
+        }
+    } else {
+        this.previous = {
+            snapshot: shot,
+            prior: this.previous
+        }
+    }
+
+    Cmint.Bus.$emit('toolbarDisabler', !this.changes);
+
+}
+Cmint.AppFn.undo = function() {
+    
+    if (this.previous) {
+        this.changes--;
+        this.stage = this.previous.prior.snapshot;
+        Vue.nextTick(Cmint.Drag.updateContainers);
+        this.previous = this.previous.prior;
+        if (!this.previous.prior) {
+            this.previous = null;
+        }
+        Cmint.Util.debug('state reverted (current changes: ' + this.changes + ')');
+    }
+
+    Cmint.Bus.$emit('toolbarDisabler', !this.changes);
+
+}
 Cmint.Util.runTests();
 
 Cmint.Init = function() {
@@ -1422,9 +1497,14 @@ Cmint.Init = function() {
         el: '#App',
 
         data: {
-            
-            stage: [],
 
+            // User Data
+            template: '<div class="template-test">{{ stage }}</div>',
+            username: 'mcgilljo',
+            contentName: 'My Content Name',
+            
+            // Contexts
+            stage: [],
             components: [
                 {
                     name: 'heading',
@@ -1443,26 +1523,30 @@ Cmint.Init = function() {
                 }
             ],
 
+            // Global items used by other components
+            activeComponent: null,
+            fieldsComponent: null,
             componentList: null,
 
+            // Introspection
+            contextualize: false,
             changes: 0,
-
-            username: 'mcgilljo',
-
-            contentName: 'My Content Name',
-
-            activeComponent: null,
-
-            fieldsComponent: null,
-
-            template: '<div class="template-test">{{ stage }}</div>'
+            previous: null,
+            saved: []
         
         },
 
-        methods: {},
+        methods: {
+
+            save: Cmint.AppFn.save,
+            snapshot: Cmint.AppFn.snapshot,
+            undo: Cmint.AppFn.undo
+
+        },
 
         mounted: function() {
             Cmint.Ui.documentHandler();
+            Cmint.Ui.contextualize();
             Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }

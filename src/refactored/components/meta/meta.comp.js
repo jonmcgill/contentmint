@@ -10,6 +10,7 @@ Vue.component('comp', {
             ? this.config.tags.root
             : 'div';
         classes[Cmint.Settings.name.component] = true;
+        classes[Cmint.Settings.name.contextualize] = this.contextualize;
 
         return make(
             tag, { 'class': classes },
@@ -20,6 +21,12 @@ Vue.component('comp', {
     data: function(){return{
         environment: null
     }},
+
+    computed: {
+        contextualize: function() {
+            return Cmint.App ? Cmint.App.contextualize : false;
+        }
+    },
 
     methods: {
 

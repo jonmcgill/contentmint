@@ -23,7 +23,6 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-
         isActive: false
 
     }},
@@ -63,7 +62,7 @@ Vue.component('toolbar', {
         var _this = this;
         _this.disable(true);
 
-        _this.$bus.$on('toolbar-disabler', function(value) {
+        _this.$bus.$on('toolbarDisabler', function(value) {
             _this.disable(value);
         })
 

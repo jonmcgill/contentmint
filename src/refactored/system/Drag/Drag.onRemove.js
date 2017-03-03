@@ -10,7 +10,8 @@ Cmint.Drag.onRemove = function(element, container, source) {
         Cmint.Sync.removeVmContextData(Cmint.Drag.dragVmContextData);
 
         // Vue.nextTick(Cmint.app.refresh);
-        // Vue.nextTick(Cmint.app.snapshot);
+        Vue.nextTick(Cmint.App.save);
+        Vue.nextTick(Cmint.App.snapshot);
 
     }
 

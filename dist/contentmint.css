@@ -548,7 +548,8 @@ body {
   margin-left: -44px;
   margin-top: -2px;
   border: 1px solid #333;
-  border-radius: 3px; }
+  border-radius: 3px;
+  z-index: 9000; }
   #ActionBar.active {
     opacity: 1; }
   #ActionBar > button {
@@ -735,11 +736,13 @@ body {
       color: rgba(255, 255, 255, 0.2);
       cursor: default; }
   #Toolbar button.toolbar-btn-fancy {
-    background: #1fb4fc;
-    color: rgba(0, 0, 0, 0.5); }
+    color: #38bcfc;
+    border: 1px solid #38bcfc;
+    transition: background 200ms, color 200ms;
+    border-radius: 3px; }
     #Toolbar button.toolbar-btn-fancy:hover {
-      background: #51c5fd;
-      color: rgba(0, 0, 0, 0.73); }
+      background: #38bcfc;
+      color: black; }
 
 .notification {
   background: #1fb4fc;

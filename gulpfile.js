@@ -58,7 +58,7 @@ var refactored_files = [
     p('system/Sync/Sync.insertVmContextData'),
     p('system/Sync/Sync.rearrangeVmContextData'),
     p('system/Sync/Sync.removeVmContextData'),
-    p('system/Ui/Ui.actionbarHandler'),
+    
 
     p('system/Api/*'),
 
@@ -73,7 +73,9 @@ var refactored_files = [
     p('system/Editor/Editor.config'),
     p('system/Editor/Editor.init'),
 
-    p('system/Ui/Ui.documentHandler'),
+    p('system/Ui/*'),
+    // p('system/Ui/Ui.')
+    // p('system/Ui/Ui.actionbarHandler'),
 
     p('system/Drag/Drag.fn'),
     p('system/Drag/Drag.onDrag'),
@@ -81,8 +83,7 @@ var refactored_files = [
     p('system/Drag/Drag.onRemove'),
     p('system/Drag/Drag.init'),
     
-
-
+    p('system/AppFn/*'),
     p('system/Cmint.Init')
 
 ];

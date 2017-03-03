@@ -48,8 +48,8 @@ Cmint.Editor.init = function(component) {
             editor.on('blur', function() {
                 if (!component.config.content) return;
                 if (component.config.content[contentKey] !== stash) {
-                    // Cmint.app.save();
-                    // Cmint.app.snapshot();
+                    Cmint.App.save();
+                    Cmint.App.snapshot();
                 }
             })
             $this.removeAttr('data-temp');

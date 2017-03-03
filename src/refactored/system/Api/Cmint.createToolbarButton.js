@@ -34,7 +34,7 @@ Cmint.createToolbarButton({
     btnClasses: { 'toolbar-save': true },
     iconClasses: { 'fa': true, 'fa-save': true },
     callback: function(button) {
-        Cmint.Util.debug('content saved');
+        Cmint.App.save();
     }
 })
 
@@ -44,6 +44,7 @@ Cmint.createToolbarButton({
     iconClasses: { 'fa': true, 'fa-object-ungroup': true },
     callback: function(toolbar, config) {
         config.btnClasses.active = !config.btnClasses.active;
+        Cmint.Bus.$emit('contextualize');
         Cmint.Util.debug('Contextualizing stage components');
     }
 })
@@ -54,6 +55,6 @@ Cmint.createToolbarButton({
     iconClasses: { 'fa': true, 'fa-undo': true },
     disable: null,
     callback: function() {
-        Cmint.Util.debug('Reverting most recent change');
+        Cmint.App.undo();
     }
 })

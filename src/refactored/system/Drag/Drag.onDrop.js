@@ -18,21 +18,18 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Sync.insertVmContextData(Cmint.Drag.dropIndex, Cmint.Drag.dragData, Cmint.App.stage);
         // Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Cmint.Drag.fn.updateContainers);
-        // Vue.nextTick(Cmint.app.snapshot);
-        // Cmint.app.save();
+        Vue.nextTick(Cmint.App.snapshot);
         Cmint.Util.debug('dropped new component "'+Cmint.Drag.dragData.name+'" in stage at [' + Cmint.Drag.dropIndex + ']');
+        Cmint.App.save();
     }
 
     if (Cmint.Drag.dropReordered) {
 
         Cmint.Drag.fn.insertPlaceholder();
-
         Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
         Cmint.Util.debug('dropped reordered component at [' + Cmint.Drag.dropIndex + ']');
-
         Cmint.Drag.fn.replacePlaceholder(element);
         Cmint.Util.debug('replaced placeholder with dropped element');
-
         Cmint.Drag.dropVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dropIndex, Cmint.App.stage);
 
         dragVm = Cmint.Drag.dragVmContextData;
@@ -52,8 +49,8 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Sync.rearrangeVmContextData(dragVm, dropVm);
         // Vue.nextTick(Cmint.app.refresh);
         Vue.nextTick(Cmint.Drag.updateContainers);
-        // Vue.nextTick(Cmint.app.snapshot);
-        // Cmint.app.save();
+        Vue.nextTick(Cmint.App.snapshot);
+        Cmint.App.save();
         // Util.debug('refreshing and updating containers')
 
     }

@@ -99,11 +99,17 @@
     }
 
     button.toolbar-btn-fancy {
-        background: lighten($color-accent, 10%);
-        color: $color-font-fade;
+        // background: lighten($color-accent, 10%);
+        // color: $color-font-fade;
+        color: lighten($color-accent, 15%);
+        border: 1px solid lighten($color-accent, 15%);
+        transition: background 200ms, color 200ms;
+        border-radius: 3px;
         &:hover {
-            background: lighten($color-accent, 20%);
-            color: $color-font-dark;
+            // background: lighten($color-accent, 20%);
+            // color: $color-font-dark;
+            background: lighten($color-accent, 15%);
+            color: black;
         }
     }
 
