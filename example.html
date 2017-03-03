@@ -44,5 +44,20 @@
         }
     })
 
+    Cmint.createComponent({
+        template: '\
+            <comp :config="config">\
+                <context :contexts="config.contexts.container" data-context="container"></context>\
+            </comp>',
+        config: {
+            name: 'container',
+            display: 'Empty Container',
+            category: 'Layout',
+            contexts: {
+                container: []
+            }
+        }
+    })
+
     Cmint.Init();
 </script>

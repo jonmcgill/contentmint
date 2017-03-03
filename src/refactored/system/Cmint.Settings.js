@@ -11,7 +11,8 @@ Cmint.Settings = {
         dataHook: 'data-hook',
         dataContext: 'data-context',
         dataDisable: 'data-disable',
-        dataEdit: 'data-edit'
+        dataEdit: 'data-edit',
+        placeholder: 'cmint-placeholder'
     },
 
     class: {
@@ -19,7 +20,8 @@ Cmint.Settings = {
         context: '.Context',
         categories: '.category-container',
         fieldchoice: '.field-choice-wrap',
-        dropdown: '.dropdown'
+        dropdown: '.dropdown',
+        placeholder: '.cmint-placeholder'
     },
 
     id: {

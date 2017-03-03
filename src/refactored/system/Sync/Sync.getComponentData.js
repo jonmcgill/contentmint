@@ -6,11 +6,11 @@
 Cmint.Sync.getComponentData = function(position, environment) {
 
     var data = Cmint.Util.copyObject(environment);
-
+    var _position = Cmint.Util.copyObject(position);
     // remove the first item since that is provided by the environment
-    position.shift();
+    _position.shift();
 
-    position.forEach(function(key, i) {
+    _position.forEach(function(key, i) {
         if (typeof(key) === 'string') {
             data = data.contexts[key];
         } else {

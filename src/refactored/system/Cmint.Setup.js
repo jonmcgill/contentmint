@@ -60,7 +60,8 @@ var Cmint = Cmint || (function() {
         // API for managing miscellaneous application features
         Ui: {
             Toolbar: [],
-            Actionbar: []
+            Actionbar: [],
+            componentList: null
         },
 
         // Helper functions

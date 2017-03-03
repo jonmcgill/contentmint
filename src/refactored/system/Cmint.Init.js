@@ -9,21 +9,27 @@ Cmint.Init = function() {
 
         data: {
             
-            stage: [{
-                name: 'heading',
-                display: 'Heading',
-                category: 'Content',
-                tags: { root: 'h1' },
-                content: { text: 'Lorem Ipsum Headingum' }
-            }],
+            stage: [],
 
-            components: [{
-                name: 'heading',
-                display: 'Heading',
-                category: 'Content',
-                tags: { root: 'h1' },
-                content: { text: 'Lorem Ipsum Headingum' }
-            }],
+            components: [
+                {
+                    name: 'heading',
+                    display: 'Heading',
+                    category: 'Content',
+                    tags: { root: 'h1' },
+                    content: { text: 'Lorem Ipsum Headingum' }
+                },
+                {
+                    name: 'container',
+                    display: 'Empty Container',
+                    category: 'Layout',
+                    contexts: {
+                        container: []
+                    }
+                }
+            ],
+
+            componentList: null,
 
             changes: 0,
 
@@ -43,6 +49,7 @@ Cmint.Init = function() {
 
         mounted: function() {
             Cmint.Ui.documentHandler();
+            Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }
 

@@ -1,7 +1,7 @@
 // Meta component for contextual regions that nest <comp> instances
 Vue.component('context', {
 
-    props: ['tag', 'insert', 'containers', 'thumbnails'],
+    props: ['tag', 'insert', 'contexts', 'thumbnails'],
 
     render: function(make) {
 
@@ -13,7 +13,7 @@ Vue.component('context', {
         classes[Cmint.Settings.name.context] = true;
 
         if (this.thumbnails) {
-            output = this.containers.map(function(child) {
+            output = this.contexts.map(function(child) {
                 return make('div', {'class': {'thumbnail': true}}, [
                     make('span', {'class': {'thumbnail-name': true}}, [child.display]),
                     make('div', {'class': {'thumbnail-component': true}}, [
@@ -24,14 +24,14 @@ Vue.component('context', {
                 ])
             })
         } else {
-            output = this.containers.map(function(child) {
+            output = this.contexts.map(function(child) {
                 return make(child.name, {
                     props: { 'config': child },
                     key: child.id
                 })
             })
         }
-        if (!this.containers.length) {
+        if (!this.contexts.length) {
             output = [make(insertTag, {'class':{'context-insert':true}},['Drag components here'])]
         }
 

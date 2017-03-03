@@ -60,7 +60,8 @@ var Cmint = Cmint || (function() {
         // API for managing miscellaneous application features
         Ui: {
             Toolbar: [],
-            Actionbar: []
+            Actionbar: [],
+            componentList: null
         },
 
         // Helper functions
@@ -82,7 +83,8 @@ Cmint.Settings = {
         dataHook: 'data-hook',
         dataContext: 'data-context',
         dataDisable: 'data-disable',
-        dataEdit: 'data-edit'
+        dataEdit: 'data-edit',
+        placeholder: 'cmint-placeholder'
     },
 
     class: {
@@ -90,7 +92,8 @@ Cmint.Settings = {
         context: '.Context',
         categories: '.category-container',
         fieldchoice: '.field-choice-wrap',
-        dropdown: '.dropdown'
+        dropdown: '.dropdown',
+        placeholder: '.cmint-placeholder'
     },
 
     id: {
@@ -265,11 +268,11 @@ Cmint.Util.test('Cmint.Sync.getStagePosition', function() {
 Cmint.Sync.getComponentData = function(position, environment) {
 
     var data = Cmint.Util.copyObject(environment);
-
+    var _position = Cmint.Util.copyObject(position);
     // remove the first item since that is provided by the environment
-    position.shift();
+    _position.shift();
 
-    position.forEach(function(key, i) {
+    _position.forEach(function(key, i) {
         if (typeof(key) === 'string') {
             data = data.contexts[key];
         } else {
@@ -314,12 +317,13 @@ Cmint.Util.test('Cmint.Sync.getComponentData', function() {
 Cmint.Sync.getVmContextData = function(position, context) {
 
     var output,
+        _position = Cmint.Util.copyObject(position),
         _context = context;
 
-    position.shift();
+    _position.shift();
 
-    position.forEach(function(key, i) {
-        if (i === (position.length - 1)) {
+    _position.forEach(function(key, i) {
+        if (i === (_position.length - 1)) {
             output = {
                 context: _context,
                 index: key
@@ -395,6 +399,21 @@ Cmint.Util.test('Cmint.Sync.insertVmContextData', function() {
     return [result, expected, got];
 
 })
+// When components are rearranged on stage using dragula, we need to revert what dragula
+// did to the DOM and then give control back over to the Vm data. This function
+// takes the dragged data and splices it into the dropped context data.
+// Both parameters are the result of Sync.getVmContextData.
+Cmint.Sync.rearrangeVmContextData = function(fromData, toData) {
+
+    toData.context.splice(toData.index, 0, fromData.context.splice(fromData.index, 1)[0]);
+    Cmint.Util.debug('rearranging Vm context data');
+
+}
+Cmint.Sync.removeVmContextData = function(vmData) {
+
+    vmData.context.splice(vmData.index, 1);
+
+}
 Cmint.Ui.actionbarHandler = function(component) {
 
     if (component.environment === 'components') return;
@@ -475,7 +494,7 @@ Cmint.Ui.actionbarHandler = function(component) {
 Cmint.createComponent = function(options) {
     if (!options.template) console.error('All components need a template');
     if (!options.config) console.error('All components need config options');
-    if (Cmint.Instance.Components[name]) {
+    if (Cmint.Instance.Components[options.config.name]) {
         console.error('Component "'+options.config.name+'" already exists')
     } else {
         if (!options.config.index) options.config.index = [];
@@ -662,32 +681,45 @@ Vue.component('comp', {
         environment: null
     }},
 
+    methods: {
+
+        run: function(action) {
+            $el = $(this.$el);
+
+            // Is the component staged, or in the component sidebar?
+            this.environment = $el.closest(Cmint.Settings.id.components).length
+                ? 'components'
+                : 'stage';
+
+            // Get the component's position in data from its position in DOM
+            this.config.index = Cmint.Sync.getStagePosition(this.$el);
+            
+            // Run component hooks
+
+            // Run editor initiation
+            Cmint.Editor.init(this);
+
+            // Run actionbar handler
+            Cmint.Ui.actionbarHandler(this);
+
+            Cmint.Util.debug(action + ' <comp> "' + this.config.name + '"');
+        }
+
+    },
+
     mounted: function() {
-        $el = $(this.$el);
+        this.run('mounted');
+    },
 
-        // Is the component staged, or in the component sidebar?
-        this.environment = $el.closest(Cmint.Settings.id.components).length
-            ? 'components'
-            : 'stage';
-
-        // Get the component's position in data from its position in DOM
-        this.config.index = Cmint.Sync.getStagePosition(this.$el);
-        
-        // Run component hooks
-
-        // Run editor initiation
-        Cmint.Editor.init(this);
-
-        // Run actionbar handler
-        Cmint.Ui.actionbarHandler(this);
-
-        Cmint.Util.debug('mounted <comp> "' + this.config.name + '"');
+    updated: function() {
+        this.run('updated');
     }
+
 })
 // Meta component for contextual regions that nest <comp> instances
 Vue.component('context', {
 
-    props: ['tag', 'insert', 'containers', 'thumbnails'],
+    props: ['tag', 'insert', 'contexts', 'thumbnails'],
 
     render: function(make) {
 
@@ -699,7 +731,7 @@ Vue.component('context', {
         classes[Cmint.Settings.name.context] = true;
 
         if (this.thumbnails) {
-            output = this.containers.map(function(child) {
+            output = this.contexts.map(function(child) {
                 return make('div', {'class': {'thumbnail': true}}, [
                     make('span', {'class': {'thumbnail-name': true}}, [child.display]),
                     make('div', {'class': {'thumbnail-component': true}}, [
@@ -710,14 +742,14 @@ Vue.component('context', {
                 ])
             })
         } else {
-            output = this.containers.map(function(child) {
+            output = this.contexts.map(function(child) {
                 return make(child.name, {
                     props: { 'config': child },
                     key: child.id
                 })
             })
         }
-        if (!this.containers.length) {
+        if (!this.contexts.length) {
             output = [make(insertTag, {'class':{'context-insert':true}},['Drag components here'])]
         }
 
@@ -827,7 +859,7 @@ Vue.component('sidebar', {
                 <context id="Components"\
                     data-context="components"\
                     :thumbnails="true"\
-                    :containers="components"></context>\
+                    :contexts="components"></context>\
             </div>\
         </aside>',
 
@@ -862,12 +894,13 @@ Vue.component('sidebar', {
 
     mounted: function() {
 
-        this.handleClasses['fa-close'] = true;
-
         var _this = this;
+        _this.handleClasses['fa-close'] = true;
+        Cmint.Ui.componentList = _this.componentList;
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            Cmint.Ui.componentList = _this.componentList;
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {
@@ -1043,7 +1076,7 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
-            Cmint.Util.debug('component in focus: ' + this.hasFields);
+            Cmint.Util.debug('active component is "'+Cmint.App.activeComponent.config.name+'"');
         })
         this.$bus.$on('closeActionBar', function() {
             if (_this.isActive) {
@@ -1067,7 +1100,7 @@ Vue.component('content-template', {
     template: '',
 
     created: function() {
-        var stage = '<context :containers="stage" data-context="stage"></context>';
+        var stage = '<context id="Stage" :contexts="stage" data-context="stage"></context>';
         var template = '<div id="Template">';
         template += this.template.replace(/\{\{\s*stage\s*\}\}/, stage);
         template += '</div>';
@@ -1169,7 +1202,8 @@ Cmint.Ui.documentHandler = function() {
                 }
             } else {
                 $(Cmint.Settings.class.component + '.active').removeClass('active');
-                if (!isActionBar) {
+                if (!isActionBar && Cmint.App.activeComponent) {
+                    Cmint.Util.debug('deactivated component "'+Cmint.App.activeComponent.config.name+'"');
                     Cmint.Bus.$emit('closeActionBar');
                 }
             }
@@ -1185,6 +1219,199 @@ Cmint.Ui.documentHandler = function() {
     })
 
 }
+Cmint.Drag.fn = (function(){
+
+    function updateContainers() {
+        $(Cmint.Settings.id.stage + ' ' + Cmint.Settings.class.context).each(function() {
+            if (Cmint.Drag.drake.containers.indexOf(this) <= -1) {
+                Cmint.Drag.drake.containers.push(this);
+                Cmint.Util.debug('added container to drake.containers');
+            }
+        })
+    }
+
+    function insertPlaceholder() {
+        var placeholder = '<div class="'+Cmint.Settings.name.placeholder+'" style="display:none;"></div>';
+        if (Cmint.Drag.dragInsertType === 'prepend') {
+            $(Cmint.Drag.dragPosition).prepend(placeholder);
+        } else if (Cmint.Drag.dragInsertType === 'after') {
+            $(placeholder).insertAfter(Cmint.Drag.dragPosition);
+        }
+    }
+
+    function replacePlaceholder(replacement) {
+        $(Cmint.Settings.class.placeholder).replaceWith(replacement);
+    }
+
+    return {
+        updateContainers: updateContainers,
+        insertPlaceholder: insertPlaceholder,
+        replacePlaceholder: replacePlaceholder
+    }
+
+})()
+Cmint.Drag.onDrag = function(element, source) {
+
+    Cmint.Bus.$emit('closeActionBar');
+
+    if (source === Cmint.Drag.components) {
+
+        // Get the DOM position of the dragged element and then, using that index
+        // get the corresponding piece of data in componentList (i.e. filtered component list)
+        Cmint.Drag.dragFromComponents = true;
+        Cmint.Drag.dragIndex = Cmint.Sync.getStagePosition(element);
+        Cmint.Drag.dragData = Cmint.Sync.getComponentData(Cmint.Drag.dragIndex, Cmint.Ui.componentList);
+        Cmint.Util.debug('dragging from component list at [' + Cmint.Drag.dragIndex + ']');
+
+    }
+
+    if ($(source).closest(Cmint.Settings.id.stage).length) {
+
+        Cmint.Drag.dragFromComponents = false;
+        Cmint.Drag.dragIndex = Cmint.Sync.getStagePosition(element);
+        console.log(Cmint.Drag.dragIndex);
+        Cmint.Drag.dragData = Cmint.Sync.getComponentData(Cmint.Drag.dragIndex, Cmint.App.stage);
+
+        Cmint.Drag.dragVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dragIndex, Cmint.App.stage);
+
+        if ($(element).prev().length === 0) {
+            Cmint.Drag.dragInsertType = 'prepend';
+            Cmint.Drag.dragPosition = $(element).parent();
+        } else {
+            Cmint.Drag.dragInsertType = 'after';
+            Cmint.Drag.dragPosition = $(element).prev();
+        }
+
+        Cmint.Util.debug('dragging from stage at [' + Cmint.Drag.dragIndex + ']');
+        Cmint.Util.debug('drag insert type is "'+Cmint.Drag.dragInsertType+'"');
+
+    }
+
+}
+Cmint.Drag.onDrop = function(element, target, source, sibling) {
+
+    var $element = $(element),
+        $target = $(target),
+        $source = $(source),
+        dragVm,
+        dropVm,
+        dragIndex,
+        dropIndex;
+
+    Cmint.Drag.dropInContext = $target.closest(Cmint.Settings.class.context).length > 0;
+    Cmint.Drag.dropReordered = $source.closest(Cmint.Settings.id.stage).length > 0;
+
+    if (Cmint.Drag.dragFromComponents && Cmint.Drag.dropInContext) {
+
+        Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
+        $element.remove();
+        Cmint.Sync.insertVmContextData(Cmint.Drag.dropIndex, Cmint.Drag.dragData, Cmint.App.stage);
+        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.Drag.fn.updateContainers);
+        // Vue.nextTick(Cmint.app.snapshot);
+        // Cmint.app.save();
+        Cmint.Util.debug('dropped new component "'+Cmint.Drag.dragData.name+'" in stage at [' + Cmint.Drag.dropIndex + ']');
+    }
+
+    if (Cmint.Drag.dropReordered) {
+
+        Cmint.Drag.fn.insertPlaceholder();
+
+        Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
+        Cmint.Util.debug('dropped reordered component at [' + Cmint.Drag.dropIndex + ']');
+
+        Cmint.Drag.fn.replacePlaceholder(element);
+        Cmint.Util.debug('replaced placeholder with dropped element');
+
+        Cmint.Drag.dropVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dropIndex, Cmint.App.stage);
+
+        dragVm = Cmint.Drag.dragVmContextData;
+        dropVm = Cmint.Drag.dropVmContextData;
+
+        // if the drop spot is the same context as the drag spot
+        // we need to make sure we account for the placeholder in our index.
+        // If the element is being dragged down, we need to subtract one from the
+        // drop index on account of the placeholder.
+        if (dropVm.context == dragVm.context) {
+            dragIndex = Cmint.Drag.dragIndex[Cmint.Drag.dragIndex - 1];
+            dropIndex = dropVm.index;
+            if (dragIndex < dropIndex) dropVm.index--;
+            Cmint.Util.debug('reordered components in the same context');
+        }
+
+        Cmint.Sync.rearrangeVmContextData(dragVm, dropVm);
+        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.Drag.updateContainers);
+        // Vue.nextTick(Cmint.app.snapshot);
+        // Cmint.app.save();
+        // Util.debug('refreshing and updating containers')
+
+    }
+
+}
+Cmint.Drag.onRemove = function(element, container, source) {
+    
+    if ($(source).closest(Cmint.Settings.id.stage).length) {
+
+        Cmint.Drag.fn.insertPlaceholder();
+        Cmint.Drag.fn.replacePlaceholder(element);
+        $(element).removeClass('gu-hide');
+
+        Cmint.Util.debug('removed component "'+Cmint.Drag.dragData.name+'" from stage at ' + Cmint.Drag.dragData.index);
+        Cmint.Sync.removeVmContextData(Cmint.Drag.dragVmContextData);
+
+        // Vue.nextTick(Cmint.app.refresh);
+        // Vue.nextTick(Cmint.app.snapshot);
+
+    }
+
+}
+Cmint.Drag.init = function() {
+
+    Cmint.Drag.stage = $(Cmint.Settings.id.stage)[0];
+    Cmint.Drag.components = $(Cmint.Settings.id.components)[0];
+
+    Cmint.Drag.dragIndex = null;
+    Cmint.Drag.dragData = null;
+    Cmint.Drag.dragPosition = null;
+    Cmint.Drag.dragFromComponents = null;
+    Cmint.Drag.dragVmContextData = null;
+
+    Cmint.Drag.dropInsertType = null;
+    Cmint.Drag.dropIndex = null;
+    Cmint.Drag.dropInContext = null;
+    Cmint.Drag.dropReordered = null;
+    Cmint.Drag.dropVmContextData = null;
+
+    Cmint.Drag.config = {
+
+        copy: function(element, source) {
+            return source === Cmint.Drag.components;
+        },
+
+        accepts: function(element, target, source, sibling) {
+            return target !== Cmint.Drag.components && !Cmint.Util.contains(element, target);
+        },
+
+        removeOnSpill: true
+
+    }
+
+    Cmint.Drag.drake = dragula([ Cmint.Drag.stage, Cmint.Drag.components ], Cmint.Drag.config);
+
+    Cmint.Drag.drake.on('drag', function(element, source) {
+        Cmint.Drag.onDrag(element, source);
+    });
+
+    Cmint.Drag.drake.on('drop', function(element, target, source, sibling) {
+        Cmint.Drag.onDrop(element, target, source, sibling);
+    });
+
+    Cmint.Drag.drake.on('remove', function(element, container, source) {
+        Cmint.Drag.onRemove(element, container, source);
+    })
+
+}
 Cmint.Util.runTests();
 
 Cmint.Init = function() {
@@ -1196,21 +1423,27 @@ Cmint.Init = function() {
 
         data: {
             
-            stage: [{
-                name: 'heading',
-                display: 'Heading',
-                category: 'Content',
-                tags: { root: 'h1' },
-                content: { text: 'Lorem Ipsum Headingum' }
-            }],
+            stage: [],
 
-            components: [{
-                name: 'heading',
-                display: 'Heading',
-                category: 'Content',
-                tags: { root: 'h1' },
-                content: { text: 'Lorem Ipsum Headingum' }
-            }],
+            components: [
+                {
+                    name: 'heading',
+                    display: 'Heading',
+                    category: 'Content',
+                    tags: { root: 'h1' },
+                    content: { text: 'Lorem Ipsum Headingum' }
+                },
+                {
+                    name: 'container',
+                    display: 'Empty Container',
+                    category: 'Layout',
+                    contexts: {
+                        container: []
+                    }
+                }
+            ],
+
+            componentList: null,
 
             changes: 0,
 
@@ -1230,6 +1463,7 @@ Cmint.Init = function() {
 
         mounted: function() {
             Cmint.Ui.documentHandler();
+            Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }
 

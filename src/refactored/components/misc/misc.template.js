@@ -5,7 +5,7 @@ Vue.component('content-template', {
     template: '',
 
     created: function() {
-        var stage = '<context :containers="stage" data-context="stage"></context>';
+        var stage = '<context id="Stage" :contexts="stage" data-context="stage"></context>';
         var template = '<div id="Template">';
         template += this.template.replace(/\{\{\s*stage\s*\}\}/, stage);
         template += '</div>';

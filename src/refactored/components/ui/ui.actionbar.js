@@ -94,7 +94,7 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
-            Cmint.Util.debug('component in focus: ' + this.hasFields);
+            Cmint.Util.debug('active component is "'+Cmint.App.activeComponent.config.name+'"');
         })
         this.$bus.$on('closeActionBar', function() {
             if (_this.isActive) {

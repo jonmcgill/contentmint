@@ -20,7 +20,8 @@ Cmint.Ui.documentHandler = function() {
                 }
             } else {
                 $(Cmint.Settings.class.component + '.active').removeClass('active');
-                if (!isActionBar) {
+                if (!isActionBar && Cmint.App.activeComponent) {
+                    Cmint.Util.debug('deactivated component "'+Cmint.App.activeComponent.config.name+'"');
                     Cmint.Bus.$emit('closeActionBar');
                 }
             }

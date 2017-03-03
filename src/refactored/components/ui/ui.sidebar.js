@@ -14,7 +14,7 @@ Vue.component('sidebar', {
                 <context id="Components"\
                     data-context="components"\
                     :thumbnails="true"\
-                    :containers="components"></context>\
+                    :contexts="components"></context>\
             </div>\
         </aside>',
 
@@ -49,12 +49,13 @@ Vue.component('sidebar', {
 
     mounted: function() {
 
-        this.handleClasses['fa-close'] = true;
-
         var _this = this;
+        _this.handleClasses['fa-close'] = true;
+        Cmint.Ui.componentList = _this.componentList;
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
+            Cmint.Ui.componentList = _this.componentList;
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {

@@ -33,7 +33,7 @@
 Cmint.createComponent = function(options) {
     if (!options.template) console.error('All components need a template');
     if (!options.config) console.error('All components need config options');
-    if (Cmint.Instance.Components[name]) {
+    if (Cmint.Instance.Components[options.config.name]) {
         console.error('Component "'+options.config.name+'" already exists')
     } else {
         if (!options.config.index) options.config.index = [];

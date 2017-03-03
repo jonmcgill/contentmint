@@ -12,12 +12,13 @@
 Cmint.Sync.getVmContextData = function(position, context) {
 
     var output,
+        _position = Cmint.Util.copyObject(position),
         _context = context;
 
-    position.shift();
+    _position.shift();
 
-    position.forEach(function(key, i) {
-        if (i === (position.length - 1)) {
+    _position.forEach(function(key, i) {
+        if (i === (_position.length - 1)) {
             output = {
                 context: _context,
                 index: key
