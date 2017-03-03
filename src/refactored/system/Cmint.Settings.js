@@ -10,7 +10,8 @@ Cmint.Settings = {
         context: 'Context',
         dataHook: 'data-hook',
         dataContext: 'data-context',
-        dataDisable: 'data-disable'
+        dataDisable: 'data-disable',
+        dataEdit: 'data-edit'
     },
 
     class: {
@@ -18,10 +19,15 @@ Cmint.Settings = {
         context: '.Context'
     },
 
+    id: {
+        components: '#Components'
+    },
+
     attr: {
         dataContext: '[data-context]',
         dataHook: '[data-hook]',
-        dataDisable: '[data-disable]'
+        dataDisable: '[data-disable]',
+        dataEdit: '[data-edit]'
     }
 
 }

@@ -80,7 +80,8 @@ Cmint.Settings = {
         context: 'Context',
         dataHook: 'data-hook',
         dataContext: 'data-context',
-        dataDisable: 'data-disable'
+        dataDisable: 'data-disable',
+        dataEdit: 'data-edit'
     },
 
     class: {
@@ -88,10 +89,15 @@ Cmint.Settings = {
         context: '.Context'
     },
 
+    id: {
+        components: '#Components'
+    },
+
     attr: {
         dataContext: '[data-context]',
         dataHook: '[data-hook]',
-        dataDisable: '[data-disable]'
+        dataDisable: '[data-disable]',
+        dataEdit: '[data-edit]'
     }
 
 }
@@ -122,6 +128,9 @@ Cmint.Util.debug = function(message) {
     if (Cmint.Settings.config.debug) {
         console.log('DEBUG: ' + message);
     }
+}
+Cmint.Util.random = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 Cmint.Util.Tests = [];
 
@@ -155,6 +164,16 @@ Cmint.Util.runTests = function() {
             }
         })
     }
+}
+Cmint.Util.uid = function(length) {
+    var id = 'ID-', i = 1;
+    while (i <= length) {
+        id += i % 2 === 0
+            ? String.fromCharCode(Cmint.Util.random(65, 90))
+            : String.fromCharCode(Cmint.Util.random(48, 57));
+        i++;
+    }
+    return id;
 }
 Cmint.Sync.fn = (function() {
     
@@ -570,7 +589,7 @@ Cmint.createToolbarButton({
         Cmint.Util.debug('Reverting most recent change');
     }
 })
-// The <comp> component is the meta component wrapper for all user defined
+
 // components.
 Vue.component('comp', {
 
@@ -589,7 +608,16 @@ Vue.component('comp', {
         )
     },
 
+    data: function(){return{
+        environment: null
+    }},
+
     mounted: function() {
+        $el = $(this.$el);
+        this.environment = $el.closest(Cmint.Settings.id.components).length
+            ? 'components'
+            : 'stage';
+        Cmint.Editor.init(this);
         Cmint.Util.debug('mounted <comp> "' + this.config.name + '"');
     }
 })
@@ -865,6 +893,77 @@ Vue.component('content-template', {
     }
 
 })
+Cmint.Editor.config = {
+    inline: true,
+    menubar: false,
+    insert_toolbar: false,
+    force_hex_style_colors: true,
+    fixed_toolbar_container: '#EditorToolbar',
+    plugins: 'link lists paste textpattern autolink charmap',
+    toolbar: 'bold italic alignleft aligncenter link bullist numlist superscript charmap',
+    forced_root_block: 'div'
+}
+Cmint.Editor.init = function(component) {
+
+    if (!component.config.content) return;
+
+    var editable = $(component.$el).find(Cmint.Settings.attr.dataEdit);
+
+    if ($(component.$el).attr(Cmint.Settings.attr.dataEdit) !== '') {
+        editable.push($(component.$el));
+    }
+
+    editable.each(function() {
+
+        var config = Cmint.Util.copyObject(Cmint.Editor.config),
+            editorUid = Cmint.Util.uid(10),
+            $this = $(this),
+            contentKey = $this.attr(Cmint.Settings.name.dataEdit),
+            stash;
+
+        $this.html(component.config.content[contentKey]);
+
+        if (component.environment === 'components') return false;
+
+        $this.attr('data-temp', editorUid);
+        config.selector = '[data-temp="'+editorUid+'"]';
+
+        config.init_instance_callback = function(editor) {
+            stash = editor.getContent();
+            editor.on('PostProcess', function(e) {
+                Cmint.Instance.Editor.PostProcesses.forEach(function(fn) {
+                    fn(e);
+                })
+            })
+        }
+
+        config.setup = function(editor) {
+            editor.on('Change keyup', _.debounce(function() {
+                if (component) {
+                    // Editor.runHook(component, 'editor');
+                    component.config.content[contentKey] = editor.getContent();
+                    Cmint.Bus.$emit('fieldProcessing');
+                    Cmint.Util.debug('updated content "'+contentKey+'" for ' + component.config.name);
+                }
+            }));
+            editor.on('focus', function() {
+                stash = editor.getContent();
+            });
+            editor.on('blur', function() {
+                if (!component.config.content) return;
+                if (component.config.content[contentKey] !== stash) {
+                    // Cmint.app.save();
+                    // Cmint.app.snapshot();
+                }
+            })
+            $this.removeAttr('data-temp');
+        }
+
+        tinymce.init(config);
+
+    })
+
+}
 Cmint.Util.runTests();
 
 Cmint.Init = function() {

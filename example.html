@@ -15,6 +15,7 @@
         :fieldsComponent="fieldsComponent" 
         :template="template"
         :stage="stage"></content-template>
+    <div id="EditorToolbar"></div>
 </div>
 
 
@@ -33,7 +34,7 @@
     })
 
     Cmint.createComponent({
-        template: '<comp :config="config">Lorem Ipsum Headingum</comp>',
+        template: '<comp :config="config" data-edit="text"></comp>',
         config: {
             name: 'heading',
             display: 'Heading',

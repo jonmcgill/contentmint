@@ -66,6 +66,9 @@ var refactored_files = [
     p('components/ui/ui.categories'),
     p('components/misc/misc.template'),
 
+    p('system/Editor/Editor.config'),
+    p('system/Editor/Editor.init'),
+
     p('system/Cmint.Init')
 
 ];

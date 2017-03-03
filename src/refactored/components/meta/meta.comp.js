@@ -1,4 +1,4 @@
-// The <comp> component is the meta component wrapper for all user defined
+
 // components.
 Vue.component('comp', {
 
@@ -17,7 +17,16 @@ Vue.component('comp', {
         )
     },
 
+    data: function(){return{
+        environment: null
+    }},
+
     mounted: function() {
+        $el = $(this.$el);
+        this.environment = $el.closest(Cmint.Settings.id.components).length
+            ? 'components'
+            : 'stage';
+        Cmint.Editor.init(this);
         Cmint.Util.debug('mounted <comp> "' + this.config.name + '"');
     }
 })
