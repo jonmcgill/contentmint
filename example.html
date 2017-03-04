@@ -21,12 +21,14 @@ TODO
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
+    <overlay></overlay>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     <actionbar></actionbar>
     <content-template 
         :fields-component="fieldsComponent" 
         :template="template"
-        :stage="stage"></content-template>
+        :stage="stage"
+        :class="{ scale: !!fieldsComponent }"></content-template>
 </div>
 
 
@@ -41,6 +43,14 @@ TODO
         iconClasses: { 'fa': true, 'fa-code': true },
         callback: function() {
             Cmint.Util.debug('get content code');
+        }
+    })
+
+    Cmint.createComponentHook('vertical-space', 'Global', function(element, event) {
+        if (event === 'editing') {
+            $(element).css({
+                'margin-bottom': '24px'
+            });
         }
     })
 

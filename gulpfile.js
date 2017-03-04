@@ -69,7 +69,9 @@ var refactored_files = [
     p('components/ui/ui.categories'),
     p('components/ui/ui.custom'),
     p('components/ui/ui.actionbar'),
+
     p('components/misc/misc.template'),
+    p('components/misc/misc.overlay'),
 
     p('system/Editor/Editor.config'),
     p('system/Editor/Editor.init'),

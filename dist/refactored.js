@@ -513,7 +513,7 @@ Cmint.createField = function(options) {
     if (!options.name) console.error('You must give all created fields a name');
     if (!options.config.type) console.error('You must give all created fields a field type');
     if (!options.config.label) console.error('You must give all created fields a label');
-    if (!options.config.input) console.error('You must associate all created fields with an input');
+    if (!options.config.input && !options.config.type === 'field-choice') console.error('You must associate all created fields with an input');
     
     if (Cmint.Instance.Fields.List[options.name]) {
         console.error('Field "'+options.name+'" already exists');
@@ -1115,6 +1115,29 @@ Vue.component('content-template', {
         this.$options.template = template;
     }
 
+})
+Vue.component('overlay', {
+    template: '<div id="Overlay"></div>',
+    data: function() {return{
+        isActive: false,
+        isVisible: false
+    }},
+    mounted: function() {
+        var _this = this;
+        var $el = $(this.$el);
+        this.$bus.$on('callComponentFields', function() {
+            $el.addClass('active');
+            setTimeout(function() {
+                $el.addClass('visible');
+            }, 20);
+        })
+        this.$bus.$on('closeFieldWidget', function() {
+            $el.removeClass('visible');
+            setTimeout(function() {
+                $el.removeClass('active');
+            }, 200);
+        })
+    }
 })
 Cmint.Editor.config = {
     inline: true,

@@ -21,7 +21,7 @@ Cmint.createField = function(options) {
     if (!options.name) console.error('You must give all created fields a name');
     if (!options.config.type) console.error('You must give all created fields a field type');
     if (!options.config.label) console.error('You must give all created fields a label');
-    if (!options.config.input) console.error('You must associate all created fields with an input');
+    if (!options.config.input && !options.config.type === 'field-choice') console.error('You must associate all created fields with an input');
     
     if (Cmint.Instance.Fields.List[options.name]) {
         console.error('Field "'+options.name+'" already exists');
