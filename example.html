@@ -11,9 +11,10 @@
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
+    <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     <actionbar></actionbar>
     <content-template 
-        :fieldsComponent="fieldsComponent" 
+        :fields-component="fieldsComponent" 
         :template="template"
         :stage="stage"></content-template>
 </div>
@@ -33,14 +34,32 @@
         }
     })
 
+    Cmint.createField({
+        name: 'color',
+        config: {
+            type: 'field-text',
+            display: 'Color',
+            label: 'Color',
+            input: 'color',
+            help: 'Any valid CSS color value'
+        }
+    })
+
     Cmint.createComponent({
-        template: '<comp :config="config" data-edit="text"></comp>',
+        template: '\
+            <comp :config="config">\
+                <h1 :style="{color:config.fields.output.color}" data-edit="text"></h1>\
+            </comp>',
         config: {
             name: 'heading',
             display: 'Heading',
             category: 'Content',
-            tags: { root: 'h1' },
-            content: { text: 'Lorem Ipsum Headingum' }
+            tokens: [{ 'text': 'text' }],
+            content: { text: 'Lorem Ipsum Headingum' },
+            fields: {
+                output: { color: 'red' },
+                list: [{ name: 'color', result: 'color' }]
+            }
         }
     })
 

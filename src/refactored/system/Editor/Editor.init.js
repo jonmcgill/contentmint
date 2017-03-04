@@ -3,8 +3,7 @@ Cmint.Editor.init = function(component) {
     if (!component.config.content) return;
 
     var editable = $(component.$el).find(Cmint.Settings.attr.dataEdit);
-
-    if ($(component.$el).attr(Cmint.Settings.attr.dataEdit) !== '') {
+    if ($(component.$el).attr(Cmint.Settings.name.dataEdit)) {
         editable.push($(component.$el));
     }
 

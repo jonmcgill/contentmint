@@ -1099,7 +1099,7 @@ Vue.component('actionbar', {
 })
 Vue.component('content-template', {
 
-    props: ['fieldsComponent', 'template', 'stage'],
+    props: ['fields-component', 'template', 'stage'],
 
     template: '',
 
@@ -1127,8 +1127,7 @@ Cmint.Editor.init = function(component) {
     if (!component.config.content) return;
 
     var editable = $(component.$el).find(Cmint.Settings.attr.dataEdit);
-
-    if ($(component.$el).attr(Cmint.Settings.attr.dataEdit) !== '') {
+    if ($(component.$el).attr(Cmint.Settings.name.dataEdit)) {
         editable.push($(component.$el));
     }
 
@@ -1316,6 +1315,217 @@ Cmint.Ui.removeComponent = function() {
     Cmint.App.save();
 
 }
+Cmint.Fields.processFieldText = function(instance) {
+
+    var fieldData = instance.fields[instance.field.name];
+    var input = instance.field.inputs[fieldData.input];
+
+    // tokenize
+    if (instance.component.tokens) {
+        input = Cmint.Fields.tokenize(input, instance.component);
+    }
+
+    // run check function
+    if (instance.field.check && input !== '') {
+        instance.pass = !!input.match(instance.field.check);
+        Cmint.Util.debug('field passed - ' + instance.pass);
+    }
+
+    // run user-defined field processes
+
+    // send to declared output
+    instance.component.fields.output[instance.field.result] = input;
+
+}
+Cmint.Fields.tokenize = function(input, component) {
+
+    var output = input;
+
+    if (!component.tokens) return output;
+
+    component.tokens.forEach(function(pair) {
+        var token = Object.keys(pair)[0];
+        var key = pair[token];
+        var exp = new RegExp('\\{\\{\\s*'+token+'\\s*\\}\\}', 'g');
+        var value, matches;
+
+        // searches content keys first
+        if (component.content && component.content[key]) {
+            value = component.content[key].replace(/<.+?>/g,'');
+        }
+
+        // searches fields.output keys next
+        else if (component.fields.output[key]) {
+            value = component.fields.output[key]
+        }
+
+        // finally searches through input keys
+        else {
+            component.fields.list.forEach(function(field) {
+                value = field.inputs[key] || value;
+            })
+        }
+
+        value = value || '';
+        matches = output.match(exp);
+        if (matches) {
+            output = output.replace(exp, value);
+            Cmint.Util.debug('tokenized {{ '+token+' }} => ' + value);
+        }
+
+    })
+
+    return output;
+}
+Vue.component('field-text', {
+
+    props: ['field', 'component'],
+
+    template:'\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div class="field-input-wrap">\
+                <input type="text" v-model="field.inputs[fields[field.name].input]" @input="process()" />\
+                <div class="field-help" v-if="field.help" :style="check">{{ field.help }}</div>\
+            </div>\
+        </div>',
+
+    data: function() { return {
+        fields: Cmint.Instance.Fields.List,
+        pass: true
+    }},
+
+    computed: {
+        check: function() {
+            return this.pass ? {'color': 'rgba(0,0,0,0.4)'} : {'color': '#E57373'};
+        }
+    },
+
+    methods: {
+        process: _.debounce(function() {
+            Cmint.Fields.processFieldText(this);
+        }, 500)
+    },
+
+    mounted: function() {
+        var _this = this;
+        Cmint.Fields.processFieldText(_this);
+        Cmint.Bus.$on('fieldProcessing', function() {
+            Cmint.Fields.processFieldText(_this);
+            Cmint.Util.debug('processed field "'+_this.field.name+'" after tinymce editing');
+        })
+        Cmint.Util.debug('mounted <field> "'+this.field.name+'"');
+    }
+
+})
+Vue.component('field', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-wrap">\
+            <component :is="field.type" :field="field" :component="component"></component>\
+        </div>',
+    beforeMount: function() {
+        // result = default output listed in components
+        var result = this.component.fields.output[this.field.result];
+
+        // field instances aren't components; they're object literals passed to field components
+        var fieldData = Cmint.Instance.Fields.List[this.field.name];
+
+        this.field.label = fieldData.label;
+        this.field.type = fieldData.type;
+        this.field.display = fieldData.display;
+        this.field.menu = fieldData.menu || null;
+        this.field.choices = fieldData.choices || null;
+        this.field.help = fieldData.help || null;
+        this.field.check = fieldData.check || null;
+        this.field.hook = fieldData.hook || null;
+        
+        // if no inputs, this is the first instantiation of this field for a given component.
+        // inputs are established based on the defaults provided to the fieldData and the components
+        if (!this.field.inputs) {
+            this.field.inputs = {};
+            // If text input, make the input equal the default result
+            if (this.field.type === 'field-text') {
+                this.field.inputs[fieldData.input] = result;
+            }
+            // If dropdown, make the input equal 'Default' selection
+            if (this.field.type === 'field-dropdown') {
+                this.field.inputs[fieldData.input] = 'Default';
+            }
+            // If field group, cycle through and add to inputs
+            if (this.field.type === 'field-group') {
+                if (!this.field.hook) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated hook';
+                var inputs = this.field.inputs;
+                fieldData.input.forEach(function(inp) {
+                    inputs[inp.name] = { label: inp.label, type: inp.type, value: '' };
+                })
+            }
+        }
+
+    }
+})
+Vue.component('fields', {
+    props: ['component'],
+    template: '\
+        <div :class="wrapClasses">\
+            <div class="fields-top">\
+                <button class="fields-close-btn" @click="close">\
+                    <i class="fa fa-chevron-left"></i>Done\
+                </button>\
+                <div class="fields-header">{{ component.display }}</div>\
+                <div class="field-tokens" v-if="component.tokens">\
+                    <i class="fa fa-question-circle-o"></i>\
+                    <span>Tokens: </span><span class="token-wrap" v-html="tokens"></span>\
+                </div>\
+            </div>\
+            <div class="field-list">\
+                <field v-for="field in component.fields.list" :field="field" :component="component" :key="field.id"></field>\
+            </div>\
+        </div>',
+    data: function(){return {
+        isActive: false
+    }},
+    computed: {
+        wrapClasses: function() {
+            return {
+                'cmint': true,
+                'fields-container': true,
+                'active': this.isActive
+            }
+        },
+        tokens: function() {
+            return this.component.tokens.map(function(pair) {
+                return '<span>{{ '+ Object.keys(pair)[0] + ' }}</span>';
+            }).join(', ');
+        }
+    },
+    methods: {
+        open: function() {
+            var _this = this;
+            setTimeout(function() {
+                _this.isActive = true;
+            },50);
+        },
+        close: function() {
+            var _this = this;
+            setTimeout(function() {
+                _this.isActive = false;
+                _this.$bus.$emit('closeFieldWidget');
+                setTimeout(function() {
+                    Cmint.App.fieldsComponent = null;
+                    Vue.nextTick(Cmint.App.snapshot);
+                    Cmint.App.save();
+                },200)
+                Cmint.Util.debug('closed field wiget');
+            },50);
+            
+        }
+    },
+    mounted: function() {
+        this.open();
+        Cmint.Util.debug('opened fields for "' + this.component.name + '"');
+    }
+})
 Cmint.Drag.fn = (function(){
 
     function updateContainers() {
@@ -1593,24 +1803,7 @@ Cmint.Init = function() {
             username: 'mcgilljo',
             contentName: 'My Content Name',
             // For testing = UserData.customComponents['templateName']
-            customComponents: [
-                {
-                    name: 'container',
-                    display: 'My Component',
-                    category: 'Blocks',
-                    contexts: {
-                        container: [
-                            {
-                                name: 'heading',
-                                display: 'Heading',
-                                category: 'Content',
-                                tags: { root: 'h1' },
-                                content: { text: 'Custom Article Title in Container' }
-                            }
-                        ]
-                    }
-                }
-            ],
+            customComponents: [],
             
             // Contexts
             stage: [],
@@ -1619,8 +1812,12 @@ Cmint.Init = function() {
                     name: 'heading',
                     display: 'Heading',
                     category: 'Content',
-                    tags: { root: 'h1' },
-                    content: { text: 'Lorem Ipsum Headingum' }
+                    tokens: [{'text': 'text'}],
+                    content: { text: 'Lorem Ipsum Headingum' },
+                    fields: {
+                        output: { color: 'red' },
+                        list: [{ name: 'color', result: 'color' }]
+                    }
                 },
                 {
                     name: 'container',
@@ -1659,6 +1856,10 @@ Cmint.Init = function() {
         },
 
         mounted: function() {
+            var _this = this;
+            this.$bus.$on('callComponentFields', function() {
+                _this.fieldsComponent = _this.activeComponent.config;
+            })
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
             Cmint.Bus.setSelectedCategory(this);

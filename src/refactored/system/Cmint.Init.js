@@ -15,24 +15,7 @@ Cmint.Init = function() {
             username: 'mcgilljo',
             contentName: 'My Content Name',
             // For testing = UserData.customComponents['templateName']
-            customComponents: [
-                {
-                    name: 'container',
-                    display: 'My Component',
-                    category: 'Blocks',
-                    contexts: {
-                        container: [
-                            {
-                                name: 'heading',
-                                display: 'Heading',
-                                category: 'Content',
-                                tags: { root: 'h1' },
-                                content: { text: 'Custom Article Title in Container' }
-                            }
-                        ]
-                    }
-                }
-            ],
+            customComponents: [],
             
             // Contexts
             stage: [],
@@ -41,8 +24,12 @@ Cmint.Init = function() {
                     name: 'heading',
                     display: 'Heading',
                     category: 'Content',
-                    tags: { root: 'h1' },
-                    content: { text: 'Lorem Ipsum Headingum' }
+                    tokens: [{'text': 'text'}],
+                    content: { text: 'Lorem Ipsum Headingum' },
+                    fields: {
+                        output: { color: 'red' },
+                        list: [{ name: 'color', result: 'color' }]
+                    }
                 },
                 {
                     name: 'container',
@@ -81,6 +68,10 @@ Cmint.Init = function() {
         },
 
         mounted: function() {
+            var _this = this;
+            this.$bus.$on('callComponentFields', function() {
+                _this.fieldsComponent = _this.activeComponent.config;
+            })
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
             Cmint.Bus.setSelectedCategory(this);

@@ -76,6 +76,11 @@ var refactored_files = [
     p('system/Editor/Editor.init'),
 
     p('system/Ui/*'),
+    p('system/Fields/*'),
+    
+    p('components/fields/fields.text'),
+    p('components/fields/fields.field'),
+    p('components/fields/fields.fields'),
 
     p('system/Drag/Drag.fn'),
     p('system/Drag/Drag.onDrag'),

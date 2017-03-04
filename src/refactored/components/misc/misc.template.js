@@ -1,6 +1,6 @@
 Vue.component('content-template', {
 
-    props: ['fieldsComponent', 'template', 'stage'],
+    props: ['fields-component', 'template', 'stage'],
 
     template: '',
 
