@@ -24,11 +24,16 @@ Cmint.Init = function() {
                     name: 'heading',
                     display: 'Heading',
                     category: 'Content',
-                    tokens: [{'text': 'text'}],
-                    content: { text: 'Lorem Ipsum Headingum' },
+                    tokens: [{'text': 'text'}, {'bg': 'bg'}],
+                    content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
                     fields: {
-                        output: { color: 'red' },
-                        list: [{ name: 'color', result: 'color' }]
+                        output: { color: 'red', bg: '', padding: '', href: '' },
+                        list: [
+                            { name: 'color', result: 'color' },
+                            { name: 'bg-color', result: 'bg' },
+                            { name: 'padding', result: 'padding' },
+                            { name: 'link-choice', result: 'href' }
+                        ]
                     }
                 },
                 {

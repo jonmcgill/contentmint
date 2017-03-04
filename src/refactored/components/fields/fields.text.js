@@ -28,6 +28,10 @@ Vue.component('field-text', {
         }, 500)
     },
 
+    beforeMount: function() {
+        Cmint.Fields.watchOutputUpdates(this);
+    },
+
     mounted: function() {
         var _this = this;
         Cmint.Fields.processFieldText(_this);

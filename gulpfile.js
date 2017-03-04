@@ -60,7 +60,6 @@ var refactored_files = [
     p('system/Sync/Sync.rearrangeVmContextData'),
     p('system/Sync/Sync.removeVmContextData'),
     
-
     p('system/Api/*'),
 
     p('components/meta/meta.comp'),
@@ -79,6 +78,9 @@ var refactored_files = [
     p('system/Fields/*'),
     
     p('components/fields/fields.text'),
+    p('components/fields/fields.dropdown'),
+    p('components/fields/fields.group'),
+    p('components/fields/fields.choice'),
     p('components/fields/fields.field'),
     p('components/fields/fields.fields'),
 

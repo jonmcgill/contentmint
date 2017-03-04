@@ -54,6 +54,10 @@ Vue.component('comp', {
 
     },
 
+    created: function() {
+        Cmint.Fields.setOutputWatch(this);
+    },
+
     mounted: function() {
         this.run('mounted');
     },

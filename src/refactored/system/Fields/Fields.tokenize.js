@@ -2,7 +2,7 @@ Cmint.Fields.tokenize = function(input, component) {
 
     var output = input;
 
-    if (!component.tokens) return output;
+    if (!component.tokens || !output) return output;
 
     component.tokens.forEach(function(pair) {
         var token = Object.keys(pair)[0];

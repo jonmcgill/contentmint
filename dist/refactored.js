@@ -681,6 +681,10 @@ Vue.component('comp', {
 
     },
 
+    created: function() {
+        Cmint.Fields.setOutputWatch(this);
+    },
+
     mounted: function() {
         this.run('mounted');
     },
@@ -1327,21 +1331,48 @@ Cmint.Fields.processFieldText = function(instance) {
 
     // run check function
     if (instance.field.check && input !== '') {
+        console.log(instance.field);
         instance.pass = !!input.match(instance.field.check);
         Cmint.Util.debug('field passed - ' + instance.pass);
     }
 
     // run user-defined field processes
+    if (instance.field.processes) {
+        instance.field.processes.forEach(function(fn) {
+            input = Cmint.Instance.Fields.Processes[fn](input);
+            Cmint.Util.debug('ran "'+fn+'" field process')
+        })
+    }
 
     // send to declared output
     instance.component.fields.output[instance.field.result] = input;
+
+}
+Cmint.Fields.setOutputWatch = function(component) {
+
+    if (component.config.tokens) {
+        component.$options.watch = {};
+        component.config.tokens.forEach(function(token) {
+            var source = token[Object.keys(token)[0]];
+            component.$watch(
+                function() {
+                    if (component.config.fields) {
+                        return component.config.fields.output[source];
+                    }
+                },
+                function(newVal, oldVal) {
+                    Cmint.Bus.$emit('outputUpdate', source);
+                }
+            )
+        })
+    }
 
 }
 Cmint.Fields.tokenize = function(input, component) {
 
     var output = input;
 
-    if (!component.tokens) return output;
+    if (!component.tokens || !output) return output;
 
     component.tokens.forEach(function(pair) {
         var token = Object.keys(pair)[0];
@@ -1377,6 +1408,13 @@ Cmint.Fields.tokenize = function(input, component) {
 
     return output;
 }
+Cmint.Fields.watchOutputUpdates = function(fieldComponent) {
+    fieldComponent.$bus.$on('outputUpdate', function(output) {
+        if (output !== fieldComponent.field.result) {
+            fieldComponent.process();
+        }
+    })
+}
 Vue.component('field-text', {
 
     props: ['field', 'component'],
@@ -1407,6 +1445,10 @@ Vue.component('field-text', {
         }, 500)
     },
 
+    beforeMount: function() {
+        Cmint.Fields.watchOutputUpdates(this);
+    },
+
     mounted: function() {
         var _this = this;
         Cmint.Fields.processFieldText(_this);
@@ -1417,6 +1459,200 @@ Vue.component('field-text', {
         Cmint.Util.debug('mounted <field> "'+this.field.name+'"');
     }
 
+})
+Vue.component('field-dropdown', {
+
+    props: ['field', 'component'],
+
+    template: '\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div :class="{dropdown:true, active:toggle}">\
+                <button @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </button>\
+                <div class="dropdown-list">\
+                    <button v-for="(item, key) in menu"\
+                            v-text="key"\
+                            @click="process(key); toggle = !toggle"></button>\
+                </div>\
+            </div>\
+        </div>',
+
+    data: function() { return {
+        fields: Cmint.Instance.Fields.List,
+        menu: Cmint.Instance.Menus[this.field.menu],
+        selected: 'Default',
+        toggle: false
+    }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true, 'fa-chevron-left': !this.toggle, 'fa-chevron-down': this.toggle
+            }
+        }
+    },
+    methods: {
+        process: function(selection) {
+            var _menus = Cmint.Instance.Menus;
+            var _fields = Cmint.Instance.Fields.List;
+            var _processes = Cmint.Instance.Fields.Processes;
+            var _this = this;
+            var output = _menus[this.field.menu][selection];
+            if (this.field.processes) {
+                this.field.processes.forEach(function(fn) {
+                    output = _processes[fn](output, this.component, this.field);
+                })
+            }
+            this.field.inputs[_fields[this.field.name].input] = selection;
+            this.selected = selection;
+            this.component.fields.output[this.field.result] = output;
+        }
+    },
+    beforeMount: function() {
+        this.selected = this.field.inputs[this.fields[this.field.name].input] || 'Default';
+        this.process(this.selected);
+    },
+    mounted: function() {
+        var _this = this;
+        _this.$bus.$on('closeDropdown', function() {
+            _this.toggle = false;
+        })
+    }
+})
+Vue.component('field-group', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-instance">\
+            <label>{{ field.label }}</label>\
+            <div class="field-group-wrap">\
+                <div class="field-group-input" v-for="(inp, key) in field.inputs">\
+                    <label>{{ firstUppercase(key) }}</label>\
+                    <input type="text" v-if="inp.type === \'input\'"\
+                        v-model="field.inputs[key].value"\
+                        @keyup="process()"\
+                        :placeholder="inp.label" />\
+                    <textarea v-else-if="inp.type === \'textarea\'"\
+                        v-model="field.inputs[key].value"\
+                        @keyup="process()"\
+                        :placeholder="inp.label"></textarea>\
+                </div>\
+            </div>\
+        </div>',
+    data: function() { return {
+        fields: Cmint.Instance.Fields.List
+    }},
+    methods: {
+        process: function() {
+            var output,
+                _this = this,
+                _processes = Cmint.Instance.Fields.Processes;
+            if (_this.field.processes) {
+                _this.field.processes.forEach(function(fn) {
+                    output = _processes[fn](_this.field.inputs, _this.component)
+                })
+            } else {
+                console.error('Field groups must have associated processes');
+            }
+            this.component.fields.output[this.field.result] = output;
+        },
+        firstUppercase: function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.replace(/^./,'');
+        }
+    },
+    beforeMount: function() {
+        Cmint.Fields.watchOutputUpdates(this);
+    },
+    mounted: function() {
+        var _this = this;
+        Cmint.Bus.$on('fieldProcessing', function() {
+            _this.process();
+            Cmint.Util.debug('processed field "'+_this.field.name+'" after tinymce editing');
+        });
+    }
+})
+Vue.component('field-choice', {
+    props: ['field', 'component'],
+    template: '\
+        <div class="field-instance field-choice-container">\
+            <label class="field-choice-label">{{ field.label }}</label>\
+            <div :class="{\'field-choice-wrap\':true, active: toggle}">\
+                <div class="field-selected" @click="toggle = !toggle">\
+                    <span>{{ selected }}</span><i :class="chevron"></i>\
+                </div>\
+                <div class="field-choices">\
+                    <div v-for="choice in field.choices"\
+                         v-text="displayName(choice)"\
+                         @click="process(choice)"></div>\
+                </div>\
+            </div>\
+            <div class="field-selected-field-wrap" v-if="selected !== \'None\'">\
+                <field :field="selectionData" :component="component"></field>\
+            </div>\
+        </div>',
+    data: function() { return {
+        toggle: false,
+        fields: Cmint.Instance.Fields.List,
+        selected: this.field.selected || 'None',
+        selectionData: this.field.selectionData || null,
+        selectedFieldData: this.field.selectedFieldData || null
+    }},
+    computed: {
+        chevron: function() {
+            return {
+                'fa': true,
+                'fa-chevron-left': !this.toggle,
+                'fa-chevron-down': this.toggle
+            }
+        }
+    },
+    methods: {
+        displayName: function(choice) {
+            if (choice === 'None') {
+                return 'None';
+            } else {
+                return this.fields[choice.name].display;
+            }
+        },
+        process: function(selection) {
+            var _this = this;
+            var _fields = Cmint.Instance.Fields.List;
+            _this.toggle = false;
+            _this.selectionData = null;
+            _this.selectedFieldData = null;
+            _this.selected = 'None';
+
+            _this.field.selected = _this.selected;
+            _this.field.selectionData = _this.selectionData;
+            _this.field.selectedFieldData = _this.selectedFieldData;
+
+            Vue.nextTick(function() {
+                if (selection !== 'None') {
+                    var data = Cmint.Util.copyObject(selection);
+                    data.result = _this.field.result;
+                    _this.selectionData = data;
+                    _this.selectedFieldData = _fields[_this.selectionData.name];
+                    _this.selected = _this.selectedFieldData.display;
+
+                    _this.field.selected = _this.selected;
+                    _this.field.selectionData = _this.selectionData;
+                    _this.field.selectedFieldData = _this.selectedFieldData;
+                }
+                Cmint.Util.debug('field chosen: ' + _this.selected);
+            })
+        }
+    },
+    mounted: function() {
+        var _this = this;
+        this.$bus.$on('closeFieldChoice', function() {
+            _this.toggle = false;
+        })
+    },
+    beforeMount: function() {
+        if (this.field.choices[0] !== 'None') {
+            this.field.choices.splice(0, 0, 'None');
+        }
+    }
 })
 Vue.component('field', {
     props: ['field', 'component'],
@@ -1438,7 +1674,7 @@ Vue.component('field', {
         this.field.choices = fieldData.choices || null;
         this.field.help = fieldData.help || null;
         this.field.check = fieldData.check || null;
-        this.field.hook = fieldData.hook || null;
+        this.field.processes = fieldData.processes || null;
         
         // if no inputs, this is the first instantiation of this field for a given component.
         // inputs are established based on the defaults provided to the fieldData and the components
@@ -1454,7 +1690,7 @@ Vue.component('field', {
             }
             // If field group, cycle through and add to inputs
             if (this.field.type === 'field-group') {
-                if (!this.field.hook) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated hook';
+                if (!this.field.processes) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated processes';
                 var inputs = this.field.inputs;
                 fieldData.input.forEach(function(inp) {
                     inputs[inp.name] = { label: inp.label, type: inp.type, value: '' };
@@ -1812,11 +2048,16 @@ Cmint.Init = function() {
                     name: 'heading',
                     display: 'Heading',
                     category: 'Content',
-                    tokens: [{'text': 'text'}],
-                    content: { text: 'Lorem Ipsum Headingum' },
+                    tokens: [{'text': 'text'}, {'bg': 'bg'}],
+                    content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
                     fields: {
-                        output: { color: 'red' },
-                        list: [{ name: 'color', result: 'color' }]
+                        output: { color: 'red', bg: '', padding: '', href: '' },
+                        list: [
+                            { name: 'color', result: 'color' },
+                            { name: 'bg-color', result: 'bg' },
+                            { name: 'padding', result: 'padding' },
+                            { name: 'link-choice', result: 'href' }
+                        ]
                     }
                 },
                 {

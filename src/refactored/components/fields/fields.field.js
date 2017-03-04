@@ -18,7 +18,7 @@ Vue.component('field', {
         this.field.choices = fieldData.choices || null;
         this.field.help = fieldData.help || null;
         this.field.check = fieldData.check || null;
-        this.field.hook = fieldData.hook || null;
+        this.field.processes = fieldData.processes || null;
         
         // if no inputs, this is the first instantiation of this field for a given component.
         // inputs are established based on the defaults provided to the fieldData and the components
@@ -34,7 +34,7 @@ Vue.component('field', {
             }
             // If field group, cycle through and add to inputs
             if (this.field.type === 'field-group') {
-                if (!this.field.hook) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated hook';
+                if (!this.field.processes) throw 'ERROR at '+this.field.name+': All field-group fields must have an associated processes';
                 var inputs = this.field.inputs;
                 fieldData.input.forEach(function(inp) {
                     inputs[inp.name] = { label: inp.label, type: inp.type, value: '' };
