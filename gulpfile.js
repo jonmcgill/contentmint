@@ -49,6 +49,7 @@ var refactored_files = [
     p('system/Cmint.Setup'),
     p('system/Cmint.Settings'),
     p('system/Bus/Bus.setup'),
+    p('system/Bus/Bus.setSelectedCategory'),
     p('system/Util/*'),
 
     p('system/Sync/Sync.fn'),
@@ -75,8 +76,6 @@ var refactored_files = [
     p('system/Editor/Editor.init'),
 
     p('system/Ui/*'),
-    // p('system/Ui/Ui.')
-    // p('system/Ui/Ui.actionbarHandler'),
 
     p('system/Drag/Drag.fn'),
     p('system/Drag/Drag.onDrag'),

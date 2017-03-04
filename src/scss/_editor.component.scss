@@ -8,3 +8,10 @@
         box-shadow: 0 0 16px $color-accent;
     }
 }
+
+*#Stage.active,
+*.Component.active {
+    position: relative;
+    outline: 2px solid $color-accent !important;
+    box-shadow: 0 0 16px $color-accent;
+}

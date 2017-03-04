@@ -121,6 +121,14 @@ Object.defineProperties(Vue.prototype, {
         }
     }
 })
+Cmint.Bus.setSelectedCategory = function(data) {
+
+    Cmint.Bus.$on('selectedCategory', function(selection) {
+        data.selectedCategory = selection;
+        Cmint.Util.debug('selected the category "'+selection+'"');
+    })
+
+}
 // Returns boolean if a (element) contains b (element). This is used in our
 // dragging feature because dragula does not like it when you drag a component
 // into itself.
@@ -456,7 +464,7 @@ Cmint.createComponent = function(options) {
         console.error('Component "'+options.config.name+'" already exists')
     } else {
         if (!options.config.index) options.config.index = [];
-        Cmint.Instance.Components[name] = options.config;
+        Cmint.Instance.Components[options.config.name] = options.config;
         Vue.component(options.config.name, {
             props: ['config'],
             template: options.template
@@ -751,7 +759,7 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-        isActive: false
+        isActive: true
 
     }},
 
@@ -830,7 +838,7 @@ Vue.component('sidebar', {
 
     data: function(){return{
 
-        isActive: false,
+        isActive: true,
         componentList: this.components
 
     }},
@@ -844,10 +852,7 @@ Vue.component('sidebar', {
                 classes['fa-bars'] = true;
             }
             return classes;
-        },
-        // componentList: function() {
-        //     return this.components;
-        // }
+        }
     },
 
     methods: {
@@ -867,13 +872,11 @@ Vue.component('sidebar', {
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
-            console.log(_this.componentList);
             Cmint.Ui.componentList = _this.componentList;
         })
 
-        _this.$bus.$on('updateComponentList', function(listing) {
-
-            _this.componentList = listing;
+        _this.$bus.$on('updateComponentList', function(newComponent) {
+            _this.componentList.push(newComponent);
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {
@@ -918,6 +921,7 @@ Vue.component('categories', {
                     return comp.category === item;
                 })
             }
+            this.$bus.$emit('selectedCategory', item);
             this.$bus.$emit('filteredCategories', filtered);
         }
     },
@@ -961,7 +965,7 @@ Vue.component('custom', {
         <div class="custom-add-wrap">\
             <span>Custom Component Information</span>\
             <input type="text" v-model="name" placeholder="Component name" />\
-            <input type="text" v-model="category" placeholder="Component category" />\
+            <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" />\
             <button @click="addComponent">Save Component</button>\
             <div class="nameError" v-if="nameError">{{nameError}}</div>\
         </div>',
@@ -994,18 +998,16 @@ Vue.component('custom', {
                 comp.display = this.name;
                 comp.category = this.category || 'Custom';
                 Cmint.App.components.push(comp);
+                if (comp.category === Cmint.App.selectedCategory) {
+                    this.$bus.$emit('updateComponentList', comp);
+                }
                 Cmint.Util.debug('added "' + this.name + '" ('+this.category+') in template "'+Cmint.App.templateName+'"');
-                this.$bus.$emit('updateComponentList', Cmint.App.components);
                 this.$bus.$emit('closeNewComp');
             } else {
                 this.nameError = 'Name already exists';
                 this.name = '';
             }
         }
-    },
-
-    mounted: function() {
-        console.log('mounted new component modal')
     }
 
 })
@@ -1017,7 +1019,7 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
-            <button class="actionbar-new" @click="newComponent">\
+            <button class="actionbar-new" @click="callCustomModal">\
                 <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
@@ -1050,42 +1052,15 @@ Vue.component('actionbar', {
     methods: {
 
         trashComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-
-            position.context.splice(position.index, 1);
-
-            // Vue.nextTick(Cmint.app.refresh);
-            // Vue.nextTick(Drag.updateContainers);
-            Vue.nextTick(Cmint.App.snapshot);
-            // Cmint.app.save();
-
-            this.$bus.$emit('closeActionBar');
-            Cmint.Util.debug('trashed ' + comp.config.name + '[' + comp.config.index + ']');
+            Cmint.Ui.removeComponent();
         },
 
         copyComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-            var clone = Cmint.Util.copyObject(position.context[position.index])
-
-            position.context.splice(position.index + 1, 0, clone);
-
-            // Vue.nextTick(Cmint.app.refresh);
-            // Vue.nextTick(Drag.updateContainers);
-            Vue.nextTick(Cmint.App.snapshot);
-            // Cmint.app.save();
-
-            this.$bus.$emit('closeActionBar');
-            Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
+            Cmint.Ui.copyComponent();
         },
 
-        newComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-            var clone = Cmint.Util.copyObject(position.context[position.index]);
-            this.focused = clone;
-            this.newComp = !this.newComp;
+        callCustomModal: function() {
+            Cmint.Ui.callCustomModal(this);
         },
 
         callFields: function() {
@@ -1254,6 +1229,16 @@ Cmint.Ui.actionbarHandler = function(component) {
     })
 
 }
+Cmint.Ui.callCustomModal = function(data) {
+
+    var comp = Cmint.App.activeComponent;
+    var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+    var clone = Cmint.Util.copyObject(position.context[position.index]);
+    
+    data.focused = clone;
+    data.newComp = !data.newComp;
+
+}
 Cmint.Ui.contextualize = function() {
 
     Cmint.Bus.$on('contextualize', function() {
@@ -1261,6 +1246,21 @@ Cmint.Ui.contextualize = function() {
         Cmint.App.contextualize = !Cmint.App.contextualize;
 
     })
+
+}
+Cmint.Ui.copyComponent = function() {
+
+    var comp = Cmint.App.activeComponent;
+    var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+    var clone = Cmint.Util.copyObject(position.context[position.index])
+
+    position.context.splice(position.index + 1, 0, clone);
+    Vue.nextTick(Cmint.Drag.updateContainers);
+    Vue.nextTick(Cmint.App.snapshot);
+
+    Cmint.Bus.$emit('closeActionBar');
+    Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
+    Cmint.App.save();
 
 }
 Cmint.Ui.documentHandler = function() {
@@ -1300,6 +1300,20 @@ Cmint.Ui.documentHandler = function() {
         }
 
     })
+
+}
+Cmint.Ui.removeComponent = function() {
+
+    var comp = Cmint.App.activeComponent;
+    var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
+
+    position.context.splice(position.index, 1);
+    Vue.nextTick(Cmint.Drag.updateContainers);
+    Vue.nextTick(Cmint.App.snapshot);
+
+    Cmint.Bus.$emit('closeActionBar');
+    Cmint.Util.debug('removed "' + comp.config.name + '" [' + comp.config.index + ']');
+    Cmint.App.save();
 
 }
 Cmint.Drag.fn = (function(){
@@ -1493,12 +1507,12 @@ Cmint.Drag.init = function() {
     })
 
 }
-Cmint.AppFn.mergeCustomComponents = function() {
+Cmint.AppFn.mergeCustomComponents = function(data) {
     
-    if (this.customComponents.length > 0) {
+    if (data.customComponents.length > 0) {
 
-        this.components = this.components.concat(this.customComponents);
-        Cmint.Bus.$emit('updateComponentList', this.components);
+        data.components = data.components.concat(data.customComponents);
+        Cmint.Bus.$emit('updateComponentList', data.components);
 
     }
 
@@ -1622,6 +1636,7 @@ Cmint.Init = function() {
             activeComponent: null,
             fieldsComponent: null,
             componentList: null,
+            selectedCategory: 'All',
 
             // Introspection
             contextualize: false,
@@ -1633,18 +1648,20 @@ Cmint.Init = function() {
 
         methods: {
 
-            // callFields: null
             save: Cmint.AppFn.save,
             snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo,
-            mergeCustom: Cmint.AppFn.mergeCustomComponents
+            undo: Cmint.AppFn.undo
 
         },
 
+        created: function() {
+            Cmint.AppFn.mergeCustomComponents(this);
+        },
+
         mounted: function() {
-            this.mergeCustom();
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
+            Cmint.Bus.setSelectedCategory(this);
             Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }

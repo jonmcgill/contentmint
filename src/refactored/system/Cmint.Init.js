@@ -58,6 +58,7 @@ Cmint.Init = function() {
             activeComponent: null,
             fieldsComponent: null,
             componentList: null,
+            selectedCategory: 'All',
 
             // Introspection
             contextualize: false,
@@ -69,18 +70,20 @@ Cmint.Init = function() {
 
         methods: {
 
-            // callFields: null
             save: Cmint.AppFn.save,
             snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo,
-            mergeCustom: Cmint.AppFn.mergeCustomComponents
+            undo: Cmint.AppFn.undo
 
         },
 
+        created: function() {
+            Cmint.AppFn.mergeCustomComponents(this);
+        },
+
         mounted: function() {
-            this.mergeCustom();
             Cmint.Ui.documentHandler();
             Cmint.Ui.contextualize();
+            Cmint.Bus.setSelectedCategory(this);
             Cmint.Drag.init();
             Cmint.Util.debug('mounted application');
         }

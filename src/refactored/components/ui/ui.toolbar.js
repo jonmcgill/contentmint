@@ -23,7 +23,7 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-        isActive: false
+        isActive: true
 
     }},
 

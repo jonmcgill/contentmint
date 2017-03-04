@@ -1,9 +1,9 @@
-Cmint.AppFn.mergeCustomComponents = function() {
+Cmint.AppFn.mergeCustomComponents = function(data) {
     
-    if (this.customComponents.length > 0) {
+    if (data.customComponents.length > 0) {
 
-        this.components = this.components.concat(this.customComponents);
-        Cmint.Bus.$emit('updateComponentList', this.components);
+        data.components = data.components.concat(data.customComponents);
+        Cmint.Bus.$emit('updateComponentList', data.components);
 
     }
 

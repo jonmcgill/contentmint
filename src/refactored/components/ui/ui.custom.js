@@ -6,7 +6,7 @@ Vue.component('custom', {
         <div class="custom-add-wrap">\
             <span>Custom Component Information</span>\
             <input type="text" v-model="name" placeholder="Component name" />\
-            <input type="text" v-model="category" placeholder="Component category" />\
+            <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" />\
             <button @click="addComponent">Save Component</button>\
             <div class="nameError" v-if="nameError">{{nameError}}</div>\
         </div>',
@@ -39,18 +39,16 @@ Vue.component('custom', {
                 comp.display = this.name;
                 comp.category = this.category || 'Custom';
                 Cmint.App.components.push(comp);
+                if (comp.category === Cmint.App.selectedCategory) {
+                    this.$bus.$emit('updateComponentList', comp);
+                }
                 Cmint.Util.debug('added "' + this.name + '" ('+this.category+') in template "'+Cmint.App.templateName+'"');
-                this.$bus.$emit('updateComponentList', Cmint.App.components);
                 this.$bus.$emit('closeNewComp');
             } else {
                 this.nameError = 'Name already exists';
                 this.name = '';
             }
         }
-    },
-
-    mounted: function() {
-        console.log('mounted new component modal')
     }
 
 })

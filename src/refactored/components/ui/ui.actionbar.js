@@ -6,7 +6,7 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
-            <button class="actionbar-new" @click="newComponent">\
+            <button class="actionbar-new" @click="callCustomModal">\
                 <i class="fa fa-plus"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
@@ -39,42 +39,15 @@ Vue.component('actionbar', {
     methods: {
 
         trashComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-
-            position.context.splice(position.index, 1);
-
-            // Vue.nextTick(Cmint.app.refresh);
-            // Vue.nextTick(Drag.updateContainers);
-            Vue.nextTick(Cmint.App.snapshot);
-            // Cmint.app.save();
-
-            this.$bus.$emit('closeActionBar');
-            Cmint.Util.debug('trashed ' + comp.config.name + '[' + comp.config.index + ']');
+            Cmint.Ui.removeComponent();
         },
 
         copyComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-            var clone = Cmint.Util.copyObject(position.context[position.index])
-
-            position.context.splice(position.index + 1, 0, clone);
-
-            // Vue.nextTick(Cmint.app.refresh);
-            // Vue.nextTick(Drag.updateContainers);
-            Vue.nextTick(Cmint.App.snapshot);
-            // Cmint.app.save();
-
-            this.$bus.$emit('closeActionBar');
-            Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
+            Cmint.Ui.copyComponent();
         },
 
-        newComponent: function() {
-            var comp = Cmint.App.activeComponent;
-            var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
-            var clone = Cmint.Util.copyObject(position.context[position.index]);
-            this.focused = clone;
-            this.newComp = !this.newComp;
+        callCustomModal: function() {
+            Cmint.Ui.callCustomModal(this);
         },
 
         callFields: function() {

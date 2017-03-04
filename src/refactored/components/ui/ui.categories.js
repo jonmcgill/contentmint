@@ -31,6 +31,7 @@ Vue.component('categories', {
                     return comp.category === item;
                 })
             }
+            this.$bus.$emit('selectedCategory', item);
             this.$bus.$emit('filteredCategories', filtered);
         }
     },

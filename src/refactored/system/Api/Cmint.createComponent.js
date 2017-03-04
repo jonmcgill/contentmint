@@ -37,7 +37,7 @@ Cmint.createComponent = function(options) {
         console.error('Component "'+options.config.name+'" already exists')
     } else {
         if (!options.config.index) options.config.index = [];
-        Cmint.Instance.Components[name] = options.config;
+        Cmint.Instance.Components[options.config.name] = options.config;
         Vue.component(options.config.name, {
             props: ['config'],
             template: options.template

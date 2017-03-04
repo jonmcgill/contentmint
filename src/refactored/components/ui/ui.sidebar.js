@@ -20,7 +20,7 @@ Vue.component('sidebar', {
 
     data: function(){return{
 
-        isActive: false,
+        isActive: true,
         componentList: this.components
 
     }},
@@ -34,10 +34,7 @@ Vue.component('sidebar', {
                 classes['fa-bars'] = true;
             }
             return classes;
-        },
-        // componentList: function() {
-        //     return this.components;
-        // }
+        }
     },
 
     methods: {
@@ -57,13 +54,11 @@ Vue.component('sidebar', {
 
         _this.$bus.$on('filteredCategories', function(filtered) {
             _this.componentList = filtered;
-            console.log(_this.componentList);
             Cmint.Ui.componentList = _this.componentList;
         })
 
-        _this.$bus.$on('updateComponentList', function(listing) {
-
-            _this.componentList = listing;
+        _this.$bus.$on('updateComponentList', function(newComponent) {
+            _this.componentList.push(newComponent);
         })
 
         _this.$bus.$on('toggleToolbar', function(toolbarState) {

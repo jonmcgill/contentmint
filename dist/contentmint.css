@@ -530,6 +530,12 @@ body {
     outline: 2px solid #039BE5;
     box-shadow: 0 0 16px #039BE5; }
 
+*#Stage.active,
+*.Component.active {
+  position: relative;
+  outline: 2px solid #039BE5 !important;
+  box-shadow: 0 0 16px #039BE5; }
+
 .context-insert {
   text-align: center;
   background: transparent;
