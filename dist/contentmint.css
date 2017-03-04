@@ -92,9 +92,9 @@ body {
     opacity: 1; }
 
 #Template {
-  margin: 70px 30em 5em 5em;
+  margin: 40px 0 0;
   transform: scale(1);
-  transition: transform 200ms; }
+  transition: transform 200ms, margin-right 200ms, margin-top 200ms; }
   #Template.scale {
     transform: scale(0.85); }
   #Template .Contextualized {
@@ -553,7 +553,7 @@ body {
   transition: opacity 200ms;
   margin-left: -44px;
   margin-top: -2px;
-  border: 1px solid #333;
+  border: 1px solid #555;
   border-radius: 3px;
   z-index: 9000; }
   #ActionBar.active {
@@ -670,6 +670,7 @@ body {
   background: #333;
   color: white;
   line-height: 40px;
+  border-bottom: 1px solid #555;
   height: 40px; }
   #Toolbar .cmint-toolbar-handle {
     position: absolute;

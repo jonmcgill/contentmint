@@ -22,6 +22,9 @@ var Cmint = Cmint || (function() {
             types: {}
         },
 
+        // Manages running component hook functions
+        Hooks: {},
+
         // API for field system
         Fields: {},
 
@@ -669,6 +672,7 @@ Vue.component('comp', {
             this.config.index = Cmint.Sync.getStagePosition(this.$el);
             
             // Run component hooks
+            Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
 
             // Run editor initiation
             Cmint.Editor.init(this);
@@ -1084,6 +1088,14 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
+            var left = _this.left.replace('px','') * 1;
+            var top = _this.top.replace('px','') * 1;
+            if (left < 48) {
+                _this.left = '48px';
+            }
+            if (top < 45) {
+                _this.top = '45px';
+            }
             Cmint.Util.debug('active component is "'+Cmint.App.activeComponent.config.name+'"');
         })
         this.$bus.$on('closeActionBar', function() {
@@ -1107,12 +1119,48 @@ Vue.component('content-template', {
 
     template: '',
 
+    data: function() {return {
+        sidebarOpen: true,
+        toolbarOpen: true
+    }},
+
+    computed: {
+        margin: function() {
+            var right = this.sidebarOpen ? '360px' : '0';
+            var top = this.toolbarOpen ? '40px' : '0';
+            return {
+                'margin-right': right,
+                'margin-top': top
+            }
+        }
+    },
+
     created: function() {
         var stage = '<context id="Stage" :contexts="stage" data-context="stage"></context>';
-        var template = '<div id="Template">';
+        var template = '<div id="Template" :style="margin">';
         template += this.template.replace(/\{\{\s*stage\s*\}\}/, stage);
         template += '</div>';
         this.$options.template = template;
+    },
+
+    mounted: function() {
+        var _this = this;
+        Cmint.Bus.$on('toggleSidebar', function(isOpen) {
+            if (isOpen) {
+                _this.sidebarOpen = true;
+                _this.toolbarOpen = true;
+            } else {
+                _this.sidebarOpen = false;
+            }
+        })
+        Cmint.Bus.$on('toggleToolbar', function(isOpen) {
+            if (!isOpen) {
+                _this.toolbarOpen = false;
+                _this.sidebarOpen = false;
+            } else {
+                _this.toolbarOpen = true;
+            }
+        })
     }
 
 })
@@ -1437,6 +1485,38 @@ Cmint.Fields.watchOutputUpdates = function(fieldComponent) {
             fieldComponent.process();
         }
     })
+}
+Cmint.Hooks.runComponentHooks = function(event, element, data) {
+
+    var Local = Cmint.Instance.Hooks.Local;
+    var Global = Cmint.Instance.Hooks.Global;
+
+    for (var hook in Global) {
+        if (event === 'editing') {
+            Global[hook].editing(element, data);
+            Cmint.Util.debug('ran global component hook "'+hook+'" during editing')
+        }
+        if (event === 'cleanup') {
+            Global[hook].cleanup(element, data);
+            Cmint.Util.debug('ran global component hook "'+hook+'" during cleanup')
+        }
+    }
+
+    if (data.hooks) {
+        data.hooks.forEach(function(hookName) {
+            if (Local.hasOwnProperty(hookName)) {
+                if (event === 'editing') {
+                    Local[hookName].editing(element, data);
+                    Cmint.Util.debug('ran local component hook "'+hook+'" during editing')
+                }
+                if (event === 'cleanup') {
+                    Local[hookName].cleanup(element, data);
+                    Cmint.Util.debug('ran local component hook "'+hook+'" during cleanup')
+                }
+            }
+        })
+    }
+
 }
 Vue.component('field-text', {
 

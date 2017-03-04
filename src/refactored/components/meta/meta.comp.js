@@ -42,6 +42,7 @@ Vue.component('comp', {
             this.config.index = Cmint.Sync.getStagePosition(this.$el);
             
             // Run component hooks
+            Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
 
             // Run editor initiation
             Cmint.Editor.init(this);

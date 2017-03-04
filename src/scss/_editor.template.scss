@@ -1,7 +1,7 @@
 #Template {
-    margin: 70px 30em 5em 5em;
+    margin: 40px 0 0;
     transform: scale(1);
-    transition: transform 200ms;
+    transition: transform 200ms, margin-right 200ms, margin-top 200ms;
 
     &.scale {
         transform: scale(0.85);

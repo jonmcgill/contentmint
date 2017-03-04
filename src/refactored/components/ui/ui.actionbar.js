@@ -67,6 +67,14 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
+            var left = _this.left.replace('px','') * 1;
+            var top = _this.top.replace('px','') * 1;
+            if (left < 48) {
+                _this.left = '48px';
+            }
+            if (top < 45) {
+                _this.top = '45px';
+            }
             Cmint.Util.debug('active component is "'+Cmint.App.activeComponent.config.name+'"');
         })
         this.$bus.$on('closeActionBar', function() {

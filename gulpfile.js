@@ -78,6 +78,7 @@ var refactored_files = [
 
     p('system/Ui/*'),
     p('system/Fields/*'),
+    p('system/Hooks/*'),
     
     p('components/fields/fields.text'),
     p('components/fields/fields.dropdown'),

@@ -22,6 +22,9 @@ var Cmint = Cmint || (function() {
             types: {}
         },
 
+        // Manages running component hook functions
+        Hooks: {},
+
         // API for field system
         Fields: {},
 

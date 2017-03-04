@@ -8,14 +8,12 @@
 <body>
 <!--
 TODO
-    - component hooks (local and global)
     - editor post processing
     - editor types
     - inputting user data with template
     - hook for save function
     - code cleanup (including hook transformation) and storage
     - component drag handles
-    - actionbar position when component is at edge of viewport
     - keyboard bindings for toolbar and sidebar views
  -->
 <div id="App" v-cloak>
@@ -46,8 +44,8 @@ TODO
         }
     })
 
-    Cmint.createComponentHook('vertical-space', 'Global', function(element, event) {
-        if (event === 'editing') {
+    Cmint.createComponentHook('vertical-space', 'Global', {
+        editing: function(element) {
             $(element).css({
                 'margin-bottom': '24px'
             });
@@ -164,6 +162,7 @@ TODO
             category: 'Content',
             tokens: [{'text': 'text'}, {'bg': 'bg'}],
             content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
+            hooks: ['vertical-space'],
             fields: {
                 output: { color: 'red', bg: '', padding: '', href: '' },
                 list: [
