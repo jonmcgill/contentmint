@@ -2151,6 +2151,9 @@ Cmint.Init = function() {
                     name: 'heading',
                     display: 'Heading',
                     category: 'Content',
+                    css: {
+                        fontfam: 'sans-serif'
+                    },
                     tokens: [{'text': 'text'}, {'bg': 'bg'}],
                     content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
                     fields: {
@@ -2164,11 +2167,32 @@ Cmint.Init = function() {
                     }
                 },
                 {
+                    name: 'body-copy',
+                    display: 'Body Copy',
+                    category: 'Content',
+                    css: {
+                        'line-height': '1.7',
+                        'font-family': 'sans-serif',
+                        'font-size': '1.15em'
+                    },
+                    content: {
+                        copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
+                    }
+                },
+                {
                     name: 'container',
                     display: 'Empty Container',
                     category: 'Layout',
                     contexts: {
                         container: []
+                    },
+                    fields: {
+                        output: { padding: '', centerblock:'', maxwidth: '' },
+                        list: [
+                            {name: 'padding', result: 'padding'},
+                            {name: 'align-block', result: 'centerblock' },
+                            {name: 'max-width', result: 'maxwidth'}
+                        ]
                     }
                 }
             ],

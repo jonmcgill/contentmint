@@ -11,7 +11,9 @@ TODO
     - editor post processing
     - editor types
     - inputting user data with template
+    - able to edit and remove custom components
     - hook for save function
+    - hook for new component addition/edit/removal
     - code cleanup (including hook transformation) and storage
     - component drag handles
     - keyboard bindings for toolbar and sidebar views
@@ -35,6 +37,9 @@ TODO
 <script src="dist/refactored.js"></script>
 <script type="text/javascript">
 
+    // Default toolbar buttons are save, context, and undo. You'll most likely want to 
+    // write some kind of ajax request that does something with the data and/or markup
+    // from your created content. This is a way to add a toolbar button for that thing.
     Cmint.createToolbarButton({
         text: 'Get Code',
         btnClasses: { 'toolbar-code':true, 'toolbar-btn-fancy': true },
@@ -44,12 +49,39 @@ TODO
         }
     })
 
+    // You may have situations where you'd like to manipulate a component after it has
+    // mounted or updated. You may also not want that thing to be the same in the editor
+    // versus the result. Additionally, you may want a thing to happen across the board for
+    // all components, or you may want to localize it to specific components when called.
+    // A component hook can therefore be global (runs on every component) or local (only
+    // runs if you define it in config). They can also be separate for the 'editing'
+    // experience and the 'cleanup' phase of the content.
     Cmint.createComponentHook('vertical-space', 'Global', {
         editing: function(element) {
             $(element).css({
                 'margin-bottom': '24px'
             });
+        },
+        cleanup: function(element) {
+            $(element).css({'margin-bottom': null});
+            $(element).insertAfter('<br><br>');
         }
+    })
+
+    // Editor post processes are to the editor instance markup what component hooks are
+    // to components. Whenever a change occurs in a tinymce editing instance, a postprocess
+    // hook is run. Tinymce allows you to hook into that process and this is simply a
+    // wrapper around that feature injecting it into our tinymce implementation.
+    Cmint.createEditorPostProcess(function(e) {
+        $(e.target.bodyElement).find('a').each(function() {
+            var attrs = this.attributes;
+            if (!attrs.style) {
+                this.setAttribute('style', 'color:#0b4b87;');
+            } else {
+                this.attributes.style = this.attributes.style + 'color:#0b4b87';
+            }
+            this.setAttribute('target', '_blank');
+        })
     })
 
     Cmint.createMenu('padding', {
@@ -153,7 +185,7 @@ TODO
                     background: config.fields.output.bg,\
                     padding: config.fields.output.padding\
                 }">\
-                <h1 :style="{color:config.fields.output.color}" data-edit="text"></h1>\
+                <h1 :style="{color:config.fields.output.color, \'font-family\': config.css.fontfam}" data-edit="text"></h1>\
                 <a :href="config.fields.output.href" data-edit="link-text"></a>\
             </comp>',
         config: {
@@ -176,8 +208,56 @@ TODO
     })
 
     Cmint.createComponent({
+        template: '<comp :config="config" data-edit="copy" :style="config.css"></comp>',
+        config: {
+            name: 'body-copy',
+            display: 'Body Copy',
+            category: 'Content',
+            css: {
+                'line-height': '1.7',
+                'font-family': 'sans-serif',
+                'font-size': '1.15em'
+            },
+            content: {
+                copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
+            }
+        }
+    })
+
+    Cmint.createField({
+        name: 'max-width',
+        config: {
+            type: 'field-text',
+            display: 'Max Width',
+            label: 'Max Width',
+            input: 'maxwidth',
+            help: 'add "px" to the end for pixels'
+        }
+    })
+
+    Cmint.createField({
+        name: 'align-block',
+        config: {
+            type: 'field-dropdown',
+            display: 'Alignment',
+            label: 'Alignment',
+            input: 'alignblock',
+            menu: 'align-block'
+        }
+    })
+
+    Cmint.createMenu('align-block', {
+        'Default': '',
+        'Center': '0 auto'
+    })
+
+    Cmint.createComponent({
         template: '\
-            <comp :config="config">\
+            <comp :config="config" :style="{\
+                padding:config.fields.output.padding,\
+                \'max-width\': config.fields.output.maxwidth,\
+                margin: config.fields.output.centerblock\
+            }">\
                 <context :contexts="config.contexts.container" data-context="container"></context>\
             </comp>',
         config: {
