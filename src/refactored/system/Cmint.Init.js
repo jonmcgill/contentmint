@@ -2,111 +2,71 @@ Cmint.Util.runTests();
 
 Cmint.Init = function() {
 
+    // Get user data from textarea. The textarea is populated by whatever backend
+    // the project happens to be using.
+    Cmint.Instance.Data = JSON.parse($('#Data').text());
 
-    Cmint.App = new Vue({
+    // Fetch the template markup using a jquery ajax call. The callback will initiate the main
+    // Vue instance.
+    var template = Cmint.Instance.Data.template;
+    $.get(Cmint.Instance.Templates[template].path, function(markup) {
 
-        el: '#App',
+        Cmint.App = new Vue({
 
-        data: {
+            el: '#App',
 
-            // User Data for testing
-            template: '<div class="template-test">{{ stage }}</div>',
-            templateName: 'test-template',
-            username: 'mcgilljo',
-            contentName: 'My Content Name',
-            // For testing = UserData.customComponents['templateName']
-            customComponents: [],
+            data: {
+
+                // User Data for testing
+                template: markup,
+                templateName: Cmint.Instance.Data.template,
+                username: Cmint.Instance.Data.username,
+                contentName: Cmint.Instance.Data.contentName,
+                customComponents: Cmint.Instance.Data.customComponents,
+                
+                // Contexts
+                stage: Cmint.Instance.Data.saved,
+                components: Cmint.AppFn.getTemplateComponents(template),
+
+                // Global items used by other components
+                activeComponent: null,
+                fieldsComponent: null,
+                componentList: null,
+                selectedCategory: 'All',
+
+                // Introspection
+                contextualize: false,
+                changes: 0,
+                previous: null,
+                saved: []
             
-            // Contexts
-            stage: [],
-            components: [
-                {
-                    name: 'heading',
-                    display: 'Heading',
-                    category: 'Content',
-                    css: {
-                        fontfam: 'sans-serif'
-                    },
-                    tokens: [{'text': 'text'}, {'bg': 'bg'}],
-                    content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
-                    fields: {
-                        output: { color: 'red', bg: '', padding: '', href: '' },
-                        list: [
-                            { name: 'color', result: 'color' },
-                            { name: 'bg-color', result: 'bg' },
-                            { name: 'padding', result: 'padding' },
-                            { name: 'link-choice', result: 'href' }
-                        ]
-                    }
-                },
-                {
-                    name: 'body-copy',
-                    display: 'Body Copy',
-                    category: 'Content',
-                    css: {
-                        'line-height': '1.7',
-                        'font-family': 'sans-serif',
-                        'font-size': '1.15em'
-                    },
-                    content: {
-                        copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
-                    }
-                },
-                {
-                    name: 'container',
-                    display: 'Empty Container',
-                    category: 'Layout',
-                    contexts: {
-                        container: []
-                    },
-                    fields: {
-                        output: { padding: '', centerblock:'', maxwidth: '' },
-                        list: [
-                            {name: 'padding', result: 'padding'},
-                            {name: 'align-block', result: 'centerblock' },
-                            {name: 'max-width', result: 'maxwidth'}
-                        ]
-                    }
-                }
-            ],
+            },
 
-            // Global items used by other components
-            activeComponent: null,
-            fieldsComponent: null,
-            componentList: null,
-            selectedCategory: 'All',
+            methods: {
 
-            // Introspection
-            contextualize: false,
-            changes: 0,
-            previous: null,
-            saved: []
-        
-        },
+                save: Cmint.AppFn.save,
+                snapshot: Cmint.AppFn.snapshot,
+                undo: Cmint.AppFn.undo
 
-        methods: {
+            },
 
-            save: Cmint.AppFn.save,
-            snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo
+            created: function() {
+                Cmint.AppFn.mergeCustomComponents(this);
+            },
 
-        },
+            mounted: function() {
+                var _this = this;
+                this.$bus.$on('callComponentFields', function() {
+                    _this.fieldsComponent = _this.activeComponent.config;
+                })
+                Cmint.Ui.documentHandler();
+                Cmint.Ui.contextualize();
+                Cmint.Bus.setSelectedCategory(this);
+                Cmint.Drag.init();
+                Cmint.Util.debug('mounted application');
+            }
 
-        created: function() {
-            Cmint.AppFn.mergeCustomComponents(this);
-        },
-
-        mounted: function() {
-            var _this = this;
-            this.$bus.$on('callComponentFields', function() {
-                _this.fieldsComponent = _this.activeComponent.config;
-            })
-            Cmint.Ui.documentHandler();
-            Cmint.Ui.contextualize();
-            Cmint.Bus.setSelectedCategory(this);
-            Cmint.Drag.init();
-            Cmint.Util.debug('mounted application');
-        }
+        })
 
     })
 

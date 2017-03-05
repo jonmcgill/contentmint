@@ -559,7 +559,7 @@ Cmint.createTemplate = function(name, options) {
         console.error('Template "' + name + '" already exists');
     } else {
         if (!options.path) {
-            console.error('Need path for tempalte "' + name + '"');
+            console.error('Need path for template "' + name + '"');
         }
         if (!options.components) {
             console.error('No components defined for template "' + name +'"');
@@ -986,35 +986,7 @@ Vue.component('custom', {
 
     methods: {
         addComponent: function() {
-            // var D = Cmint.app.Data;
-            var double = false;
-            var _this = this;
-            if (!Cmint.App.customComponents) {
-                Cmint.App.customComponents = [];
-            }
-            if (this.name === '') {
-                this.nameError = 'Name field is blank';
-                return;
-            }
-            Cmint.App.components.forEach(function(component) {
-                if (component.display === _this.name) {
-                    double = true;
-                }
-            })
-            if (!double) {
-                var comp = Cmint.Util.copyObject(this.component);
-                comp.display = this.name;
-                comp.category = this.category || 'Custom';
-                Cmint.App.components.push(comp);
-                if (comp.category === Cmint.App.selectedCategory) {
-                    this.$bus.$emit('updateComponentList', comp);
-                }
-                Cmint.Util.debug('added "' + this.name + '" ('+this.category+') in template "'+Cmint.App.templateName+'"');
-                this.$bus.$emit('closeNewComp');
-            } else {
-                this.nameError = 'Name already exists';
-                this.name = '';
-            }
+            Cmint.AppFn.createCustomComponent(this);
         }
     }
 
@@ -2056,6 +2028,54 @@ Cmint.Drag.init = function() {
     })
 
 }
+Cmint.AppFn.createCustomComponent = function(customModal) {
+
+    var double = false;
+    if (!Cmint.App.customComponents) {
+        Cmint.App.customComponents = [];
+    }
+    if (customModal.name === '') {
+        customModal.nameError = 'Name field is blank';
+        return;
+    }
+    Cmint.App.components.forEach(function(component) {
+        if (component.display === component.name) {
+            double = true;
+        }
+    })
+    if (!double) {
+        var comp = Cmint.Util.copyObject(customModal.component);
+        comp.display = customModal.name;
+        comp.category = customModal.category || 'Custom';
+        Cmint.App.components.push(comp);
+        Cmint.App.customComponents.push(comp);
+        Cmint.App.save();
+        if (comp.category === Cmint.App.selectedCategory) {
+            Cmint.Bus.$emit('updateComponentList', comp);
+        }
+        Cmint.Util.debug('added "' + customModal.name + '" ('+customModal.category+') in template "'+Cmint.App.templateName+'"');
+        Cmint.Bus.$emit('closeNewComp');
+    } else {
+        customModal.nameError = 'Name already exists';
+        customModal.name = '';
+    }
+
+}
+Cmint.AppFn.getTemplateComponents = function(name) {
+
+    var components = [];
+
+    Cmint.Instance.Templates[name].components.forEach(function(comp) {
+
+        var compData = Cmint.Util.copyObject(Cmint.Instance.Components[comp]);
+
+        components.push(compData);
+
+    })
+
+    return components;
+
+}
 Cmint.AppFn.mergeCustomComponents = function(data) {
     
     if (data.customComponents.length > 0) {
@@ -2129,111 +2149,71 @@ Cmint.Util.runTests();
 
 Cmint.Init = function() {
 
+    // Get user data from textarea. The textarea is populated by whatever backend
+    // the project happens to be using.
+    Cmint.Instance.Data = JSON.parse($('#Data').text());
 
-    Cmint.App = new Vue({
+    // Fetch the template markup using a jquery ajax call. The callback will initiate the main
+    // Vue instance.
+    var template = Cmint.Instance.Data.template;
+    $.get(Cmint.Instance.Templates[template].path, function(markup) {
 
-        el: '#App',
+        Cmint.App = new Vue({
 
-        data: {
+            el: '#App',
 
-            // User Data for testing
-            template: '<div class="template-test">{{ stage }}</div>',
-            templateName: 'test-template',
-            username: 'mcgilljo',
-            contentName: 'My Content Name',
-            // For testing = UserData.customComponents['templateName']
-            customComponents: [],
+            data: {
+
+                // User Data for testing
+                template: markup,
+                templateName: Cmint.Instance.Data.template,
+                username: Cmint.Instance.Data.username,
+                contentName: Cmint.Instance.Data.contentName,
+                customComponents: Cmint.Instance.Data.customComponents,
+                
+                // Contexts
+                stage: Cmint.Instance.Data.saved,
+                components: Cmint.AppFn.getTemplateComponents(template),
+
+                // Global items used by other components
+                activeComponent: null,
+                fieldsComponent: null,
+                componentList: null,
+                selectedCategory: 'All',
+
+                // Introspection
+                contextualize: false,
+                changes: 0,
+                previous: null,
+                saved: []
             
-            // Contexts
-            stage: [],
-            components: [
-                {
-                    name: 'heading',
-                    display: 'Heading',
-                    category: 'Content',
-                    css: {
-                        fontfam: 'sans-serif'
-                    },
-                    tokens: [{'text': 'text'}, {'bg': 'bg'}],
-                    content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
-                    fields: {
-                        output: { color: 'red', bg: '', padding: '', href: '' },
-                        list: [
-                            { name: 'color', result: 'color' },
-                            { name: 'bg-color', result: 'bg' },
-                            { name: 'padding', result: 'padding' },
-                            { name: 'link-choice', result: 'href' }
-                        ]
-                    }
-                },
-                {
-                    name: 'body-copy',
-                    display: 'Body Copy',
-                    category: 'Content',
-                    css: {
-                        'line-height': '1.7',
-                        'font-family': 'sans-serif',
-                        'font-size': '1.15em'
-                    },
-                    content: {
-                        copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
-                    }
-                },
-                {
-                    name: 'container',
-                    display: 'Empty Container',
-                    category: 'Layout',
-                    contexts: {
-                        container: []
-                    },
-                    fields: {
-                        output: { padding: '', centerblock:'', maxwidth: '' },
-                        list: [
-                            {name: 'padding', result: 'padding'},
-                            {name: 'align-block', result: 'centerblock' },
-                            {name: 'max-width', result: 'maxwidth'}
-                        ]
-                    }
-                }
-            ],
+            },
 
-            // Global items used by other components
-            activeComponent: null,
-            fieldsComponent: null,
-            componentList: null,
-            selectedCategory: 'All',
+            methods: {
 
-            // Introspection
-            contextualize: false,
-            changes: 0,
-            previous: null,
-            saved: []
-        
-        },
+                save: Cmint.AppFn.save,
+                snapshot: Cmint.AppFn.snapshot,
+                undo: Cmint.AppFn.undo
 
-        methods: {
+            },
 
-            save: Cmint.AppFn.save,
-            snapshot: Cmint.AppFn.snapshot,
-            undo: Cmint.AppFn.undo
+            created: function() {
+                Cmint.AppFn.mergeCustomComponents(this);
+            },
 
-        },
+            mounted: function() {
+                var _this = this;
+                this.$bus.$on('callComponentFields', function() {
+                    _this.fieldsComponent = _this.activeComponent.config;
+                })
+                Cmint.Ui.documentHandler();
+                Cmint.Ui.contextualize();
+                Cmint.Bus.setSelectedCategory(this);
+                Cmint.Drag.init();
+                Cmint.Util.debug('mounted application');
+            }
 
-        created: function() {
-            Cmint.AppFn.mergeCustomComponents(this);
-        },
-
-        mounted: function() {
-            var _this = this;
-            this.$bus.$on('callComponentFields', function() {
-                _this.fieldsComponent = _this.activeComponent.config;
-            })
-            Cmint.Ui.documentHandler();
-            Cmint.Ui.contextualize();
-            Cmint.Bus.setSelectedCategory(this);
-            Cmint.Drag.init();
-            Cmint.Util.debug('mounted application');
-        }
+        })
 
     })
 

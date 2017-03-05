@@ -9,7 +9,7 @@ Cmint.createTemplate = function(name, options) {
         console.error('Template "' + name + '" already exists');
     } else {
         if (!options.path) {
-            console.error('Need path for tempalte "' + name + '"');
+            console.error('Need path for template "' + name + '"');
         }
         if (!options.components) {
             console.error('No components defined for template "' + name +'"');

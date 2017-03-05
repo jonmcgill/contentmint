@@ -8,16 +8,32 @@
 <body>
 <!--
 TODO
-    - editor post processing
     - editor types
-    - inputting user data with template
     - able to edit and remove custom components
-    - hook for save function
-    - hook for new component addition/edit/removal
+    * hook for save function
     - code cleanup (including hook transformation) and storage
     - component drag handles
     - keyboard bindings for toolbar and sidebar views
+
+    This is the data populated by whatever backend processes you choose. The
+    path for the template markup should be defined in Cmint.createTemplate. Also,
+    customComponents here should only be custom components created for this
+    particular template. That is something that will need to be managed on the 
+    back end. When the saved data is sent up to the server there will need to be
+    some mechanism that stores that array in association with that template. This
+    is because we don't want to load the custom components saved for every possible
+    template that could exist in the project. Note that the markup for the content
+    is not saved in the data.
  -->
+ <textarea style="display: none" id="Data">
+     {
+        "template": "email",
+        "contentName": "Example Email",
+        "username": "mcgilljo",
+        "saved": [],
+        "customComponents": []
+     }
+ </textarea>
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
@@ -47,6 +63,11 @@ TODO
         callback: function() {
             Cmint.Util.debug('get content code');
         }
+    })
+
+    Cmint.createTemplate('email', {
+        path: '/example/email.html',
+        components: ['heading', 'body-copy', 'container']
     })
 
     // You may have situations where you'd like to manipulate a component after it has
@@ -90,6 +111,7 @@ TODO
         'A lot': '2.5em'
     })
 
+    // type, display, label, input, menu, help*, processes*
     Cmint.createField({
         name: 'padding',
         config: {
@@ -101,6 +123,7 @@ TODO
         }
     })
 
+    // type, display, label, input, help*, check*, processes*
     Cmint.createField({
         name: 'color',
         config: {
@@ -121,12 +144,13 @@ TODO
             help: 'Any valid CSS color value'
         }
     })
+
+    // type, display, label, input[{name, label, type}], processes[], help*
     Cmint.createField({
         name: 'link-mailto',
         config: {
             type: 'field-group',
             display: 'Email Link',
-            hook: 'mailto',
             label: 'Email Link',
             processes: ['mailto'],
             input: [
@@ -153,6 +177,8 @@ TODO
             check: /^https*:\/\/.+/g,
         }
     })
+
+    // type, display, label, choices[{name}]
     Cmint.createField({
         name: 'link-choice',
         config: {
@@ -166,10 +192,12 @@ TODO
         }
     })
 
+    // field-text takes input
     Cmint.createFieldProcess('onlyred', function(input) {
         return 'red';
     })
 
+    // field-group takes all inputs and the component instance
     Cmint.createFieldProcess('mailto', function(inputs, component) {
         var output = 'mailto:';
         output += Cmint.Fields.tokenize(inputs.to.value, component) + '?';
@@ -192,9 +220,11 @@ TODO
             name: 'heading',
             display: 'Heading',
             category: 'Content',
+            css: {
+                fontfam: 'sans-serif'
+            },
             tokens: [{'text': 'text'}, {'bg': 'bg'}],
             content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
-            hooks: ['vertical-space'],
             fields: {
                 output: { color: 'red', bg: '', padding: '', href: '' },
                 list: [
@@ -266,6 +296,14 @@ TODO
             category: 'Layout',
             contexts: {
                 container: []
+            },
+            fields: {
+                output: { padding: '', centerblock:'', maxwidth: '' },
+                list: [
+                    {name: 'padding', result: 'padding'},
+                    {name: 'align-block', result: 'centerblock' },
+                    {name: 'max-width', result: 'maxwidth'}
+                ]
             }
         }
     })
