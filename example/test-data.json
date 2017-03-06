@@ -1,8 +1,0 @@
-{
-    "template": "email",
-    "templatePath": "/example/email.html",
-    "contentName": "Test Content",
-    "username": "mcgilljo",
-    "saved": [],
-    "customComponents": {}
-}

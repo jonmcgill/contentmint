@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Example Editor</title>
+<link rel="stylesheet" type="text/css" href="/dist/contentmint.css">
+<link rel="stylesheet" type="text/css" href="/vendor/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+<!--
+TODO
+    - editor types
+    - able to edit and remove custom components
+    * notification component
+    - code cleanup (including hook transformation) and storage
+    - component drag handles
+    - keyboard bindings for toolbar and sidebar views
+
+    This is the data populated by whatever backend processes you choose. The
+    path for the template markup should be defined in Cmint.createTemplate. Also,
+    customComponents here should only be custom components created for this
+    particular template. That is something that will need to be managed on the 
+    back end. When the saved data is sent up to the server there will need to be
+    some mechanism that stores that array in association with that template. This
+    is because we don't want to load the custom components saved for every possible
+    template that could exist in the project. Note that the markup for the content
+    is not saved in the data.
+ -->
+ <textarea style="display: none" id="Data">
+     {
+        "template": "email",
+        "contentName": "Example Email",
+        "username": "mcgilljo",
+        "saved": [],
+        "customComponents": []
+     }
+ </textarea>
+<div id="App" v-cloak>
+    <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
+    <sidebar :components="components" class="cmint"></sidebar>
+    <overlay></overlay>
+    <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
+    <actionbar></actionbar>
+    <div class="cmint-notification"></div>
+    <content-template 
+        :fields-component="fieldsComponent" 
+        :template="templateMarkup"
+        :stage="stage"
+        :class="{ scale: !!fieldsComponent }"></content-template>
+</div>
+
+<!-- Contentmint Dependencies -->
+<script src="/vendor/tinymce/tinymce.min.js"></script>
+<script src="/dist/vendor.js"></script>
+<script src="/dist/contentmint.js"></script>
+
+<!-- Implementation code -->
+<script src="/example/build/example-app.js"></script>
+
+<!-- Contentmint initq -->
+<script type="text/javascript">
+Cmint.Init();
+</script>
