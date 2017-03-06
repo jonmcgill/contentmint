@@ -32,6 +32,7 @@ Cmint.Init = function() {
                 // Global items used by other components
                 activeComponent: null,
                 fieldsComponent: null,
+                fieldsMountOnly: false,
                 componentList: null,
                 selectedCategory: 'All',
 
@@ -58,7 +59,7 @@ Cmint.Init = function() {
 
             mounted: function() {
                 var _this = this;
-                this.$bus.$on('callComponentFields', function() {
+                Cmint.Bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.activeComponent.config;
                 })
                 Cmint.Ui.documentHandler();

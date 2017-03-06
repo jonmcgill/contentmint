@@ -1,19 +1,27 @@
 Cmint.createComponent({
     template: '\
-        <comp :config="config" cellspacing="5" cellpadding="5" align="center" width="100%">\
-            <thead>\
+        <comp :config="config" cellspacing="3" cellpadding="3" align="center" width="100%">\
+            <tbody>\
                 <tr>\
-                    <th :style="config.css.header">Date</th>\
-                    <th :style="config.css.header">Course Name</th>\
-                    <th :style="config.css.header">Course ID</th>\
-                    <th :style="config.css.header">Register</th>\
+                    <td width="90" :style="config.css.header">Platform</td>\
+                    <td width="60" :style="config.css.header">Date</td>\
+                    <td width="110" :style="config.css.header">Time (Eastern)</td>\
+                    <td width="70" :style="config.css.header">Session Code</td>\
+                    <td width="180" :style="config.css.header">Session Name</td>\
+                    <td width="90" :style="config.css.header">Enroll Now</td>\
                 </tr>\
-            </thead>\
+            </tbody>\
             <context\
                 :contexts="config.contexts.rows"\
                 :tag="config.tags.rows"\
                 :insert="config.tags.insert"\
-                data-context="rows"></context>\
+                data-context="rows">\
+            </context>\
+            <tbody>\
+                <tr>\
+                    <td colspan="6" :style="config.css.header">Central Time &ndash; Subtract 1 hour; Mountain &ndash; Subtract 2 Hours; Pacific &ndash; Subtract 3 Hours</td>\
+                </tr>\
+            </tbody>\
         </comp>',
     config: {
         name: 'course-table',
@@ -26,8 +34,9 @@ Cmint.createComponent({
         category: 'Content',
         css: {
             header: { 
-                background: 'black', 
+                background: '#231f20', 
                 color: 'white',
+                'font-size': '12px',
                 'font-family': 'Arial',
                 'text-align': 'center'
             }
@@ -37,22 +46,34 @@ Cmint.createComponent({
                 name: 'course-row',
                 display: 'Course Row',
                 tags: { root: 'tr' },
-                tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+                tokens: [
+                    { 'platform': 'platform' },
+                    { 'date': 'date' }, 
+                    { 'time': 'time' },
+                    { 'code': 'code' },
+                    { 'name': 'name' }, 
+                ],
                 content: {
+                    platform: 'Contact Management',
                     date: '3/6/2017',
-                    name: 'Contact Management Advanced',
-                    id: 'CM109'
+                    time: '11:00 am',
+                    name: 'Introduction to Contact Management',
+                    code: 'CM101'
                 },
                 css: {
                     row: { 
                         'text-align': 'center',
-                        'border': '1px solid black',
-                        'font-family': 'sans-serif'
+                        'border': '1px solid #1e201f',
+                        'font-family': 'sans-serif',
+                        'font-size': '12px'
                     }
                 },
                 fields: {
-                    output: { register: '#' },
-                    list: [{name: 'link-mailto', result: 'register' }]
+                    output: { register: '#', bgcolor: '' },
+                    list: [
+                        {name: 'link-mailto', result: 'register' },
+                        {name: 'bgcolor', result: 'bgcolor' }
+                    ]
                 }
             }]
         }

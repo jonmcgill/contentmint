@@ -26,7 +26,9 @@ var Cmint = Cmint || (function() {
         Hooks: {},
 
         // API for field system
-        Fields: {},
+        Fields: {
+            UIDS: {}
+        },
 
         // Global settings and names
         Settings: {},

@@ -41,6 +41,9 @@ Vue.component('comp', {
 
             // Get the component's position in data from its position in DOM
             this.config.index = Cmint.Sync.getStagePosition(this.$el);
+
+            // Assign field uid if component utilizes fields system
+            Cmint.Fields.assignUid(this);
             
             // Run component hooks
             Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);

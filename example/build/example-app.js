@@ -18,11 +18,15 @@ Cmint.createOnSaveHook(function(data) {
 // just a list of components you'd like to make available for that template.
 Cmint.createTemplate('email', {
     path: '/example/template-markup/email.html',
-    components: ['heading', 'banner-image', 'body-copy', 'course-table', 'container']
+    components: ['heading', 'banner-image', 'body-copy', 'button-cta', 'course-table', 'container']
 })
 Cmint.createMenu('align-block', {
     'Default': '',
     'Center': '0 auto'
+})
+Cmint.createMenu('bgcolor', {
+    'Default': '',
+    'Dark': '#cccccc'
 })
 Cmint.createMenu('image-list', {
     'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
@@ -63,6 +67,17 @@ Cmint.createField({
         label: 'Alignment',
         input: 'alignblock',
         menu: 'align-block'
+    }
+})
+// type, display, label, input, menu, help*, processes*
+Cmint.createField({
+    name: 'bgcolor',
+    config: {
+        type: 'field-dropdown',
+        display: 'Background Color',
+        label: 'Background Color',
+        input: 'bgcolor',
+        menu: 'bgcolor'
     }
 })
 Cmint.createField({
@@ -138,6 +153,16 @@ Cmint.createField({
         help: 'add "px" to the end for pixels'
     }
 })
+// type, display, label, input, help*, check*, processes*
+Cmint.createField({
+    name: 'plaintext',
+    config: {
+        type: 'field-text',
+        display: 'Content Text',
+        label: 'Content Text',
+        input: 'content-text'
+    }
+})
 Cmint.createField({
     name: 'link-url',
     config: {
@@ -183,7 +208,7 @@ Cmint.createFieldProcess('mailto', function(inputs, component) {
 Cmint.createComponentHook('vertical-space', 'Global', {
     editing: function(element) {
         $(element).css({
-            'margin-bottom': '24px'
+            'margin-bottom': '16px'
         });
     },
     cleanup: function(element) {
@@ -235,12 +260,50 @@ Cmint.createComponent({
         display: 'Body Copy',
         category: 'Content',
         css: {
-            'line-height': '1.7',
+            'color': '#231f20',
+            'line-height': '20px',
+            'font-size': '14px',
             'font-family': 'sans-serif',
-            'font-size': '1.05em'
         },
         content: {
             copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
+        }
+    }
+})
+Cmint.createComponent({
+    template: '\
+        <comp :config="config" cellpadding="0" cellspacing="0" align="center" style="background:#cb4f29">\
+            <tr>\
+              <td width="20" height="5"></td>\
+              <td>&nbsp;</td>\
+              <td width="20" height="5"></td>\
+            </tr>\
+            <tr>\
+              <td width="20" height="5"></td>\
+              <td>\
+                  <div style="font-family:Arial, sans-serif; font-size:14px; font-style:italic; font-weight:bold; text-align:center; line-height:14px;">\
+                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;">{{ config.fields.output.linktext}}</a>\
+                  </div>\
+                </td>\
+              <td width="20" height="5"></td>\
+            </tr>\
+            <tr>\
+              <td width="20" height="5"></td>\
+              <td>&nbsp;</td>\
+              <td width="20" height="5"></td>\
+            </tr>\
+        </comp>',
+    config: {
+        name: 'button-cta',
+        display: 'Button',
+        category: 'Buttons',
+        tags: { root: 'table' },
+        fields: {
+            output: { href: '#', linktext: 'Button Link Text' },
+            list: [
+                { name: 'link-choice', result: 'href' },
+                { name: 'plaintext', result: 'linktext' }
+            ]
         }
     }
 })
@@ -273,50 +336,74 @@ Cmint.createComponent({
 Cmint.createComponent({
     template: '\
         <comp :config="config">\
-            <td :style="config.css.row" data-edit="date"></td>\
-            <td :style="config.css.row" data-edit="name"></td>\
-            <td :style="config.css.row" data-edit="id"></td>\
-            <td :style="config.css.row"><a :href="config.fields.output.register">Register</a></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="platform"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="date"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="time"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
+                <a :href="config.fields.output.register" style="color:#0b4b37">Click Here</a>\
+            </td>\
         </comp>',
     config: {
         name: 'course-row',
         display: 'Course Row',
         tags: { root: 'tr' },
-        tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+        tokens: [
+            { 'platform': 'platform' },
+            { 'date': 'date' }, 
+            { 'time': 'time' },
+            { 'code': 'code' },
+            { 'name': 'name' },
+        ],
         content: {
+            platform: 'Contact Management',
             date: '3/6/2017',
-            name: 'Contact Management Advanced',
-            id: 'CM109'
+            time: '11:00 am',
+            name: 'Introduction to Contact Management',
+            code: 'CM101'
         },
         css: {
             row: { 
                 'text-align': 'center',
-                'border': '1px solid black',
-                'font-family': 'sans-serif'
+                'border': '1px solid #1e201f',
+                'font-family': 'sans-serif',
+                'font-size': '12px'
             }
         },
         fields: {
-            output: { register: '#' },
-            list: [{name: 'link-mailto', result: 'register' }]
+            output: { register: '#', bgcolor: '' },
+            list: [
+                {name: 'link-mailto', result: 'register' },
+                {name: 'bgcolor', result: 'bgcolor' }
+            ]
         }
     }
 })
 Cmint.createComponent({
     template: '\
-        <comp :config="config" cellspacing="5" cellpadding="5" align="center" width="100%">\
-            <thead>\
+        <comp :config="config" cellspacing="3" cellpadding="3" align="center" width="100%">\
+            <tbody>\
                 <tr>\
-                    <th :style="config.css.header">Date</th>\
-                    <th :style="config.css.header">Course Name</th>\
-                    <th :style="config.css.header">Course ID</th>\
-                    <th :style="config.css.header">Register</th>\
+                    <td width="90" :style="config.css.header">Platform</td>\
+                    <td width="60" :style="config.css.header">Date</td>\
+                    <td width="110" :style="config.css.header">Time (Eastern)</td>\
+                    <td width="70" :style="config.css.header">Session Code</td>\
+                    <td width="180" :style="config.css.header">Session Name</td>\
+                    <td width="90" :style="config.css.header">Enroll Now</td>\
                 </tr>\
-            </thead>\
+            </tbody>\
             <context\
                 :contexts="config.contexts.rows"\
                 :tag="config.tags.rows"\
                 :insert="config.tags.insert"\
-                data-context="rows"></context>\
+                data-context="rows">\
+            </context>\
+            <tbody>\
+                <tr>\
+                    <td colspan="6" :style="config.css.header">Central Time &ndash; Subtract 1 hour; Mountain &ndash; Subtract 2 Hours; Pacific &ndash; Subtract 3 Hours</td>\
+                </tr>\
+            </tbody>\
         </comp>',
     config: {
         name: 'course-table',
@@ -329,8 +416,9 @@ Cmint.createComponent({
         category: 'Content',
         css: {
             header: { 
-                background: 'black', 
+                background: '#231f20', 
                 color: 'white',
+                'font-size': '12px',
                 'font-family': 'Arial',
                 'text-align': 'center'
             }
@@ -340,22 +428,34 @@ Cmint.createComponent({
                 name: 'course-row',
                 display: 'Course Row',
                 tags: { root: 'tr' },
-                tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+                tokens: [
+                    { 'platform': 'platform' },
+                    { 'date': 'date' }, 
+                    { 'time': 'time' },
+                    { 'code': 'code' },
+                    { 'name': 'name' }, 
+                ],
                 content: {
+                    platform: 'Contact Management',
                     date: '3/6/2017',
-                    name: 'Contact Management Advanced',
-                    id: 'CM109'
+                    time: '11:00 am',
+                    name: 'Introduction to Contact Management',
+                    code: 'CM101'
                 },
                 css: {
                     row: { 
                         'text-align': 'center',
-                        'border': '1px solid black',
-                        'font-family': 'sans-serif'
+                        'border': '1px solid #1e201f',
+                        'font-family': 'sans-serif',
+                        'font-size': '12px'
                     }
                 },
                 fields: {
-                    output: { register: '#' },
-                    list: [{name: 'link-mailto', result: 'register' }]
+                    output: { register: '#', bgcolor: '' },
+                    list: [
+                        {name: 'link-mailto', result: 'register' },
+                        {name: 'bgcolor', result: 'bgcolor' }
+                    ]
                 }
             }]
         }
@@ -366,8 +466,11 @@ Cmint.createComponent({
         <comp :config="config" :style="{\
             background: config.fields.output.bg,\
             padding: config.fields.output.padding,\
-            \'font-family\': config.css.fontFam,\
-            color:config.fields.output.color}"\
+            color:config.fields.output.color,\
+            \'font-family\': config.css.fontfam,\
+            \'font-size\': config.css.fontsize,\
+            \'font-weight\': config.css.fontweight,\
+            \'line-height\': config.css.lineheight}"\
             data-edit="text">\
         </comp>',
     config: {
@@ -375,10 +478,15 @@ Cmint.createComponent({
         display: 'Heading',
         category: 'Content',
         css: {
-            fontfam: 'sans-serif'
+            fontfam: 'Arial, sans-serif',
+            fontsize: '24px',
+            fontweight: 'bold',
+            lineheight: 'normal'
         },
         tokens: [{'text': 'text'}, {'bg': 'bg'}],
-        content: { text: '<h1 style="font-family:sans-serif;">Lorem Ipsum Headingum</h1>' },
+        content: { 
+            text: '<div>Lorem Ipsum Headingum</div>'
+        },
         fields: {
             output: { color: '', bg: '', padding: '' },
             list: [

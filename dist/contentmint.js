@@ -26,7 +26,9 @@ var Cmint = Cmint || (function() {
         Hooks: {},
 
         // API for field system
-        Fields: {},
+        Fields: {
+            UIDS: {}
+        },
 
         // Global settings and names
         Settings: {},
@@ -674,6 +676,9 @@ Vue.component('comp', {
 
             // Get the component's position in data from its position in DOM
             this.config.index = Cmint.Sync.getStagePosition(this.$el);
+
+            // Assign field uid if component utilizes fields system
+            Cmint.Fields.assignUid(this);
             
             // Run component hooks
             Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
@@ -1189,10 +1194,10 @@ Cmint.Editor.init = function(component) {
             $this = $(this),
             contentKey = $this.attr(Cmint.Settings.name.dataEdit),
             stash;
-
+            
         $this.html(component.config.content[contentKey]);
 
-        if (component.environment === 'components') return false;
+        if (component.environment === 'components') return;
 
         $this.attr('data-temp', editorUid);
         config.selector = '[data-temp="'+editorUid+'"]';
@@ -1213,7 +1218,7 @@ Cmint.Editor.init = function(component) {
                     component.config.content[contentKey] = editor.getContent();
                     Cmint.Util.debug('updated content "'+contentKey+'" for ' + component.config.name);
                 }
-            },500));
+            }));
             editor.on('focus', function() {
                 Cmint.Bus.$emit('showToolbar');
                 component.config.content[contentKey] = editor.getContent();
@@ -1306,9 +1311,23 @@ Cmint.Ui.copyComponent = function() {
     var position = Cmint.Sync.getVmContextData(comp.config.index, Cmint.App.stage);
     var clone = Cmint.Util.copyObject(position.context[position.index])
 
+    clone.copy = true;
+
     position.context.splice(position.index + 1, 0, clone);
+
     Vue.nextTick(Cmint.Drag.updateContainers);
     Vue.nextTick(Cmint.App.snapshot);
+
+    // If a component with fields is copied it must have it's fields initiated by
+    // mounting the fields widget with the component. Otherwise it will not be
+    // linked to Fields.UIDS and any updates made to editor content will not trigger
+    // field processes.
+    Cmint.App.fieldsMountOnly = true;
+    Cmint.App.fieldsComponent = clone;
+    setTimeout(function() {
+        Cmint.App.fieldsMountOnly = false;
+        Cmint.App.fieldsComponent = null;
+    },20)
 
     Cmint.Bus.$emit('closeActionBar');
     Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
@@ -1335,6 +1354,13 @@ Cmint.Ui.documentHandler = function() {
                     $(Cmint.Settings.class.component + '.active').removeClass('active');
                     component.addClass('active');
                 }
+                // blur the previously focused editor instance
+                $('.mce-edit-focus').each(function() {
+                    if (!$(this).closest(Cmint.Settings.class.component).hasClass('active')) {
+                        $(this).blur();
+                    }
+                })
+                
             } else {
                 $(Cmint.Settings.class.component + '.active').removeClass('active');
                 if (!isActionBar && Cmint.App.activeComponent) {
@@ -1368,19 +1394,47 @@ Cmint.Ui.removeComponent = function() {
     Cmint.App.save();
 
 }
+// Some field processes need to hold on to specific component data so that when that data
+// mutates, they can run and update any tokens that may have been used. Because Vue creates
+// new instances of component data on mount and update, those data sets were being eliminated
+// and the field processes would be updating data that was no longer attached to anything.
+// With field uids, all field processing will be sent to whatever component is referenced by
+// Fields.UIDS.
+Cmint.Fields.assignUid = function(component) {
+
+    var uid;
+
+    if (component.config.fields &&
+        component.environment === 'stage' &&
+        !component.config.fields.uid || component.config.copy) {
+
+        uid = Cmint.Util.uid(12);
+        component.config.fields.uid = uid;
+        Cmint.Util.debug('assigned field uid "'+uid+'" to component at [' + component.config.index + ']');
+
+        if (component.config.copy) {
+            component.config.copy = false;
+        }
+
+        Cmint.Fields.UIDS[uid] = component;
+
+    }
+
+}
 Cmint.Fields.processFieldText = function(instance) {
 
     var fieldData = instance.fields[instance.field.name];
     var input = instance.field.inputs[fieldData.input];
+    var compUid = instance.component.fields.uid;
+    var component = Cmint.Fields.UIDS[compUid];
 
     // tokenize
-    if (instance.component.tokens) {
-        input = Cmint.Fields.tokenize(input, instance.component);
+    if (component.config.tokens) {
+        input = Cmint.Fields.tokenize(input, component.config);
     }
 
     // run check function
     if (instance.field.check && input !== '') {
-        console.log(instance.field);
         instance.pass = !!input.match(instance.field.check);
         Cmint.Util.debug('field passed - ' + instance.pass);
     }
@@ -1394,7 +1448,7 @@ Cmint.Fields.processFieldText = function(instance) {
     }
 
     // send to declared output
-    instance.component.fields.output[instance.field.result] = input;
+    component.config.fields.output[instance.field.result] = input;
 
 }
 Cmint.Fields.setOutputWatch = function(component) {
@@ -1602,7 +1656,9 @@ Vue.component('field-dropdown', {
     }
 })
 Vue.component('field-group', {
+
     props: ['field', 'component'],
+
     template: '\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
@@ -1620,22 +1676,25 @@ Vue.component('field-group', {
                 </div>\
             </div>\
         </div>',
+
     data: function() { return {
         fields: Cmint.Instance.Fields.List
     }},
+
     methods: {
         process: function() {
             var output,
+                compUid = this.component.fields.uid,
                 _this = this,
                 _processes = Cmint.Instance.Fields.Processes;
             if (_this.field.processes) {
                 _this.field.processes.forEach(function(fn) {
-                    output = _processes[fn](_this.field.inputs, _this.component)
+                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config);
                 })
             } else {
                 console.error('Field groups must have associated processes');
             }
-            this.component.fields.output[this.field.result] = output;
+            Cmint.Fields.UIDS[compUid].config.fields.output[this.field.result] = output;
         },
         firstUppercase: function(txt) {
             return txt.charAt(0).toUpperCase() + txt.replace(/^./,'');
@@ -1782,7 +1841,7 @@ Vue.component('field', {
     }
 })
 Vue.component('fields', {
-    props: ['component'],
+    props: ['component', 'mountonly'],
     template: '\
         <div :class="wrapClasses">\
             <div class="fields-top">\
@@ -1817,11 +1876,17 @@ Vue.component('fields', {
         }
     },
     methods: {
-        open: function() {
+        open: function(mountOnly) {
             var _this = this;
-            setTimeout(function() {
-                _this.isActive = true;
-            },50);
+            if (!mountOnly) {
+                setTimeout(function() {
+                    _this.isActive = true;
+                },50);
+            } else {
+                setTimeout(function() {
+                    Cmint.App.fieldsComponent = null;
+                })
+            }
         },
         close: function() {
             var _this = this;
@@ -1839,8 +1904,12 @@ Vue.component('fields', {
         }
     },
     mounted: function() {
-        this.open();
-        Cmint.Util.debug('opened fields for "' + this.component.name + '"');
+        if (!this.mountonly) {
+            this.open();
+            Cmint.Util.debug('opened fields for "' + this.component.name + '"');
+        } else {
+            Cmint.Util.debug('only mounting field component "'+this.component.name+'"')
+        }
     }
 })
 Cmint.Drag.fn = (function(){
@@ -1893,7 +1962,6 @@ Cmint.Drag.onDrag = function(element, source) {
 
         Cmint.Drag.dragFromComponents = false;
         Cmint.Drag.dragIndex = Cmint.Sync.getStagePosition(element);
-        console.log(Cmint.Drag.dragIndex);
         Cmint.Drag.dragData = Cmint.Sync.getComponentData(Cmint.Drag.dragIndex, Cmint.App.stage);
 
         Cmint.Drag.dragVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dragIndex, Cmint.App.stage);
@@ -2206,6 +2274,7 @@ Cmint.Init = function() {
                 // Global items used by other components
                 activeComponent: null,
                 fieldsComponent: null,
+                fieldsMountOnly: false,
                 componentList: null,
                 selectedCategory: 'All',
 
@@ -2232,7 +2301,7 @@ Cmint.Init = function() {
 
             mounted: function() {
                 var _this = this;
-                this.$bus.$on('callComponentFields', function() {
+                Cmint.Bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.activeComponent.config;
                 })
                 Cmint.Ui.documentHandler();

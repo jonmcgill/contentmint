@@ -73,7 +73,7 @@ gulp.task('build', function() {
         .pipe(gulp.dest('dist/'));
 })
 
-gulp.task('dev', ['build'], function() {
+gulp.task('dev', ['build', 'build-example'], function() {
     server.start({
         host: 'localhost',
         port: 3000,
@@ -90,6 +90,7 @@ gulp.task('dev', ['build'], function() {
             .pipe(sass())
             .pipe(gulp.dest('dist/'))
     })
+    gulp.watch('example/**/*', ['build-example']);
 })
 
 

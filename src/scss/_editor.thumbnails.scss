@@ -39,7 +39,7 @@
     }
 }
 
-$scale: 0.7;
+$scale: 0.5;
 .thumbnail-scale-wrap {
     transform: scale($scale);
     -moz-transform: scale($scale);
@@ -49,6 +49,12 @@ $scale: 0.7;
     -moz-transform-origin: 0 0;
     -ms-transform-origin: 0 0;
     -webkit-transform-origin: 0 0;
-    width: 142.85714%;
+    width: 200%;
     overflow: hidden;
+}
+.gu-mirror {
+    .thumbnail-scale-wrap {
+        transform: scale(1);
+        width: 100%;
+    }
 }

@@ -17,7 +17,6 @@ Cmint.Drag.onDrag = function(element, source) {
 
         Cmint.Drag.dragFromComponents = false;
         Cmint.Drag.dragIndex = Cmint.Sync.getStagePosition(element);
-        console.log(Cmint.Drag.dragIndex);
         Cmint.Drag.dragData = Cmint.Sync.getComponentData(Cmint.Drag.dragIndex, Cmint.App.stage);
 
         Cmint.Drag.dragVmContextData = Cmint.Sync.getVmContextData(Cmint.Drag.dragIndex, Cmint.App.stage);

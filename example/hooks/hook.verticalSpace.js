@@ -8,7 +8,7 @@
 Cmint.createComponentHook('vertical-space', 'Global', {
     editing: function(element) {
         $(element).css({
-            'margin-bottom': '24px'
+            'margin-bottom': '16px'
         });
     },
     cleanup: function(element) {

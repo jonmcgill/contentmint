@@ -1,5 +1,5 @@
 Vue.component('fields', {
-    props: ['component'],
+    props: ['component', 'mountonly'],
     template: '\
         <div :class="wrapClasses">\
             <div class="fields-top">\
@@ -34,11 +34,17 @@ Vue.component('fields', {
         }
     },
     methods: {
-        open: function() {
+        open: function(mountOnly) {
             var _this = this;
-            setTimeout(function() {
-                _this.isActive = true;
-            },50);
+            if (!mountOnly) {
+                setTimeout(function() {
+                    _this.isActive = true;
+                },50);
+            } else {
+                setTimeout(function() {
+                    Cmint.App.fieldsComponent = null;
+                })
+            }
         },
         close: function() {
             var _this = this;
@@ -56,7 +62,11 @@ Vue.component('fields', {
         }
     },
     mounted: function() {
-        this.open();
-        Cmint.Util.debug('opened fields for "' + this.component.name + '"');
+        if (!this.mountonly) {
+            this.open();
+            Cmint.Util.debug('opened fields for "' + this.component.name + '"');
+        } else {
+            Cmint.Util.debug('only mounting field component "'+this.component.name+'"')
+        }
     }
 })

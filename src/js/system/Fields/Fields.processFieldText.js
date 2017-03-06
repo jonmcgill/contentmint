@@ -2,15 +2,16 @@ Cmint.Fields.processFieldText = function(instance) {
 
     var fieldData = instance.fields[instance.field.name];
     var input = instance.field.inputs[fieldData.input];
+    var compUid = instance.component.fields.uid;
+    var component = Cmint.Fields.UIDS[compUid];
 
     // tokenize
-    if (instance.component.tokens) {
-        input = Cmint.Fields.tokenize(input, instance.component);
+    if (component.config.tokens) {
+        input = Cmint.Fields.tokenize(input, component.config);
     }
 
     // run check function
     if (instance.field.check && input !== '') {
-        console.log(instance.field);
         instance.pass = !!input.match(instance.field.check);
         Cmint.Util.debug('field passed - ' + instance.pass);
     }
@@ -24,6 +25,6 @@ Cmint.Fields.processFieldText = function(instance) {
     }
 
     // send to declared output
-    instance.component.fields.output[instance.field.result] = input;
+    component.config.fields.output[instance.field.result] = input;
 
 }

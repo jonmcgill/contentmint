@@ -14,10 +14,10 @@ Cmint.Editor.init = function(component) {
             $this = $(this),
             contentKey = $this.attr(Cmint.Settings.name.dataEdit),
             stash;
-
+            
         $this.html(component.config.content[contentKey]);
 
-        if (component.environment === 'components') return false;
+        if (component.environment === 'components') return;
 
         $this.attr('data-temp', editorUid);
         config.selector = '[data-temp="'+editorUid+'"]';
@@ -38,7 +38,7 @@ Cmint.Editor.init = function(component) {
                     component.config.content[contentKey] = editor.getContent();
                     Cmint.Util.debug('updated content "'+contentKey+'" for ' + component.config.name);
                 }
-            },500));
+            }));
             editor.on('focus', function() {
                 Cmint.Bus.$emit('showToolbar');
                 component.config.content[contentKey] = editor.getContent();

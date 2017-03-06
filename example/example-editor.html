@@ -8,9 +8,8 @@
 <body>
 <!--
 TODO
-    - editor types
+    - tinymce editor types
     - able to edit and remove custom components
-    * notification component
     - code cleanup (including hook transformation) and storage
     - component drag handles
     - keyboard bindings for toolbar and sidebar views
@@ -25,27 +24,27 @@ TODO
     template that could exist in the project. Note that the markup for the content
     is not saved in the data.
  -->
- <textarea style="display: none" id="Data">
-     {
-        "template": "email",
-        "contentName": "Example Email",
-        "username": "mcgilljo",
-        "saved": [],
-        "customComponents": []
-     }
- </textarea>
+<textarea style="display: none" id="Data">
+ {
+    "template": "email",
+    "contentName": "Example Email",
+    "username": "mcgilljo",
+    "saved": [],
+    "customComponents": []
+ }
+</textarea>
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
     <overlay></overlay>
-    <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
+    <fields v-if="fieldsComponent" :component="fieldsComponent" :mountonly="fieldsMountOnly"></fields>
     <actionbar></actionbar>
     <div class="cmint-notification"></div>
     <content-template 
         :fields-component="fieldsComponent" 
         :template="templateMarkup"
         :stage="stage"
-        :class="{ scale: !!fieldsComponent }"></content-template>
+        :class="{ scale: !!fieldsComponent && !fieldsMountOnly }"></content-template>
 </div>
 
 <!-- Contentmint Dependencies -->

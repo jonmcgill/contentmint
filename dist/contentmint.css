@@ -218,16 +218,20 @@ body {
     content: ''; }
 
 .thumbnail-scale-wrap {
-  transform: scale(0.7);
-  -moz-transform: scale(0.7);
-  -ms-transform: scale(0.7);
-  -webkit-transform: scale(0.7);
+  transform: scale(0.5);
+  -moz-transform: scale(0.5);
+  -ms-transform: scale(0.5);
+  -webkit-transform: scale(0.5);
   transform-origin: 0 0;
   -moz-transform-origin: 0 0;
   -ms-transform-origin: 0 0;
   -webkit-transform-origin: 0 0;
-  width: 142.85714%;
+  width: 200%;
   overflow: hidden; }
+
+.gu-mirror .thumbnail-scale-wrap {
+  transform: scale(1);
+  width: 100%; }
 
 .cmint.fields-container {
   position: fixed;

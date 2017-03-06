@@ -1,5 +1,7 @@
 Vue.component('field-group', {
+
     props: ['field', 'component'],
+
     template: '\
         <div class="field-instance">\
             <label>{{ field.label }}</label>\
@@ -17,22 +19,25 @@ Vue.component('field-group', {
                 </div>\
             </div>\
         </div>',
+
     data: function() { return {
         fields: Cmint.Instance.Fields.List
     }},
+
     methods: {
         process: function() {
             var output,
+                compUid = this.component.fields.uid,
                 _this = this,
                 _processes = Cmint.Instance.Fields.Processes;
             if (_this.field.processes) {
                 _this.field.processes.forEach(function(fn) {
-                    output = _processes[fn](_this.field.inputs, _this.component)
+                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config);
                 })
             } else {
                 console.error('Field groups must have associated processes');
             }
-            this.component.fields.output[this.field.result] = output;
+            Cmint.Fields.UIDS[compUid].config.fields.output[this.field.result] = output;
         },
         firstUppercase: function(txt) {
             return txt.charAt(0).toUpperCase() + txt.replace(/^./,'');

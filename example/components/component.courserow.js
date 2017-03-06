@@ -1,31 +1,47 @@
 Cmint.createComponent({
     template: '\
         <comp :config="config">\
-            <td :style="config.css.row" data-edit="date"></td>\
-            <td :style="config.css.row" data-edit="name"></td>\
-            <td :style="config.css.row" data-edit="id"></td>\
-            <td :style="config.css.row"><a :href="config.fields.output.register">Register</a></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="platform"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="date"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="time"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
+                <a :href="config.fields.output.register" style="color:#0b4b37">Click Here</a>\
+            </td>\
         </comp>',
     config: {
         name: 'course-row',
         display: 'Course Row',
         tags: { root: 'tr' },
-        tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+        tokens: [
+            { 'platform': 'platform' },
+            { 'date': 'date' }, 
+            { 'time': 'time' },
+            { 'code': 'code' },
+            { 'name': 'name' },
+        ],
         content: {
+            platform: 'Contact Management',
             date: '3/6/2017',
-            name: 'Contact Management Advanced',
-            id: 'CM109'
+            time: '11:00 am',
+            name: 'Introduction to Contact Management',
+            code: 'CM101'
         },
         css: {
             row: { 
                 'text-align': 'center',
-                'border': '1px solid black',
-                'font-family': 'sans-serif'
+                'border': '1px solid #1e201f',
+                'font-family': 'sans-serif',
+                'font-size': '12px'
             }
         },
         fields: {
-            output: { register: '#' },
-            list: [{name: 'link-mailto', result: 'register' }]
+            output: { register: '#', bgcolor: '' },
+            list: [
+                {name: 'link-mailto', result: 'register' },
+                {name: 'bgcolor', result: 'bgcolor' }
+            ]
         }
     }
 })

@@ -18,6 +18,13 @@ Cmint.Ui.documentHandler = function() {
                     $(Cmint.Settings.class.component + '.active').removeClass('active');
                     component.addClass('active');
                 }
+                // blur the previously focused editor instance
+                $('.mce-edit-focus').each(function() {
+                    if (!$(this).closest(Cmint.Settings.class.component).hasClass('active')) {
+                        $(this).blur();
+                    }
+                })
+                
             } else {
                 $(Cmint.Settings.class.component + '.active').removeClass('active');
                 if (!isActionBar && Cmint.App.activeComponent) {

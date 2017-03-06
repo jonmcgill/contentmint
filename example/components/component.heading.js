@@ -3,8 +3,11 @@ Cmint.createComponent({
         <comp :config="config" :style="{\
             background: config.fields.output.bg,\
             padding: config.fields.output.padding,\
-            \'font-family\': config.css.fontFam,\
-            color:config.fields.output.color}"\
+            color:config.fields.output.color,\
+            \'font-family\': config.css.fontfam,\
+            \'font-size\': config.css.fontsize,\
+            \'font-weight\': config.css.fontweight,\
+            \'line-height\': config.css.lineheight}"\
             data-edit="text">\
         </comp>',
     config: {
@@ -12,10 +15,15 @@ Cmint.createComponent({
         display: 'Heading',
         category: 'Content',
         css: {
-            fontfam: 'sans-serif'
+            fontfam: 'Arial, sans-serif',
+            fontsize: '24px',
+            fontweight: 'bold',
+            lineheight: 'normal'
         },
         tokens: [{'text': 'text'}, {'bg': 'bg'}],
-        content: { text: '<h1 style="font-family:sans-serif;">Lorem Ipsum Headingum</h1>' },
+        content: { 
+            text: '<div>Lorem Ipsum Headingum</div>'
+        },
         fields: {
             output: { color: '', bg: '', padding: '' },
             list: [
