@@ -548,6 +548,9 @@ Cmint.createMenu = function(name, map) {
     }
 
 }
+Cmint.createOnSaveHook = function(fn) {
+    Cmint.Hooks.onSaveHook = fn;
+}
 // Defines a template and assigns path and components
 // options = {
 //     path: '/path/to/template.html',
@@ -632,13 +635,14 @@ Cmint.createToolbarButton({
 // components.
 Vue.component('comp', {
 
-    props: ['config'],
+    props: ['config', 'tag'],
 
     render: function(make) {
         var classes = {};
         var tag = this.config.tags && this.config.tags.root
             ? this.config.tags.root
             : 'div';
+        tag = this.tag ? this.tag : tag;
         classes[Cmint.Settings.name.component] = true;
         classes[Cmint.Settings.name.contextualize] = this.contextualize;
 
@@ -1203,23 +1207,25 @@ Cmint.Editor.init = function(component) {
         }
 
         config.setup = function(editor) {
+            if (component) 
             editor.on('Change keyup', _.debounce(function() {
                 if (component) {
-                    // Editor.runHook(component, 'editor');
                     component.config.content[contentKey] = editor.getContent();
-                    Cmint.Bus.$emit('fieldProcessing');
                     Cmint.Util.debug('updated content "'+contentKey+'" for ' + component.config.name);
                 }
-            }));
+            },500));
             editor.on('focus', function() {
                 Cmint.Bus.$emit('showToolbar');
+                component.config.content[contentKey] = editor.getContent();
                 stash = editor.getContent();
             });
             editor.on('blur', function() {
                 if (!component.config.content) return;
                 if (component.config.content[contentKey] !== stash) {
+                    Cmint.Bus.$emit('fieldProcessing');
+                    Vue.nextTick(Cmint.App.refresh);
+                    Vue.nextTick(Cmint.App.snapshot);
                     Cmint.App.save();
-                    Cmint.App.snapshot();
                 }
             })
             $this.removeAttr('data-temp');
@@ -1924,7 +1930,7 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
         $element.remove();
         Cmint.Sync.insertVmContextData(Cmint.Drag.dropIndex, Cmint.Drag.dragData, Cmint.App.stage);
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.Drag.fn.updateContainers);
         Vue.nextTick(Cmint.App.snapshot);
         Cmint.Util.debug('dropped new component "'+Cmint.Drag.dragData.name+'" in stage at [' + Cmint.Drag.dropIndex + ']');
@@ -1955,7 +1961,7 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         }
 
         Cmint.Sync.rearrangeVmContextData(dragVm, dropVm);
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.Drag.updateContainers);
         Vue.nextTick(Cmint.App.snapshot);
         Cmint.App.save();
@@ -1975,7 +1981,7 @@ Cmint.Drag.onRemove = function(element, container, source) {
         Cmint.Util.debug('removed component "'+Cmint.Drag.dragData.name+'" from stage at ' + Cmint.Drag.dragData.index);
         Cmint.Sync.removeVmContextData(Cmint.Drag.dragVmContextData);
 
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.App.save);
         Vue.nextTick(Cmint.App.snapshot);
 
@@ -2086,16 +2092,37 @@ Cmint.AppFn.mergeCustomComponents = function(data) {
     }
 
 }
+Cmint.AppFn.notify = function(message) {
+    
+    var $notify = $(Cmint.Settings.class.notification);
+    
+    $notify.text(message);
+    $notify.addClass('active');
+    setTimeout(function() {
+        $notify.removeClass('active');
+    }, 2500);
+
+}
+Cmint.AppFn.refresh = function() {
+    
+    this.stage = Cmint.Util.copyObject(this.stage);
+
+}
 Cmint.AppFn.save = function() {
     
     Cmint.Bus.$emit('updateEditorData');
 
     this.saved = Cmint.Util.copyObject(this.stage);
-    var $notify = $(Cmint.Settings.class.notification);
-    $notify.addClass('active');
-    setTimeout(function() {
-        $notify.removeClass('active');
-    }, 2500);
+
+    Cmint.Hooks.onSaveHook({
+        template: Cmint.App.template,
+        contentNae: Cmint.App.contentName,
+        username: Cmint.App.username,
+        saved: Cmint.App.saved,
+        customComponents: Cmint.App.customComponents
+    })
+
+    Cmint.AppFn.notify('saved');
 
     Cmint.Util.debug('content saved');
 
@@ -2164,8 +2191,9 @@ Cmint.Init = function() {
 
             data: {
 
-                // User Data for testing
-                template: markup,
+                templateMarkup: markup, // Does not get pushed on save
+                template: Cmint.Instance.Data.template,
+                
                 templateName: Cmint.Instance.Data.template,
                 username: Cmint.Instance.Data.username,
                 contentName: Cmint.Instance.Data.contentName,
@@ -2193,7 +2221,8 @@ Cmint.Init = function() {
 
                 save: Cmint.AppFn.save,
                 snapshot: Cmint.AppFn.snapshot,
-                undo: Cmint.AppFn.undo
+                undo: Cmint.AppFn.undo,
+                refresh: Cmint.AppFn.refresh
 
             },
 

@@ -16,7 +16,7 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         Cmint.Drag.dropIndex = Cmint.Sync.getStagePosition(element);
         $element.remove();
         Cmint.Sync.insertVmContextData(Cmint.Drag.dropIndex, Cmint.Drag.dragData, Cmint.App.stage);
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.Drag.fn.updateContainers);
         Vue.nextTick(Cmint.App.snapshot);
         Cmint.Util.debug('dropped new component "'+Cmint.Drag.dragData.name+'" in stage at [' + Cmint.Drag.dropIndex + ']');
@@ -47,7 +47,7 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         }
 
         Cmint.Sync.rearrangeVmContextData(dragVm, dropVm);
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.Drag.updateContainers);
         Vue.nextTick(Cmint.App.snapshot);
         Cmint.App.save();

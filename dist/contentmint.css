@@ -1,4 +1,4 @@
-.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #ActionBar .custom-add-wrap, #Toolbar, .notification {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #ActionBar .custom-add-wrap, #Toolbar, .cmint-notification {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -99,8 +99,7 @@ body {
     transform: scale(0.85); }
   #Template .Contextualized {
     padding: 12px;
-    background: rgba(3, 155, 229, 0.5);
-    border: 1px dashed black; }
+    outline: 1px dashed black; }
   #Template .Contextualized.active {
     position: relative;
     outline: 2px solid orange !important;
@@ -751,16 +750,15 @@ body {
       background: #38bcfc;
       color: black; }
 
-.notification {
-  background: #1fb4fc;
-  border: 1px solid #0279b3;
-  border-radius: 0 3px 3px 0;
-  color: rgba(0, 0, 0, 0.8);
+.cmint-notification {
+  background: #333;
+  border: #cdcdcd;
+  color: white;
   display: inline-block;
-  padding: 0.5em 1em;
+  padding: 0.25em 1em;
   position: fixed;
   bottom: 2em;
   left: -5em;
-  transition: left 100ms; }
-  .notification.active {
+  transition: left 150ms; }
+  .cmint-notification.active {
     left: -2px; }

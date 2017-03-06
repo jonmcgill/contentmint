@@ -9,7 +9,7 @@ Cmint.Drag.onRemove = function(element, container, source) {
         Cmint.Util.debug('removed component "'+Cmint.Drag.dragData.name+'" from stage at ' + Cmint.Drag.dragData.index);
         Cmint.Sync.removeVmContextData(Cmint.Drag.dragVmContextData);
 
-        // Vue.nextTick(Cmint.app.refresh);
+        Vue.nextTick(Cmint.App.refresh);
         Vue.nextTick(Cmint.App.save);
         Vue.nextTick(Cmint.App.snapshot);
 

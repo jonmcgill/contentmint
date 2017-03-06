@@ -32,23 +32,25 @@ Cmint.Editor.init = function(component) {
         }
 
         config.setup = function(editor) {
+            if (component) 
             editor.on('Change keyup', _.debounce(function() {
                 if (component) {
-                    // Editor.runHook(component, 'editor');
                     component.config.content[contentKey] = editor.getContent();
-                    Cmint.Bus.$emit('fieldProcessing');
                     Cmint.Util.debug('updated content "'+contentKey+'" for ' + component.config.name);
                 }
-            }));
+            },500));
             editor.on('focus', function() {
                 Cmint.Bus.$emit('showToolbar');
+                component.config.content[contentKey] = editor.getContent();
                 stash = editor.getContent();
             });
             editor.on('blur', function() {
                 if (!component.config.content) return;
                 if (component.config.content[contentKey] !== stash) {
+                    Cmint.Bus.$emit('fieldProcessing');
+                    Vue.nextTick(Cmint.App.refresh);
+                    Vue.nextTick(Cmint.App.snapshot);
                     Cmint.App.save();
-                    Cmint.App.snapshot();
                 }
             })
             $this.removeAttr('data-temp');

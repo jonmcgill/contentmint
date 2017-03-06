@@ -2,13 +2,14 @@
 // components.
 Vue.component('comp', {
 
-    props: ['config'],
+    props: ['config', 'tag'],
 
     render: function(make) {
         var classes = {};
         var tag = this.config.tags && this.config.tags.root
             ? this.config.tags.root
             : 'div';
+        tag = this.tag ? this.tag : tag;
         classes[Cmint.Settings.name.component] = true;
         classes[Cmint.Settings.name.contextualize] = this.contextualize;
 

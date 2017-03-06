@@ -10,7 +10,7 @@
 TODO
     - editor types
     - able to edit and remove custom components
-    * hook for save function
+    * notification component
     - code cleanup (including hook transformation) and storage
     - component drag handles
     - keyboard bindings for toolbar and sidebar views
@@ -40,9 +40,10 @@ TODO
     <overlay></overlay>
     <fields v-if="fieldsComponent" :component="fieldsComponent"></fields>
     <actionbar></actionbar>
+    <div class="cmint-notification"></div>
     <content-template 
         :fields-component="fieldsComponent" 
-        :template="template"
+        :template="templateMarkup"
         :stage="stage"
         :class="{ scale: !!fieldsComponent }"></content-template>
 </div>
@@ -65,9 +66,17 @@ TODO
         }
     })
 
+    // Templates are just some html with a token that stands in place for the main staging
+    // area. In the place where you want to add components write in {{ stage }}. The path
+    // is used on page load to run an ajax request for the markup. The components array is
+    // just a list of components you'd like to make available for that template.
     Cmint.createTemplate('email', {
         path: '/example/email.html',
-        components: ['heading', 'body-copy', 'container']
+        components: ['heading', 'banner-image', 'body-copy', 'course-table', 'container']
+    })
+
+    Cmint.createOnSaveHook(function(data) {
+        // Cmint.Util.debug('ran onSave hook:\n' + JSON.stringify(data, null, 2));
     })
 
     // You may have situations where you'd like to manipulate a component after it has
@@ -111,6 +120,20 @@ TODO
         'A lot': '2.5em'
     })
 
+    Cmint.createMenu('image-list', {
+        'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+        'Computer': 'http://www.imakenews.com/rbm/sed_computer.jpg',
+        'Dayton Fountain': 'http://www.imakenews.com/rbm/sed_ru_fountain.jpg',
+        'Instructor': 'http://www.imakenews.com/rbm/sed_instructor.jpg',
+        'Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
+        'Students': 'http://www.imakenews.com/rbm/sed_students.jpg',
+        'Mouse': 'http://www.imakenews.com/rbm/sed_mouse.jpg',
+        'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
+        'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
+        'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
+        'YoYo': 'http://mediad.publicbroadcasting.net/p/michigan/files/styles/x_large/public/yoyo_ma_trumpie_12.jpg'
+    })
+
     // type, display, label, input, menu, help*, processes*
     Cmint.createField({
         name: 'padding',
@@ -120,6 +143,55 @@ TODO
             label: 'Padding',
             input: 'padding',
             menu: 'padding'
+        }
+    })
+
+    Cmint.createField({
+        name: 'image-presets',
+        config: {
+            type: 'field-dropdown',
+            display: 'Preset Images',
+            label: 'Image List',
+            input: 'selected-image',
+            menu: 'image-list'
+        }
+    })
+
+    Cmint.createComponent({
+        template: '\
+            <comp v-if="config.fields.output.link" :tag="config.tags.link" :config="config" :href="config.fields.output.link" target="_blank" style="display:block">\
+                <img :src="config.fields.output.source" :style="config.css" />\
+            </comp>\
+            <comp v-else :tag="config.tags.image" :config="config" :src="config.fields.output.source" :style="config.css"></comp>',
+        config: {
+            name: 'banner-image',
+            display: 'Banner Image',
+            category: 'Images',
+            css: {
+                'width':'100%',
+                'display': 'block',
+                'margin':'0 auto'
+            },
+            tags: {
+                image: 'img',
+                link: 'a'
+            },
+            tokens: [
+                { 'url': 'link' },
+                { 'source': 'source' }
+            ],
+            fields: {
+                output: {
+                    source: 'http://placehold.it/800x300',
+                    link: ''
+                },
+                list: [
+                    {   name: 'link-choice',
+                        result: 'link'      },
+                    {   name: 'image-presets',
+                        result: 'source'    }
+                ]
+            }
         }
     })
 
@@ -210,11 +282,11 @@ TODO
     Cmint.createComponent({
         template: '\
             <comp :config="config" :style="{\
-                    background: config.fields.output.bg,\
-                    padding: config.fields.output.padding\
-                }">\
-                <h1 :style="{color:config.fields.output.color, \'font-family\': config.css.fontfam}" data-edit="text"></h1>\
-                <a :href="config.fields.output.href" data-edit="link-text"></a>\
+                background: config.fields.output.bg,\
+                padding: config.fields.output.padding,\
+                \'font-family\': config.css.fontFam,\
+                color:config.fields.output.color}"\
+                data-edit="text">\
             </comp>',
         config: {
             name: 'heading',
@@ -224,14 +296,13 @@ TODO
                 fontfam: 'sans-serif'
             },
             tokens: [{'text': 'text'}, {'bg': 'bg'}],
-            content: { text: 'Lorem Ipsum Headingum', 'link-text': 'email@here' },
+            content: { text: '<h1 style="font-family:sans-serif;">Lorem Ipsum Headingum</h1>' },
             fields: {
-                output: { color: 'red', bg: '', padding: '', href: '' },
+                output: { color: '', bg: '', padding: '' },
                 list: [
                     { name: 'color', result: 'color' },
                     { name: 'bg-color', result: 'bg' },
-                    { name: 'padding', result: 'padding' },
-                    { name: 'link-choice', result: 'href' }
+                    { name: 'padding', result: 'padding' }
                 ]
             }
         }
@@ -246,7 +317,7 @@ TODO
             css: {
                 'line-height': '1.7',
                 'font-family': 'sans-serif',
-                'font-size': '1.15em'
+                'font-size': '1.05em'
             },
             content: {
                 copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
@@ -279,6 +350,99 @@ TODO
     Cmint.createMenu('align-block', {
         'Default': '',
         'Center': '0 auto'
+    })
+
+    Cmint.createComponent({
+        template: '\
+            <comp :config="config" cellspacing="5" cellpadding="5" align="center" width="100%">\
+                <thead>\
+                    <tr>\
+                        <th :style="config.css.header">Date</th>\
+                        <th :style="config.css.header">Course Name</th>\
+                        <th :style="config.css.header">Course ID</th>\
+                        <th :style="config.css.header">Register</th>\
+                    </tr>\
+                </thead>\
+                <context\
+                    :contexts="config.contexts.rows"\
+                    :tag="config.tags.rows"\
+                    :insert="config.tags.insert"\
+                    data-context="rows"></context>\
+            </comp>',
+        config: {
+            name: 'course-table',
+            display: 'Course Table',
+            tags: { 
+                root: 'table',
+                rows: 'tbody',
+                insert: 'tr'
+            },
+            category: 'Content',
+            css: {
+                header: { 
+                    background: 'black', 
+                    color: 'white',
+                    'font-family': 'Arial',
+                    'text-align': 'center'
+                }
+            },
+            contexts: {
+                rows: [{
+                    name: 'course-row',
+                    display: 'Course Row',
+                    tags: { root: 'tr' },
+                    tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+                    content: {
+                        date: '3/6/2017',
+                        name: 'Contact Management Advanced',
+                        id: 'CM109'
+                    },
+                    css: {
+                        row: { 
+                            'text-align': 'center',
+                            'border': '1px solid black',
+                            'font-family': 'sans-serif'
+                        }
+                    },
+                    fields: {
+                        output: { register: '#' },
+                        list: [{name: 'link-mailto', result: 'register' }]
+                    }
+                }]
+            }
+        }
+    })
+
+    Cmint.createComponent({
+        template: '\
+            <comp :config="config">\
+                <td :style="config.css.row" data-edit="date"></td>\
+                <td :style="config.css.row" data-edit="name"></td>\
+                <td :style="config.css.row" data-edit="id"></td>\
+                <td :style="config.css.row"><a :href="config.fields.output.register">Register</a></td>\
+            </comp>',
+        config: {
+            name: 'course-row',
+            display: 'Course Row',
+            tags: { root: 'tr' },
+            tokens: [{ date: 'date'}, {name: 'name'}, {id: 'id'}],
+            content: {
+                date: '3/6/2017',
+                name: 'Contact Management Advanced',
+                id: 'CM109'
+            },
+            css: {
+                row: { 
+                    'text-align': 'center',
+                    'border': '1px solid black',
+                    'font-family': 'sans-serif'
+                }
+            },
+            fields: {
+                output: { register: '#' },
+                list: [{name: 'link-mailto', result: 'register' }]
+            }
+        }
     })
 
     Cmint.createComponent({

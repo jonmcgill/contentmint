@@ -17,8 +17,9 @@ Cmint.Init = function() {
 
             data: {
 
-                // User Data for testing
-                template: markup,
+                templateMarkup: markup, // Does not get pushed on save
+                template: Cmint.Instance.Data.template,
+                
                 templateName: Cmint.Instance.Data.template,
                 username: Cmint.Instance.Data.username,
                 contentName: Cmint.Instance.Data.contentName,
@@ -46,7 +47,8 @@ Cmint.Init = function() {
 
                 save: Cmint.AppFn.save,
                 snapshot: Cmint.AppFn.snapshot,
-                undo: Cmint.AppFn.undo
+                undo: Cmint.AppFn.undo,
+                refresh: Cmint.AppFn.refresh
 
             },
 
