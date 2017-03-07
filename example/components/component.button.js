@@ -10,7 +10,7 @@ Cmint.createComponent({
               <td width="20" height="5"></td>\
               <td>\
                   <div style="font-family:Arial, sans-serif; font-size:14px; font-style:italic; font-weight:bold; text-align:center; line-height:14px;">\
-                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;">{{ config.fields.output.linktext}}</a>\
+                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;" v-text="config.fields.output.linktext"></a>\
                   </div>\
                 </td>\
               <td width="20" height="5"></td>\

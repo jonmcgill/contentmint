@@ -1,12 +1,14 @@
 #Stage .Component {
 
     transition: padding 200ms, background 200ms;
+    position: relative;
 
     &.active {
         position: relative;
         outline: 2px solid $color-accent;
         box-shadow: 0 0 16px $color-accent;
     }
+
 }
 
 *#Stage.active,

@@ -13,6 +13,9 @@ Cmint.Fields.assignUid = function(component) {
         !component.config.fields.uid || component.config.copy) {
 
         uid = Cmint.Util.uid(12);
+        while (Cmint.Fields.UIDS.hasOwnProperty(uid)) {
+            uid = Cmint.Util.uid(12);
+        }
         component.config.fields.uid = uid;
         Cmint.Util.debug('assigned field uid "'+uid+'" to component at [' + component.config.index + ']');
 
@@ -20,8 +23,16 @@ Cmint.Fields.assignUid = function(component) {
             component.config.copy = false;
         }
 
-        Cmint.Fields.UIDS[uid] = component;
+    }
 
+    // If a custom component is being added, its components may already have field uids.
+    // If that is the case, check if that uid exists in Cmint.Fields.UIDS. If so, generate
+    // a new uid, add it to UIDS, and assign it to the component.
+    if (component.config.fields.uid) {
+        if (Cmint.Fields.UIDS.hasOwnProperty(uid)) {
+            component.config.fields.uid = Cmint.Util.uid(12);
+        }
+        Cmint.Fields.UIDS[component.config.fields.uid] = component;
     }
 
 }

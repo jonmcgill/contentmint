@@ -22,10 +22,9 @@ Cmint.Drag.init = function() {
         },
 
         accepts: function(element, target, source, sibling) {
-            return target !== Cmint.Drag.components && !Cmint.Util.contains(element, target);
-        },
-
-        removeOnSpill: true
+            return target !== Cmint.Drag.components &&
+                   !Cmint.Util.contains(element, target);
+        }
 
     }
 

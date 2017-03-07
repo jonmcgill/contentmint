@@ -66,7 +66,6 @@ Cmint.Init = function() {
                 Cmint.Ui.contextualize();
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
-                Cmint.Ui.windowLoad();
                 Cmint.Util.debug('mounted application');
             }
 

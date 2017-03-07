@@ -29,7 +29,7 @@ Cmint.createMenu('bgcolor', {
     'Dark': '#cccccc'
 })
 Cmint.createMenu('image-list', {
-    'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+    'Default': 'http://placehold.it/800x300',
     'Computer': 'http://www.imakenews.com/rbm/sed_computer.jpg',
     'Dayton Fountain': 'http://www.imakenews.com/rbm/sed_ru_fountain.jpg',
     'Instructor': 'http://www.imakenews.com/rbm/sed_instructor.jpg',
@@ -282,7 +282,7 @@ Cmint.createComponent({
               <td width="20" height="5"></td>\
               <td>\
                   <div style="font-family:Arial, sans-serif; font-size:14px; font-style:italic; font-weight:bold; text-align:center; line-height:14px;">\
-                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;">{{ config.fields.output.linktext}}</a>\
+                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;" v-text="config.fields.output.linktext"></a>\
                   </div>\
                 </td>\
               <td width="20" height="5"></td>\

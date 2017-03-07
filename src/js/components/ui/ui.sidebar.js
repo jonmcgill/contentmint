@@ -42,6 +42,10 @@ Vue.component('sidebar', {
         toggle: function() {
             this.isActive = !this.isActive;
             this.$bus.$emit('toggleSidebar', this.isActive);
+        },
+
+        updateThumbnails: function() {
+            Cmint.Ui.refreshComponentList();
         }
 
     },
@@ -66,6 +70,14 @@ Vue.component('sidebar', {
                 _this.isActive = false;
             }
         })
+
+        this.updateThumbnails();
+
+    },
+
+    updated: function() {
+
+        this.updateThumbnails();
 
     }
 

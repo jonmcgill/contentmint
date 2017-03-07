@@ -8,12 +8,41 @@
 <body>
 <!--
 TODO
-    - tinymce editor types
-    - able to edit and remove custom components
-    - code cleanup (including hook transformation) and storage
-    - component drag handles
-    - keyboard bindings for toolbar and sidebar views
 
+    - Custom Component modal styles need to be standardized. Currently the inputs are not
+      the correct width on mac chrome.
+
+    - It would be nice to allow the dev to configure certain tinymce toolbars for certain
+      kinds of components. Some components you don't want the user to add bulleted lists, etc.
+
+    - There needs to be a mechanism for adding/editing/removing custom components.
+
+    - Even though it crosses the line possibly into implementation, there should be a way to 
+      cleanup and grab the markup for a given component structure. There should also be a hook
+      in place to all the dev to define how that cleanup happens.
+
+    - Users don't know when a dragged component can be dropped into stage (i.e. they don't
+      know to wait for the mirror image to pop up). There may need to be some prompt added in.
+
+    - Users, if they're moving quickly, might accidentally drag a component off the stage,
+      deleting it, if they are simply trying to highlight some text. Drag handles will certainly
+      be a necessity. However, we have to figure out how to do this without adding anything
+      inside the DOM of the component (because of structures that reject them). We could potentially
+      write a handler that adds a class to the component when someone hovers over the top right area
+      of a component. When that class is present, dragging works. This handler could fire when a
+      component is made active. A ::after psuedo selector could be used to provide a visual prompt
+      on the component. [[ For the time being, this doesn't look possible without significant modification ]]
+
+    - Some features simply cannot be made self-explanatory, like using the contextualizing feature
+      to create custom reusable components. There should probably be an icon button that pulls
+      up a help modal which explains how to use the editor in a general sense.
+
+    - Add keyboard bindings for toolbar and sidebar views as well as save, undo, and contextualize features.
+
+ -->
+
+
+ <!-- 
     This is the data populated by whatever backend processes you choose. The
     path for the template markup should be defined in Cmint.createTemplate. Also,
     customComponents here should only be custom components created for this
@@ -23,7 +52,7 @@ TODO
     is because we don't want to load the custom components saved for every possible
     template that could exist in the project. Note that the markup for the content
     is not saved in the data.
- -->
+-->
 <textarea style="display: none" id="Data">
  {
     "template": "email",

@@ -40,9 +40,9 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         // If the element is being dragged down, we need to subtract one from the
         // drop index on account of the placeholder.
         if (dropVm.context == dragVm.context) {
-            dragIndex = Cmint.Drag.dragIndex[Cmint.Drag.dragIndex - 1];
+            dragIndex = dragVm.index;
             dropIndex = dropVm.index;
-            if (dragIndex < dropIndex) dropVm.index--;
+            if (dragIndex < dropIndex) dropVm.index = dropVm.index - 1;
             Cmint.Util.debug('reordered components in the same context');
         }
 

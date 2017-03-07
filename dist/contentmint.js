@@ -678,7 +678,7 @@ Vue.component('comp', {
             this.config.index = Cmint.Sync.getStagePosition(this.$el);
 
             // Assign field uid if component utilizes fields system
-            Cmint.Fields.assignUid(this);
+            if (this.config.fields) Cmint.Fields.assignUid(this);
             
             // Run component hooks
             Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
@@ -877,6 +877,10 @@ Vue.component('sidebar', {
         toggle: function() {
             this.isActive = !this.isActive;
             this.$bus.$emit('toggleSidebar', this.isActive);
+        },
+
+        updateThumbnails: function() {
+            Cmint.Ui.refreshComponentList();
         }
 
     },
@@ -901,6 +905,14 @@ Vue.component('sidebar', {
                 _this.isActive = false;
             }
         })
+
+        this.updateThumbnails();
+
+    },
+
+    updated: function() {
+
+        this.updateThumbnails();
 
     }
 
@@ -1302,6 +1314,43 @@ Cmint.Ui.callCustomModal = function(data) {
     data.newComp = !data.newComp;
 
 }
+// Not used (for now). I'm leaving it here because there may be a time when I want it
+Cmint.Ui.componentDragIconHandler = function(component) {
+
+    var $comp = $(component.$el),
+        offset = $comp.offset(),
+        width = $comp.width();
+
+    $comp.unbind('mouseenter mouseleave');
+
+    $comp.on('mouseenter', function() {
+        $(this).addClass('maybeActive');
+    })
+    $comp.on('mouseleave', function() {
+        $(this).removeClass('maybeActive');
+    })
+
+    $(document).on('mousemove', function(event) {
+
+        var left = event.pageX,
+            top = event.pageY,
+            maybe = $comp.hasClass('maybeActive'),
+            draggable = $comp.hasClass('draggable'),
+
+            inZone = left > offset.left + width - 25 &&
+                     left < offset.left + width + 5 &&
+                     top > offset.top - 5 &&
+                     top < offset.top + 25;
+
+        if (inZone && !draggable) {
+            $comp.addClass('draggable');
+        } else if (!inZone && draggable) {
+            $comp.removeClass('draggable');
+        }
+
+    })
+
+}
 Cmint.Ui.contextualize = function() {
 
     Cmint.Bus.$on('contextualize', function() {
@@ -1328,13 +1377,15 @@ Cmint.Ui.copyComponent = function() {
     // mounting the fields widget with the component. Otherwise it will not be
     // linked to Fields.UIDS and any updates made to editor content will not trigger
     // field processes.
-    Cmint.App.fieldsMountOnly = true;
-    Cmint.App.fieldsComponent = clone;
-    setTimeout(function() {
-        Cmint.App.fieldsMountOnly = false;
-        Cmint.App.fieldsComponent = null;
-    },20)
-
+    if (!!clone.fields) {
+        Cmint.App.fieldsMountOnly = true;
+        Cmint.App.fieldsComponent = clone;
+        setTimeout(function() {
+            Cmint.App.fieldsMountOnly = false;
+            Cmint.App.fieldsComponent = null;
+        },20)
+    }
+    
     Cmint.Bus.$emit('closeActionBar');
     Cmint.Util.debug('copied ' + comp.config.name + '[' + comp.config.index + ']');
     Cmint.App.save();
@@ -1386,6 +1437,22 @@ Cmint.Ui.documentHandler = function() {
     })
 
 }
+Cmint.Ui.refreshComponentList = function() {
+
+    $(Cmint.Settings.id.components).css({opacity: 0})
+    setTimeout(function() {
+        $('.thumbnail-scale-wrap').each(function() {
+            $(this).parent().attr('style', null);
+            var h = $(this).parent().height()
+            h = h + 34 - 36;
+            h = h / 2;
+            $(this).parent().height(h)
+        })
+        $(Cmint.Settings.id.components).animate({opacity: 1}, 400);
+    }, 300);
+
+}
+
 Cmint.Ui.removeComponent = function() {
 
     var comp = Cmint.App.activeComponent;
@@ -1400,20 +1467,6 @@ Cmint.Ui.removeComponent = function() {
     Cmint.App.save();
 
 }
-Cmint.Ui.windowLoad = function() {
-
-    $(window).on('load', function() {
-        // Adjust height of thumbnail containers
-        $('.thumbnail-scale-wrap').each(function() {
-            var h = $(this).parent().height();
-            h = h + 34 - 36;
-            h = h / 2;
-            $(this).parent().height(h);
-        })
-    })
-
-}
-
 // Some field processes need to hold on to specific component data so that when that data
 // mutates, they can run and update any tokens that may have been used. Because Vue creates
 // new instances of component data on mount and update, those data sets were being eliminated
@@ -1429,6 +1482,9 @@ Cmint.Fields.assignUid = function(component) {
         !component.config.fields.uid || component.config.copy) {
 
         uid = Cmint.Util.uid(12);
+        while (Cmint.Fields.UIDS.hasOwnProperty(uid)) {
+            uid = Cmint.Util.uid(12);
+        }
         component.config.fields.uid = uid;
         Cmint.Util.debug('assigned field uid "'+uid+'" to component at [' + component.config.index + ']');
 
@@ -1436,8 +1492,16 @@ Cmint.Fields.assignUid = function(component) {
             component.config.copy = false;
         }
 
-        Cmint.Fields.UIDS[uid] = component;
+    }
 
+    // If a custom component is being added, its components may already have field uids.
+    // If that is the case, check if that uid exists in Cmint.Fields.UIDS. If so, generate
+    // a new uid, add it to UIDS, and assign it to the component.
+    if (component.config.fields.uid) {
+        if (Cmint.Fields.UIDS.hasOwnProperty(uid)) {
+            component.config.fields.uid = Cmint.Util.uid(12);
+        }
+        Cmint.Fields.UIDS[component.config.fields.uid] = component;
     }
 
 }
@@ -2042,9 +2106,9 @@ Cmint.Drag.onDrop = function(element, target, source, sibling) {
         // If the element is being dragged down, we need to subtract one from the
         // drop index on account of the placeholder.
         if (dropVm.context == dragVm.context) {
-            dragIndex = Cmint.Drag.dragIndex[Cmint.Drag.dragIndex - 1];
+            dragIndex = dragVm.index;
             dropIndex = dropVm.index;
-            if (dragIndex < dropIndex) dropVm.index--;
+            if (dragIndex < dropIndex) dropVm.index = dropVm.index - 1;
             Cmint.Util.debug('reordered components in the same context');
         }
 
@@ -2100,10 +2164,9 @@ Cmint.Drag.init = function() {
         },
 
         accepts: function(element, target, source, sibling) {
-            return target !== Cmint.Drag.components && !Cmint.Util.contains(element, target);
-        },
-
-        removeOnSpill: true
+            return target !== Cmint.Drag.components &&
+                   !Cmint.Util.contains(element, target);
+        }
 
     }
 
@@ -2125,30 +2188,44 @@ Cmint.Drag.init = function() {
 Cmint.AppFn.createCustomComponent = function(customModal) {
 
     var double = false;
+
+    // Create customComponents array
     if (!Cmint.App.customComponents) {
         Cmint.App.customComponents = [];
     }
+
+    // If no name, render error
     if (customModal.name === '') {
         customModal.nameError = 'Name field is blank';
         return;
     }
+
+    // Find any duplicate names
     Cmint.App.components.forEach(function(component) {
-        if (component.display === component.name) {
+        if (component.display === customModal.name) {
             double = true;
         }
     })
+
+    // If no duplicates, add new custom component
     if (!double) {
+
         var comp = Cmint.Util.copyObject(customModal.component);
         comp.display = customModal.name;
         comp.category = customModal.category || 'Custom';
+
         Cmint.App.components.push(comp);
         Cmint.App.customComponents.push(comp);
         Cmint.App.save();
+
         if (comp.category === Cmint.App.selectedCategory) {
             Cmint.Bus.$emit('updateComponentList', comp);
         }
         Cmint.Util.debug('added "' + customModal.name + '" ('+customModal.category+') in template "'+Cmint.App.templateName+'"');
         Cmint.Bus.$emit('closeNewComp');
+        Cmint.AppFn.notify('Custom component "'+customModal.name+'" added!')
+
+    // If duplicate name, render error
     } else {
         customModal.nameError = 'Name already exists';
         customModal.name = '';
@@ -2204,13 +2281,13 @@ Cmint.AppFn.save = function() {
 
     Cmint.Hooks.onSaveHook({
         template: Cmint.App.template,
-        contentNae: Cmint.App.contentName,
+        contentName: Cmint.App.contentName,
         username: Cmint.App.username,
         saved: Cmint.App.saved,
         customComponents: Cmint.App.customComponents
     })
 
-    Cmint.AppFn.notify('saved');
+    Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
 
     Cmint.Util.debug('content saved');
 
@@ -2328,7 +2405,6 @@ Cmint.Init = function() {
                 Cmint.Ui.contextualize();
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
-                Cmint.Ui.windowLoad();
                 Cmint.Util.debug('mounted application');
             }
 

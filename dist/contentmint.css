@@ -526,7 +526,8 @@ body {
     border-bottom: 1px solid #cdcdcd; }
 
 #Stage .Component {
-  transition: padding 200ms, background 200ms; }
+  transition: padding 200ms, background 200ms;
+  position: relative; }
   #Stage .Component.active {
     position: relative;
     outline: 2px solid #039BE5;
@@ -758,10 +759,10 @@ body {
   border: #cdcdcd;
   color: white;
   display: inline-block;
-  padding: 0.25em 1em;
+  padding: 0.4em 1em;
   position: fixed;
   bottom: 2em;
-  left: -5em;
-  transition: left 150ms; }
+  left: -1000px;
+  transition: left 250ms; }
   .cmint-notification.active {
     left: -2px; }

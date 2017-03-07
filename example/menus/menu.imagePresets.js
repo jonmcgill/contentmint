@@ -1,5 +1,5 @@
 Cmint.createMenu('image-list', {
-    'Default': 'http://scoopit.co.nz/static/images/default/placeholder.gif',
+    'Default': 'http://placehold.it/800x300',
     'Computer': 'http://www.imakenews.com/rbm/sed_computer.jpg',
     'Dayton Fountain': 'http://www.imakenews.com/rbm/sed_ru_fountain.jpg',
     'Instructor': 'http://www.imakenews.com/rbm/sed_instructor.jpg',

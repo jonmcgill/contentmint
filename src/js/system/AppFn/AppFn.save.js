@@ -6,13 +6,13 @@ Cmint.AppFn.save = function() {
 
     Cmint.Hooks.onSaveHook({
         template: Cmint.App.template,
-        contentNae: Cmint.App.contentName,
+        contentName: Cmint.App.contentName,
         username: Cmint.App.username,
         saved: Cmint.App.saved,
         customComponents: Cmint.App.customComponents
     })
 
-    Cmint.AppFn.notify('saved');
+    Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
 
     Cmint.Util.debug('content saved');
 
