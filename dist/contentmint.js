@@ -905,6 +905,12 @@ Vue.component('sidebar', {
     }
 
 })
+
+
+
+
+
+
 Vue.component('categories', {
 
     props: ['components'],
@@ -1394,6 +1400,20 @@ Cmint.Ui.removeComponent = function() {
     Cmint.App.save();
 
 }
+Cmint.Ui.windowLoad = function() {
+
+    $(window).on('load', function() {
+        // Adjust height of thumbnail containers
+        $('.thumbnail-scale-wrap').each(function() {
+            var h = $(this).parent().height();
+            h = h + 34 - 36;
+            h = h / 2;
+            $(this).parent().height(h);
+        })
+    })
+
+}
+
 // Some field processes need to hold on to specific component data so that when that data
 // mutates, they can run and update any tokens that may have been used. Because Vue creates
 // new instances of component data on mount and update, those data sets were being eliminated
@@ -2308,6 +2328,7 @@ Cmint.Init = function() {
                 Cmint.Ui.contextualize();
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
+                Cmint.Ui.windowLoad();
                 Cmint.Util.debug('mounted application');
             }
 
