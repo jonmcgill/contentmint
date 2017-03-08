@@ -30,12 +30,15 @@
             border-radius: 3px;
             color: rgba(255,255,255,0.9);
             font-weight: normal;
-            top: 3px;
+            top: 4px;
             left: 40px;
         }
         &:hover {
             background: lighten($color-accent, 22%);
             color: black;
+        }
+        i.fa-star {
+            color: gold;
         }
     }
     .actionbar-copy:hover {
@@ -54,53 +57,17 @@
         &:after {
             content: 'Add Custom';
         }
+        &:hover i.fa-star {
+            color: darken($color-accent, 20%);
+        }
+    }
+    .actionbar-new.custom:hover:after {
+        content: 'Edit Custom';
     }
     .actionbar-fields:hover {
         background: #BCAAA4;
         &:after {
             content: 'Settings';
-        }
-    }
-    .custom-add-wrap {
-        position: absolute;
-        left: 30px;
-        top: 65px;
-        width: 20em;
-        background: #333;
-        padding: 0.5em;
-        color: rgba(255,255,255,0.6);
-        @extend %cmint-type;
-        font-size: 0.8em;
-        span {
-            display: block;
-            padding: 0.2em 0.5em 0.5em;
-        }
-        input {
-            margin: 0.5em;
-            width: 17.3em;
-            border: none;
-            &:focus {
-                outline: 2px solid lighten($color-accent, 10%);    
-            }
-        }
-        button {
-            width: 10em;
-            margin: 0.5em;
-            background: lighten($color-accent, 10%);
-            color: rgba(0,0,0,0.7);
-            padding: 0.4em 0.8em;
-            border: none;
-            cursor: pointer;
-            outline: none;
-            &:hover, &:focus {
-                background: lighten($color-accent, 20%);
-                color: rgba(0,0,0,0.9);
-            }
-        }
-        .nameError {
-            margin: 0.5em;
-            color: lighten(red, 20%);
-            font-style: italic;
         }
     }
 }

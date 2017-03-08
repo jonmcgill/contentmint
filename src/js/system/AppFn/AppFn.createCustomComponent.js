@@ -1,47 +1,44 @@
 Cmint.AppFn.createCustomComponent = function(customModal) {
+    
+    customModal.hasError = false;
 
-    var double = false;
+    var error = Cmint.AppFn.checkCustomName(customModal),
+        cloneComp,
+        activeComp = Cmint.App.activeComponent;
 
     // Create customComponents array
     if (!Cmint.App.customComponents) {
         Cmint.App.customComponents = [];
     }
 
-    // If no name, render error
-    if (customModal.name === '') {
-        customModal.nameError = 'Name field is blank';
-        return;
-    }
-
-    // Find any duplicate names
-    Cmint.App.components.forEach(function(component) {
-        if (component.display === customModal.name) {
-            double = true;
-        }
-    })
+    if (error === 'blank') return;
 
     // If no duplicates, add new custom component
-    if (!double) {
+    if (error === 'pass') {
 
-        var comp = Cmint.Util.copyObject(customModal.component);
-        comp.display = customModal.name;
-        comp.category = customModal.category || 'Custom';
+        activeComp.config.display = customModal.name;
+        activeComp.config.category = customModal.category || 'Custom';
+        activeComp.config.custom = true;
 
-        Cmint.App.components.push(comp);
-        Cmint.App.customComponents.push(comp);
+        cloneComp = Cmint.Util.copyObject(activeComp.config);
+
+        Cmint.App.components.push(cloneComp);
+        Cmint.App.customComponents.push(cloneComp);
         Cmint.App.save();
 
-        if (comp.category === Cmint.App.selectedCategory) {
-            Cmint.Bus.$emit('updateComponentList', comp);
+        if (activeComp.config.category === Cmint.App.selectedCategory) {
+            Cmint.Bus.$emit('updateComponentList', cloneComp);
         }
+
         Cmint.Util.debug('added "' + customModal.name + '" ('+customModal.category+') in template "'+Cmint.App.templateName+'"');
-        Cmint.Bus.$emit('closeNewComp');
         Cmint.AppFn.notify('Custom component "'+customModal.name+'" added!')
+        customModal.closeCustom();
 
     // If duplicate name, render error
     } else {
-        customModal.nameError = 'Name already exists';
+        customModal.nameError = '"'+customModal.name+'" already exists';
         customModal.name = '';
+        customModal.hasError = true;
     }
 
 }

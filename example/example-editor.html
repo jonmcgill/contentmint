@@ -9,29 +9,17 @@
 <!--
 TODO
 
-    - Custom Component modal styles need to be standardized. Currently the inputs are not
-      the correct width on mac chrome.
-
     - It would be nice to allow the dev to configure certain tinymce toolbars for certain
       kinds of components. Some components you don't want the user to add bulleted lists, etc.
 
-    - There needs to be a mechanism for adding/editing/removing custom components.
-
     - Even though it crosses the line possibly into implementation, there should be a way to 
       cleanup and grab the markup for a given component structure. There should also be a hook
-      in place to all the dev to define how that cleanup happens.
+      in place to define how that cleanup happens.
 
     - Users don't know when a dragged component can be dropped into stage (i.e. they don't
       know to wait for the mirror image to pop up). There may need to be some prompt added in.
 
-    - Users, if they're moving quickly, might accidentally drag a component off the stage,
-      deleting it, if they are simply trying to highlight some text. Drag handles will certainly
-      be a necessity. However, we have to figure out how to do this without adding anything
-      inside the DOM of the component (because of structures that reject them). We could potentially
-      write a handler that adds a class to the component when someone hovers over the top right area
-      of a component. When that class is present, dragging works. This handler could fire when a
-      component is made active. A ::after psuedo selector could be used to provide a visual prompt
-      on the component. [[ For the time being, this doesn't look possible without significant modification ]]
+    - [[ Drag handles are posing more of a problem than I anticipated ]]
 
     - Some features simply cannot be made self-explanatory, like using the contextualizing feature
       to create custom reusable components. There should probably be an icon button that pulls
@@ -68,12 +56,12 @@ TODO
     <overlay></overlay>
     <fields v-if="fieldsComponent" :component="fieldsComponent" :mountonly="fieldsMountOnly"></fields>
     <actionbar></actionbar>
+    <custom></custom>
     <div class="cmint-notification"></div>
     <content-template 
         :fields-component="fieldsComponent" 
         :template="templateMarkup"
-        :stage="stage"
-        :class="{ scale: !!fieldsComponent && !fieldsMountOnly }"></content-template>
+        :stage="stage"></content-template>
 </div>
 
 <!-- Contentmint Dependencies -->

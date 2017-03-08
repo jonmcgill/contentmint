@@ -1,4 +1,4 @@
-.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, #ActionBar .custom-add-wrap, #Toolbar, .cmint-notification {
+.cmint-type, .cmint .sidebar-top .content-name, .cmint .sidebar-top .username, .cmint .sidebar-sub, .thumbnail-name, .cmint .fields-top, .cmint .fields-close-btn, .cmint .fields-header, .cmint .field-tokens, .cmint .field-list, .cmint .category-container button, .context-insert, .custom-add-wrap, .custom-add-wrap button, #Toolbar, .cmint-notification {
   font-family: sans-serif;
   color: rgba(0, 0, 0, 0.73);
   font-size: 0.9em;
@@ -582,11 +582,13 @@ body {
       border-radius: 3px;
       color: rgba(255, 255, 255, 0.9);
       font-weight: normal;
-      top: 3px;
+      top: 4px;
       left: 40px; }
     #ActionBar > button:hover {
       background: #5bc8fd;
       color: black; }
+    #ActionBar > button i.fa-star {
+      color: gold; }
   #ActionBar .actionbar-copy:hover {
     background: #81C784; }
     #ActionBar .actionbar-copy:hover:after {
@@ -597,44 +599,88 @@ body {
       content: 'Remove'; }
   #ActionBar .actionbar-new:hover:after {
     content: 'Add Custom'; }
+  #ActionBar .actionbar-new:hover:hover i.fa-star {
+    color: #025780; }
+  #ActionBar .actionbar-new.custom:hover:after {
+    content: 'Edit Custom'; }
   #ActionBar .actionbar-fields:hover {
     background: #BCAAA4; }
     #ActionBar .actionbar-fields:hover:after {
       content: 'Settings'; }
-  #ActionBar .custom-add-wrap {
-    position: absolute;
-    left: 30px;
-    top: 65px;
-    width: 20em;
-    background: #333;
-    padding: 0.5em;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.8em; }
-    #ActionBar .custom-add-wrap span {
-      display: block;
-      padding: 0.2em 0.5em 0.5em; }
-    #ActionBar .custom-add-wrap input {
-      margin: 0.5em;
-      width: 17.3em;
-      border: none; }
-      #ActionBar .custom-add-wrap input:focus {
-        outline: 2px solid #1fb4fc; }
-    #ActionBar .custom-add-wrap button {
-      width: 10em;
-      margin: 0.5em;
-      background: #1fb4fc;
-      color: rgba(0, 0, 0, 0.7);
-      padding: 0.4em 0.8em;
-      border: none;
-      cursor: pointer;
-      outline: none; }
-      #ActionBar .custom-add-wrap button:hover, #ActionBar .custom-add-wrap button:focus {
-        background: #51c5fd;
-        color: rgba(0, 0, 0, 0.9); }
-    #ActionBar .custom-add-wrap .nameError {
-      margin: 0.5em;
-      color: #ff6666;
-      font-style: italic; }
+
+.custom-add-wrap {
+  position: fixed;
+  top: 40px;
+  bottom: 0;
+  transition: right 200ms;
+  right: -30em;
+  width: 27.25em;
+  background: #f2f2f2;
+  border-left: 1px solid #cdcdcd;
+  color: rgba(0, 0, 0, 0.5);
+  z-index: 1000; }
+  .custom-add-wrap.active {
+    right: 0; }
+  .custom-add-wrap span {
+    display: block;
+    padding: 0.2em 0.5em 0.5em; }
+  .custom-add-wrap input {
+    width: 100%;
+    border: none;
+    background: #fafafa;
+    font-size: 1em;
+    font-family: sans-serif;
+    border-radius: 3px; }
+    .custom-add-wrap input:focus {
+      outline: 2px solid #1fb4fc; }
+  .custom-add-wrap button {
+    background: #1fb4fc;
+    outline: none;
+    border: 1px solid #0279b3;
+    border-radius: 3px;
+    padding: 0.4em 0.8em;
+    font: 1em sans-serif;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    margin-top: 2em; }
+    .custom-add-wrap button:hover, .custom-add-wrap button:focus {
+      color: rgba(0, 0, 0, 0.73);
+      background: #51c5fd; }
+    .custom-add-wrap button i {
+      font-size: 0.8em;
+      display: inline-block;
+      margin-right: 0.5em;
+      position: relative; }
+  .custom-add-wrap button.custom-done {
+    margin-top: 0; }
+  .custom-add-wrap .custom-heading {
+    padding: 2em; }
+    .custom-add-wrap .custom-heading span {
+      display: inline-block;
+      float: right;
+      font-weight: bold; }
+  .custom-add-wrap .custom-form {
+    padding: 2em;
+    background: #e4e4e4;
+    border-bottom: 1px solid #cdcdcd;
+    border-top: 1px solid #cdcdcd; }
+  .custom-add-wrap label {
+    color: rgba(0, 0, 0, 0.5);
+    display: block;
+    margin-bottom: 5px; }
+  .custom-add-wrap .delete-btn {
+    background: #E57373;
+    border-color: #761616; }
+    .custom-add-wrap .delete-btn:hover, .custom-add-wrap .delete-btn:focus {
+      background: #e88484; }
+  .custom-add-wrap .nameError {
+    color: #ff6666;
+    font-style: italic;
+    margin: 5px 0 1em;
+    opacity: 0;
+    transition: opacity 100ms; }
+    .custom-add-wrap .nameError.show {
+      opacity: 1; }
 
 #EditorToolbar {
   float: left;

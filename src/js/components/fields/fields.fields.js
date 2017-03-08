@@ -50,7 +50,8 @@ Vue.component('fields', {
             var _this = this;
             setTimeout(function() {
                 _this.isActive = false;
-                _this.$bus.$emit('closeFieldWidget');
+                // Cmint.Bus.$emit('closeFieldWidget');
+                Cmint.Bus.$emit('toggleOverlay', false);
                 setTimeout(function() {
                     Cmint.App.fieldsComponent = null;
                     Vue.nextTick(Cmint.App.snapshot);

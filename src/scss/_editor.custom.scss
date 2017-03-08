@@ -1,0 +1,101 @@
+.custom-add-wrap {
+    position: fixed;
+    top: 40px;
+    bottom: 0;
+    transition: right 200ms;
+    right: -30em;
+    &.active {
+        right: 0;
+    }
+    width: 27.25em;
+    background: $color-bg-lightgray;
+    border-left: 1px solid $color-bd-light;
+    color: $color-font-fade;
+    z-index: 1000;
+    @extend %cmint-type;
+    span {
+        display: block;
+        padding: 0.2em 0.5em 0.5em;
+    }
+    input {
+        width: 100%;
+        border: none;
+        background: #fafafa;
+        font-size: 1em;
+        font-family: sans-serif;
+        border-radius: 3px;
+        &:focus {
+            outline: 2px solid lighten($color-accent, 10%);    
+        }
+    }
+    button {
+        @extend %cmint-type;
+        background: lighten($color-accent, 10%);
+        outline: none;
+        border: 1px solid darken($color-accent, 10%);
+        border-radius: 3px;
+        padding: 0.4em 0.8em;
+        font: 1em sans-serif;
+        color: $color-font-fade;
+        cursor: pointer;
+        margin-top: 2em;
+        &:hover, &:focus {
+            color: $color-font-dark;
+            background: lighten($color-accent, 20%);
+        }
+        i {
+            font-size: 0.8em;
+            display: inline-block;
+            margin-right: 0.5em;
+            position: relative;
+        }
+    }
+    button.custom-done {
+        margin-top: 0;
+    }
+
+    .custom-heading {
+        padding: 2em;
+        span {
+            display: inline-block;
+            float: right;
+            font-weight: bold;
+        }
+    }
+
+    .custom-form {
+        padding: 2em;
+        background: #e4e4e4;
+        border-bottom: 1px solid $color-bd-light;
+        border-top: 1px solid $color-bd-light;
+    }
+
+    label {
+        color: $color-font-fade;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .delete-btn {
+        background: #E57373;
+        border-color: darken(#E57373, 40%);
+        &:hover, &:focus {
+            background: lighten(#e57373, 4%);
+        }
+    }
+
+    .update-btn {
+        
+    }
+
+    .nameError {
+        color: lighten(red, 20%);
+        font-style: italic;
+        margin: 5px 0 1em;
+        opacity: 0;
+        transition: opacity 100ms;
+        &.show {
+            opacity: 1;
+        }
+    }
+}

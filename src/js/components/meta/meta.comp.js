@@ -32,7 +32,8 @@ Vue.component('comp', {
     methods: {
 
         run: function(action) {
-            $el = $(this.$el);
+            var _this = this;
+            var $el = $(_this.$el);
 
             // Is the component staged, or in the component sidebar?
             this.environment = $el.closest(Cmint.Settings.id.components).length
@@ -44,6 +45,19 @@ Vue.component('comp', {
 
             // Assign field uid if component utilizes fields system
             if (this.config.fields) Cmint.Fields.assignUid(this);
+
+            // Adding custom, originalDisplay, originalCategory
+            Cmint.AppFn.compSetup(this.config);
+
+            // Watch for updates to the same custom component type and splice accordingly
+            // Cmint.AppFn.updateStageCustomComponents(this);
+            Cmint.Bus.$on('deleteCustomComponent', function(name) {
+                if (_this.config.custom && _this.config.display === name) {
+                    _this.config.custom = false;
+                    _this.config.display = _this.config.originalDisplay;
+                    _this.config.category = _this.config.originalCategory;
+                }
+            })
             
             // Run component hooks
             Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);

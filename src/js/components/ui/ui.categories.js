@@ -64,6 +64,10 @@ Vue.component('categories', {
         this.$bus.$on('closeCategoryList', function() {
             _this.toggle = false;
         })
+        Cmint.Bus.$on('selectCategory', function(category) {
+            category = category || _this.selected;
+            _this.select(category);
+        })
     }
 
 })

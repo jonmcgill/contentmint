@@ -6,7 +6,8 @@ Vue.component('content-template', {
 
     data: function() {return {
         sidebarOpen: true,
-        toolbarOpen: true
+        toolbarOpen: true,
+        scale: false
     }},
 
     computed: {
@@ -17,15 +18,20 @@ Vue.component('content-template', {
                 'margin-right': right,
                 'margin-top': top
             }
+        },
+        scaleClass: function() {
+            return { scale: this.scale }
         }
     },
 
     created: function() {
+
         var stage = '<context id="Stage" :contexts="stage" data-context="stage"></context>';
-        var template = '<div id="Template" :style="margin">';
+        var template = '<div id="Template" :style="margin" :class="scaleClass">';
         template += this.template.replace(/\{\{\s*stage\s*\}\}/, stage);
         template += '</div>';
         this.$options.template = template;
+
     },
 
     mounted: function() {
@@ -45,6 +51,9 @@ Vue.component('content-template', {
             } else {
                 _this.toolbarOpen = true;
             }
+        })
+        Cmint.Bus.$on('toggleOverlay', function(show) {
+            _this.scale = show;
         })
     }
 

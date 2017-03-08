@@ -667,7 +667,8 @@ Vue.component('comp', {
     methods: {
 
         run: function(action) {
-            $el = $(this.$el);
+            var _this = this;
+            var $el = $(_this.$el);
 
             // Is the component staged, or in the component sidebar?
             this.environment = $el.closest(Cmint.Settings.id.components).length
@@ -679,6 +680,19 @@ Vue.component('comp', {
 
             // Assign field uid if component utilizes fields system
             if (this.config.fields) Cmint.Fields.assignUid(this);
+
+            // Adding custom, originalDisplay, originalCategory
+            Cmint.AppFn.compSetup(this.config);
+
+            // Watch for updates to the same custom component type and splice accordingly
+            // Cmint.AppFn.updateStageCustomComponents(this);
+            Cmint.Bus.$on('deleteCustomComponent', function(name) {
+                if (_this.config.custom && _this.config.display === name) {
+                    _this.config.custom = false;
+                    _this.config.display = _this.config.originalDisplay;
+                    _this.config.category = _this.config.originalCategory;
+                }
+            })
             
             // Run component hooks
             Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
@@ -989,32 +1003,93 @@ Vue.component('categories', {
         this.$bus.$on('closeCategoryList', function() {
             _this.toggle = false;
         })
+        Cmint.Bus.$on('selectCategory', function(category) {
+            category = category || _this.selected;
+            _this.select(category);
+        })
     }
 
 })
 Vue.component('custom', {
-    
-    props: ['component'],
 
     template: '\
-        <div class="custom-add-wrap">\
-            <span>Custom Component Information</span>\
-            <input type="text" v-model="name" placeholder="Component name" />\
-            <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" />\
-            <button @click="addComponent">Save Component</button>\
-            <div class="nameError" v-if="nameError">{{nameError}}</div>\
+        <div :class="classes">\
+            <div class="custom-heading">\
+                <button class="custom-done" @click="closeCustom"><i class="fa fa-chevron-left"></i>Done</button>\
+                <span>Custom Component</span>\
+            </div>\
+            <div class="custom-form">\
+                <label>Name</label>\
+                <input type="text" v-model="name" placeholder="Component name" />\
+                <div :class="{ nameError: true, show: hasError }" v-text="nameError"></div>\
+                <label>Category</label>\
+                <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" />\
+                <button v-if="!isCustom" class="add-btn" @click="addCustom">Save Component</button>\
+                <button v-if="isCustom" class="delete-btn" @click="deleteCustom">Delete</button>\
+            </div>\
         </div>',
 
+    // Removing this for now. See below.
+    //<button v-if="isCustom" class="update-btn" @click="updateCustom">Update Component</button>\
+    
     data: function() {return{
         name: '',
         category: '',
-        nameError: false
+        nameError: false,
+        hasError: false,
+        isActive: false,
+        isCustom: false
     }},
 
-    methods: {
-        addComponent: function() {
-            Cmint.AppFn.createCustomComponent(this);
+    computed: {
+        classes: function() {
+            return {
+                'custom-add-wrap': true, 
+                cmint: true, 
+                active: this.isActive
+            }
         }
+    },
+
+    methods: {
+        addCustom: function() {
+            Cmint.AppFn.createCustomComponent(this);
+        },
+        // This is probably taking things a bit too far at the moment. Updating custom components
+        // the way I'm doing with this function wouldn't actually be intuititive for the user and
+        // would cause confusion when other pieces of content are opened with that custom component
+        // since they wouldn't match up. For now, you can just add or delete custom structures.
+        // Instances of those custom structures can be manipulated without modifying the original.
+        // updateCustom: function() {
+        //     Cmint.AppFn.updateCustomComponent(this);
+        // },
+        deleteCustom: function() {
+            Cmint.AppFn.deleteCustomComponent(this);
+        },
+        closeCustom: function() {
+            Cmint.Bus.$emit('closeCustomModal');
+        }
+    },
+
+    mounted: function() {
+
+        var _this = this;
+
+        Cmint.Bus.$on('callCustomModal', function() {
+            Cmint.Bus.$emit('toggleOverlay', true);
+            _this.isCustom = Cmint.App.activeComponent.config.custom;
+            _this.name = _this.isCustom ? Cmint.App.activeComponent.config.display : '';
+            _this.category = _this.isCustom ? Cmint.App.activeComponent.config.category : '';
+            _this.isActive = true;
+        })
+
+        Cmint.Bus.$on('closeCustomModal', function() {
+            Cmint.Bus.$emit('toggleOverlay', false);
+            _this.isActive = false;
+            _this.name = '';
+            _this.category = '';
+        })
+
     }
 
 })
@@ -1026,11 +1101,10 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
-            <button class="actionbar-new" @click="callCustomModal">\
-                <i class="fa fa-plus"></i></button>\
+            <button :class="{\'actionbar-new\':true, custom: isCustom}" @click="callCustomModal">\
+                <i :class="customClasses"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
-            <custom v-if="newComp" :component="focused"></custom>\
         </div>',
 
     data: function() {
@@ -1041,7 +1115,8 @@ Vue.component('actionbar', {
             isActive: false,
             noFields: true,
             newComp: false,
-            focused: false 
+            focused: false,
+            isCustom: false
         }
     },
 
@@ -1052,6 +1127,13 @@ Vue.component('actionbar', {
                 'top': this.top,
                 'left': this.left,
                 'position': 'absolute'
+            }
+        },
+        customClasses: function() {
+            return {
+                'fa': true,
+                'fa-plus': !this.isCustom,
+                'fa-star': this.isCustom
             }
         }
     },
@@ -1067,11 +1149,13 @@ Vue.component('actionbar', {
         },
 
         callCustomModal: function() {
-            Cmint.Ui.callCustomModal(this);
+            // Cmint.Ui.callCustomModal(this);
+            Cmint.Bus.$emit('callCustomModal');
         },
 
         callFields: function() {
-            this.$bus.$emit('callComponentFields');
+            Cmint.Bus.$emit('callComponentFields');
+            Cmint.Bus.$emit('toggleOverlay', true);
             this.$bus.$emit('closeActionBar');
         }
     },
@@ -1087,6 +1171,7 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
+            _this.isCustom = Cmint.App.activeComponent.config.custom;
             var left = _this.left.replace('px','') * 1;
             var top = _this.top.replace('px','') * 1;
             if (left < 48) {
@@ -1120,7 +1205,8 @@ Vue.component('content-template', {
 
     data: function() {return {
         sidebarOpen: true,
-        toolbarOpen: true
+        toolbarOpen: true,
+        scale: false
     }},
 
     computed: {
@@ -1131,15 +1217,20 @@ Vue.component('content-template', {
                 'margin-right': right,
                 'margin-top': top
             }
+        },
+        scaleClass: function() {
+            return { scale: this.scale }
         }
     },
 
     created: function() {
+
         var stage = '<context id="Stage" :contexts="stage" data-context="stage"></context>';
-        var template = '<div id="Template" :style="margin">';
+        var template = '<div id="Template" :style="margin" :class="scaleClass">';
         template += this.template.replace(/\{\{\s*stage\s*\}\}/, stage);
         template += '</div>';
         this.$options.template = template;
+
     },
 
     mounted: function() {
@@ -1160,6 +1251,9 @@ Vue.component('content-template', {
                 _this.toolbarOpen = true;
             }
         })
+        Cmint.Bus.$on('toggleOverlay', function(show) {
+            _this.scale = show;
+        })
     }
 
 })
@@ -1172,17 +1266,18 @@ Vue.component('overlay', {
     mounted: function() {
         var _this = this;
         var $el = $(this.$el);
-        this.$bus.$on('callComponentFields', function() {
-            $el.addClass('active');
-            setTimeout(function() {
-                $el.addClass('visible');
-            }, 20);
-        })
-        this.$bus.$on('closeFieldWidget', function() {
-            $el.removeClass('visible');
-            setTimeout(function() {
-                $el.removeClass('active');
-            }, 200);
+        Cmint.Bus.$on('toggleOverlay', function(show) {
+            if (show) {
+                $el.addClass('active');
+                setTimeout(function() {
+                    $el.addClass('visible');
+                }, 20);
+            } else {
+                $el.removeClass('visible');
+                setTimeout(function() {
+                    $el.removeClass('active');
+                }, 200);
+            }
         })
     }
 })
@@ -1976,7 +2071,8 @@ Vue.component('fields', {
             var _this = this;
             setTimeout(function() {
                 _this.isActive = false;
-                _this.$bus.$emit('closeFieldWidget');
+                // Cmint.Bus.$emit('closeFieldWidget');
+                Cmint.Bus.$emit('toggleOverlay', false);
                 setTimeout(function() {
                     Cmint.App.fieldsComponent = null;
                     Vue.nextTick(Cmint.App.snapshot);
@@ -2185,51 +2281,103 @@ Cmint.Drag.init = function() {
     })
 
 }
-Cmint.AppFn.createCustomComponent = function(customModal) {
+Cmint.AppFn.checkCustomName = function(customModal) {
+    
+    var double = 'pass';
 
-    var double = false;
+    // If no name, render error
+    if (customModal.name === '') {
+        customModal.nameError = 'Name field is blank';
+        customModal.hasError = true;
+        return 'blank';
+    }
+
+    // Find any duplicate names
+    Cmint.App.components.forEach(function(component) {
+        if (component.display === customModal.name) {
+            double = 'fail';
+        }
+    })
+
+    return double;
+
+}
+Cmint.AppFn.compSetup = function(config) {
+
+    config.custom = config.custom || false;
+    config.originalDisplay = config.originalDisplay || config.display;
+    config.originalCategory = config.originalCategory || config.category;
+
+}
+Cmint.AppFn.createCustomComponent = function(customModal) {
+    
+    customModal.hasError = false;
+
+    var error = Cmint.AppFn.checkCustomName(customModal),
+        cloneComp,
+        activeComp = Cmint.App.activeComponent;
 
     // Create customComponents array
     if (!Cmint.App.customComponents) {
         Cmint.App.customComponents = [];
     }
 
-    // If no name, render error
-    if (customModal.name === '') {
-        customModal.nameError = 'Name field is blank';
-        return;
-    }
-
-    // Find any duplicate names
-    Cmint.App.components.forEach(function(component) {
-        if (component.display === customModal.name) {
-            double = true;
-        }
-    })
+    if (error === 'blank') return;
 
     // If no duplicates, add new custom component
-    if (!double) {
+    if (error === 'pass') {
 
-        var comp = Cmint.Util.copyObject(customModal.component);
-        comp.display = customModal.name;
-        comp.category = customModal.category || 'Custom';
+        activeComp.config.display = customModal.name;
+        activeComp.config.category = customModal.category || 'Custom';
+        activeComp.config.custom = true;
 
-        Cmint.App.components.push(comp);
-        Cmint.App.customComponents.push(comp);
+        cloneComp = Cmint.Util.copyObject(activeComp.config);
+
+        Cmint.App.components.push(cloneComp);
+        Cmint.App.customComponents.push(cloneComp);
         Cmint.App.save();
 
-        if (comp.category === Cmint.App.selectedCategory) {
-            Cmint.Bus.$emit('updateComponentList', comp);
+        if (activeComp.config.category === Cmint.App.selectedCategory) {
+            Cmint.Bus.$emit('updateComponentList', cloneComp);
         }
+
         Cmint.Util.debug('added "' + customModal.name + '" ('+customModal.category+') in template "'+Cmint.App.templateName+'"');
-        Cmint.Bus.$emit('closeNewComp');
         Cmint.AppFn.notify('Custom component "'+customModal.name+'" added!')
+        customModal.closeCustom();
 
     // If duplicate name, render error
     } else {
-        customModal.nameError = 'Name already exists';
+        customModal.nameError = '"'+customModal.name+'" already exists';
         customModal.name = '';
+        customModal.hasError = true;
     }
+
+}
+Cmint.AppFn.deleteCustomComponent = function(customModal) {
+
+    var activeComp = Cmint.App.activeComponent;
+    var oldName = activeComp.config.display;
+
+    activeComp.config.display = activeComp.config.originalDisplay;
+    activeComp.config.category = activeComp.config.originalCategory;
+    activeComp.config.custom = false;
+
+    Cmint.AppFn.replaceIndexIf(Cmint.App.components, null, function(item) {
+        console.log(customModal.name);
+        return item.display === customModal.name;
+    }, 'remove')
+
+    Cmint.AppFn.replaceIndexIf(Cmint.App.customComponents, null, function(item) {
+        return item.display === customModal.name;
+    }, 'remove')
+
+    Cmint.Bus.$emit('deleteCustomComponent', oldName);
+    Cmint.Bus.$emit('selectCategory', 'All');
+    Cmint.App.save();
+
+    Cmint.Util.debug('deleted custom component "' + customModal.name + '" in template "'+Cmint.App.templateName+'"');
+    Cmint.AppFn.notify('Custom component "'+customModal.name+'" deleted')
+    customModal.closeCustom();
 
 }
 Cmint.AppFn.getTemplateComponents = function(name) {
@@ -2271,6 +2419,23 @@ Cmint.AppFn.notify = function(message) {
 Cmint.AppFn.refresh = function() {
     
     this.stage = Cmint.Util.copyObject(this.stage);
+
+}
+Cmint.AppFn.replaceIndexIf = function(list, data, fn, remove) {
+
+    var index = null;
+
+    list.forEach(function(thing, i) {
+        if (fn(thing)) index = i;
+    })
+
+    if (index !== null) {
+        if (remove === 'remove') {
+            list.splice(index, 1);
+        } else {
+            list.splice(index, 1, data);
+        }
+    }
 
 }
 Cmint.AppFn.save = function() {
@@ -2335,6 +2500,60 @@ Cmint.AppFn.undo = function() {
     }
 
     Cmint.Bus.$emit('toolbarDisabler', !this.changes);
+
+}
+Cmint.AppFn.updateCustomComponent = function(customModal) {
+    
+    customModal.hasError = false;
+
+    var error = Cmint.AppFn.checkCustomName(customModal),
+        cloneComp,
+        activeComp = Cmint.App.activeComponent,
+        oldName = activeComp.config.display;
+
+    if (error === 'blank') return;
+
+    activeComp.config.oldCustomName = oldName;
+    activeComp.config.display = customModal.name;
+    activeComp.config.category = customModal.category || 'Custom';
+    // activeComp.config.custom = true;
+
+    cloneComp = Cmint.Util.copyObject(activeComp.config);
+
+    Cmint.AppFn.replaceIndexIf(Cmint.App.components, cloneComp, function(item) {
+        return item.display === oldName;
+    })
+
+    Cmint.AppFn.replaceIndexIf(Cmint.App.customComponents, cloneComp, function(item) {
+        return item.display === oldName;
+    })
+
+    if (activeComp.config.category === Cmint.App.selectedCategory) {
+        Cmint.Bus.$emit('selectCategory', Cmint.App.selectedCategory);
+    }
+
+    Cmint.Bus.$emit('updateCustom', cloneComp);
+
+    Cmint.App.save();
+
+    
+
+    Cmint.Util.debug('updated custom component "' + customModal.name + '" in template "'+Cmint.App.templateName+'"');
+    Cmint.AppFn.notify('Custom component "'+customModal.name+'" updated')
+    customModal.closeCustom();
+
+}
+Cmint.AppFn.updateStageCustomComponents = function(component) {
+    
+    if (component.config.custom && component.environment === 'stage') {
+        Cmint.Bus.$on('updateCustom', function(data) {
+            if (component.config.display === data.oldCustomName) {
+                Cmint.Util.debug('updated staged custom component');
+                vmData = Cmint.Sync.getVmContextData(component.config.index, Cmint.App.stage);
+                vmData.context.splice(vmData.index, 1, Cmint.Util.copyObject(data));
+            }
+        })
+    }
 
 }
 Cmint.Util.runTests();

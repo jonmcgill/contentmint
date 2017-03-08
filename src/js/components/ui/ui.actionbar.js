@@ -6,11 +6,10 @@ Vue.component('actionbar', {
                 <i class="fa fa-clone"></i></button>\
             <button class="actionbar-trash" @click="trashComponent">\
                 <i class="fa fa-trash-o"></i></button>\
-            <button class="actionbar-new" @click="callCustomModal">\
-                <i class="fa fa-plus"></i></button>\
+            <button :class="{\'actionbar-new\':true, custom: isCustom}" @click="callCustomModal">\
+                <i :class="customClasses"></i></button>\
             <button :class="{\'actionbar-fields\': true, hidden: noFields}" @click="callFields">\
                 <i class="fa fa-cog"></i></button>\
-            <custom v-if="newComp" :component="focused"></custom>\
         </div>',
 
     data: function() {
@@ -21,7 +20,8 @@ Vue.component('actionbar', {
             isActive: false,
             noFields: true,
             newComp: false,
-            focused: false 
+            focused: false,
+            isCustom: false
         }
     },
 
@@ -32,6 +32,13 @@ Vue.component('actionbar', {
                 'top': this.top,
                 'left': this.left,
                 'position': 'absolute'
+            }
+        },
+        customClasses: function() {
+            return {
+                'fa': true,
+                'fa-plus': !this.isCustom,
+                'fa-star': this.isCustom
             }
         }
     },
@@ -47,11 +54,13 @@ Vue.component('actionbar', {
         },
 
         callCustomModal: function() {
-            Cmint.Ui.callCustomModal(this);
+            // Cmint.Ui.callCustomModal(this);
+            Cmint.Bus.$emit('callCustomModal');
         },
 
         callFields: function() {
-            this.$bus.$emit('callComponentFields');
+            Cmint.Bus.$emit('callComponentFields');
+            Cmint.Bus.$emit('toggleOverlay', true);
             this.$bus.$emit('closeActionBar');
         }
     },
@@ -67,6 +76,7 @@ Vue.component('actionbar', {
         this.$bus.$on('openActionBar', function(component) {
             _this.noFields = component.config.fields === undefined;
             _this.isActive = true;
+            _this.isCustom = Cmint.App.activeComponent.config.custom;
             var left = _this.left.replace('px','') * 1;
             var top = _this.top.replace('px','') * 1;
             if (left < 48) {
