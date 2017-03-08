@@ -8,10 +8,10 @@ Vue.component('custom', {
             </div>\
             <div class="custom-form">\
                 <label>Name</label>\
-                <input type="text" v-model="name" placeholder="Component name" />\
+                <input type="text" v-model="name" placeholder="Component name" :disabled="isCustom || null" />\
                 <div :class="{ nameError: true, show: hasError }" v-text="nameError"></div>\
                 <label>Category</label>\
-                <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" />\
+                <input type="text" v-model="category" placeholder="Category (Default \'Custom\')" :disabled="isCustom || null" />\
                 <button v-if="!isCustom" class="add-btn" @click="addCustom">Save Component</button>\
                 <button v-if="isCustom" class="delete-btn" @click="deleteCustom">Delete</button>\
             </div>\
