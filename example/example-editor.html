@@ -12,10 +12,6 @@ TODO
     - It would be nice to allow the dev to configure certain tinymce toolbars for certain
       kinds of components. Some components you don't want the user to add bulleted lists, etc.
 
-    * Even though it crosses the line possibly into implementation, there should be a way to 
-      cleanup and grab the markup for a given component structure. There should also be a hook
-      in place to define how that cleanup happens.
-
     * App saves every time the fields 'done' button is clicked regardless of whether or not
       anything has changed. 
 
@@ -27,10 +23,6 @@ TODO
     * Some features simply cannot be made self-explanatory, like using the contextualizing feature
       to create custom reusable components. There should probably be an icon button that pulls
       up a help modal which explains how to use the editor in a general sense. Also, README.
-
-    - There is no user dashboard with Contentmint, it is simply an editor experience. That said,
-      there should probably be a way to theme the toolbar so that it can fit with whatever
-      dashboard a project might have.
 
     - Add keyboard bindings for toolbar and sidebar views as well as save, undo, and contextualize features.
 
@@ -57,6 +49,72 @@ TODO
     "customComponents": []
  }
 </textarea>
+<!-- Implementation Modification -->
+<style type="text/css">
+    
+    p { margin: 0 }
+
+    #CodeModal {
+        position: fixed;
+        width: 600px;
+        top: 80px;
+        margin-left: calc(50% - 300px);
+        z-index: 8000;
+        background: #333;
+        border-radius: 3px;
+        padding: 1.5em;
+        -webkit-font-smoothing: antialiased;
+    }
+    #CodeModal i {
+        display: block;
+        width: 1em;
+        height: 1em;
+        padding: 1em;
+        position: absolute;
+        right: 1em;
+        font-size: 22px;
+        top: 0px;
+        color: rgba(255,255,255,0.6);
+        cursor: pointer;
+    }
+    #CodeModal i:hover {
+        color: rgba(255,255,255,0.9);
+    }
+    #CodeModal textarea {
+        width: 100%;
+        height: 220px;
+        padding: 1.5em;
+        border: none;
+        resize: none;
+        overflow-x: hidden;
+        font-size: 1em;
+        font-family: Consolas;
+        color: rgba(0,0,0,0.4);
+        outline: none;
+        background: #ddd;
+    }
+
+    #CodeModal textarea:focus {
+        background: white;
+        color: rgba(0,0,0,0.7);
+    }
+
+    #CodeModal p {
+        color: white;
+        font-family: sans-serif;
+        margin: 10px 0;
+    }
+
+    #CodeModal span {
+        font-family: sans-serif;
+        font-size: 14px;
+        font-style: italic;
+        display: block;
+        margin: 10px;
+        text-align: center;
+        color: rgba(255,255,255,0.6);
+    }
+</style>
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
@@ -81,5 +139,5 @@ TODO
 
 <!-- Contentmint initq -->
 <script type="text/javascript">
-Cmint.Init();
+// Cmint.Init();
 </script>

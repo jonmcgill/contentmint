@@ -1,0 +1,1 @@
+Cmint.Editor.config.forced_root_block = 'div';

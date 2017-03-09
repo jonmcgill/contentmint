@@ -635,6 +635,11 @@ Cmint.createToolbarButton({
         Cmint.App.undo();
     }
 })
+Cmint.getFullMarkup = function() {
+
+    return Cmint.App.templateMarkup.replace(/\{\{\s*stage\s*\}\}/, Cmint.App.markup)
+
+}
 Cmint.getMarkup = function() {
 
     var markup = Cmint.App.stage.map(function(comp) {
@@ -855,6 +860,10 @@ Vue.component('toolbar', {
             this.$bus.$emit('toggleToolbar', true);
         })
 
+        _this.$bus.$on('closeToolbar', function() {
+            _this.toggle();
+        })
+
         _this.$bus.$on('toggleSidebar', function(sidebarState) {
             if (sidebarState) {
                 _this.isActive = true;
@@ -935,6 +944,10 @@ Vue.component('sidebar', {
             if (!toolbarState) {
                 _this.isActive = false;
             }
+        })
+
+        Cmint.Bus.$on('openSidebar', function() {
+            _this.isActive = true;
         })
 
         this.updateThumbnails();
@@ -1270,6 +1283,10 @@ Vue.component('content-template', {
         })
         Cmint.Bus.$on('toggleOverlay', function(show) {
             _this.scale = show;
+        })
+        Cmint.Bus.$on('moveTemplateLeft', function() {
+            _this.sidebarOpen = true;
+            _this.toolbarOpen = true;
         })
     }
 
@@ -1727,11 +1744,11 @@ Cmint.Hooks.runComponentHooks = function(event, thing, data) {
     }
 
     if (data.hooks) {
-        data.hooks.forEach(function(hookName) {
-            if (Local.hasOwnProperty(hookName)) {
+        data.hooks.forEach(function(hook) {
+            if (Local.hasOwnProperty(hook)) {
                 if (Local[hook][event]) {
-                    Local[hookName][event](thing, data);
-                    Cmint.Util.debug('ran local component hook "'+hook+'" on event "'+event+'"')
+                    Local[hook][event](thing, data);
+                    Cmint.Util.debug('ran local component hook "'+hook+'" on event "'+event+'" for ' + data.name)
                 }
             }
         })

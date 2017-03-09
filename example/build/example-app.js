@@ -1,3 +1,4 @@
+Cmint.Editor.config.forced_root_block = 'div';
 // Default toolbar buttons are save, context, and undo. You'll most likely want to 
 // write some kind of ajax request that does something with the data and/or markup
 // from your created content. This is a way to add a toolbar button for that thing.
@@ -6,35 +7,50 @@ Cmint.createToolbarButton({
     btnClasses: { 'toolbar-code':true, 'toolbar-btn-fancy': true },
     iconClasses: { 'fa': true, 'fa-code': true },
     callback: function() {
+
+        Cmint.Bus.$emit('closeToolbar');
+
         if ($('#CodeModal').length === 0) {
-            var $codeModal = $('<div id="CodeModal"></div>');
-            $codeModal.css({
-                'position': 'fixed',
-                'top': '40px',
-                'bottom': '0',
-                'width': '100%',
-                'z-index':'8000'
-            })
-            $codeModal.append('\
-                <textarea style="margin:1em;\
-                    width:42em;height:22em;\
-                    display:block;padding:2em;\
-                    border:1px solid #888;\
-                    font-family:Consolas;"></textarea>')
+
+            var $modal = $('\
+                <div id="CodeModal">\
+                    <i class="fa fa-close"></i>\
+                    <div class="code-full">\
+                        <p>Full Code (For Litmus tests)</p>\
+                        <textarea class="code-full-area" spellcheck="false"></textarea>\
+                    </div>\
+                    <div class="code-content">\
+                        <p>Content Code (For IMN)</p>\
+                        <textarea class="code-content-area" spellcheck="false"></textarea>\
+                    </div>\
+                    <span>CTRL + C to copy</span>\
+                </div>')
+
             Cmint.Bus.$emit('toggleOverlay', true)
-            $('body').append($codeModal);
-            $('#CodeModal textarea').text(Cmint.App.markup)
-            $('#CodeModal textarea').focus().select();
+            $('body').append($modal);
+            $('#CodeModal .code-full-area').text(Cmint.getFullMarkup())
+            $('#CodeModal .code-content-area').text(Cmint.App.markup)
+            $('#CodeModal i').click(function() {
+                Cmint.Bus.$emit('toggleOverlay', false)
+                $('#CodeModal').remove();
+                Cmint.Bus.$emit('closeToolbar');
+                Cmint.Bus.$emit('openSidebar');
+                Cmint.Bus.$emit('moveTemplateLeft');
+            })
+            $('#CodeModal textarea').click(function() {
+                $(this).select();
+            })
+
         } else {
             Cmint.Bus.$emit('toggleOverlay', false)
             $('#CodeModal').remove();
+            mint.Bus.$emit('closeToolbar');
         }
         
     }
 })
 Cmint.createOnSaveHook(function(data) {
     Cmint.Util.debug('ran onSave hook: send data to back end script');
-    console.log(data);
 })
 // Templates are just some html with a token that stands in place for the main staging
 // area. In the place where you want to add components write in {{ stage }}. The path
@@ -42,7 +58,11 @@ Cmint.createOnSaveHook(function(data) {
 // just a list of components you'd like to make available for that template.
 Cmint.createTemplate('email', {
     path: '/example/template-markup/email.html',
-    components: ['heading', 'banner-image', 'body-copy', 'button-cta', 'course-table', 'container']
+    components: ['heading', 'banner-image', 'body-copy', 'button-cta', 'linebreak', 'course-table', 'container']
+})
+Cmint.createMenu('align-attr', {
+    'Default': 'center',
+    'Left': ''
 })
 Cmint.createMenu('align-block', {
     'Default': '',
@@ -53,17 +73,13 @@ Cmint.createMenu('bgcolor', {
     'Dark': '#cccccc'
 })
 Cmint.createMenu('image-list', {
-    'Default': 'http://placehold.it/800x300',
+    'Default': 'http://placehold.it/500x200',
     'Computer': 'http://www.imakenews.com/rbm/sed_computer.jpg',
     'Dayton Fountain': 'http://www.imakenews.com/rbm/sed_ru_fountain.jpg',
     'Instructor': 'http://www.imakenews.com/rbm/sed_instructor.jpg',
     'Keyboard': 'http://imakenews.com/rbm/sed_keyboard.jpg',
     'Students': 'http://www.imakenews.com/rbm/sed_students.jpg',
-    'Mouse': 'http://www.imakenews.com/rbm/sed_mouse.jpg',
-    'Cat': 'http://listhogs.com/wp-content/uploads/2016/06/10-14.jpg',
-    'Norway': 'https://www.nordicvisitor.com/images/norway/sognefjord-norway.jpg',
-    'The Grey': 'https://s-media-cache-ak0.pinimg.com/originals/b4/22/a1/b422a1816328a39b46e193c68df9e456.jpg',
-    'YoYo': 'http://mediad.publicbroadcasting.net/p/michigan/files/styles/x_large/public/yoyo_ma_trumpie_12.jpg'
+    'Mouse': 'http://www.imakenews.com/rbm/sed_mouse.jpg'
 })
 Cmint.createMenu('padding', {
     'Default': '',
@@ -91,6 +107,17 @@ Cmint.createField({
         label: 'Alignment',
         input: 'alignblock',
         menu: 'align-block'
+    }
+})
+
+Cmint.createField({
+    name: 'align-attr',
+    config: {
+        type: 'field-dropdown',
+        display: 'Alignment',
+        label: 'Alignment',
+        input: 'alignattr',
+        menu: 'align-attr'
     }
 })
 // type, display, label, input, menu, help*, processes*
@@ -213,6 +240,15 @@ Cmint.createEditorPostProcess(function(e) {
         this.setAttribute('target', '_blank');
     })
 })
+
+
+Cmint.createEditorPostProcess(function(e) {
+    $(e.target.bodyElement).find('p').each(function() {
+        var markup = $(this).html();
+        var div = $('<div></div>').append(markup);
+        $(this).replaceWith(div);
+    })
+})
 // field-group takes all inputs and the component instance
 Cmint.createFieldProcess('mailto', function(inputs, component) {
     var output = 'mailto:';
@@ -221,6 +257,33 @@ Cmint.createFieldProcess('mailto', function(inputs, component) {
     output += 'Body=' + encode(Cmint.Fields.tokenize(inputs.body.value, component));
     function encode(val) { return encodeURIComponent(val); }
     return output;
+})
+Cmint.createComponentHook('img-size', 'Global', {
+    
+    editing: function(element, config) {
+
+        setTimeout(function() {
+            $(element).find('img').each(function() {
+                var $this = $(this);
+                var w = this.naturalWidth;
+                var h = this.naturalHeight;
+                var ratio;
+
+                if (w > 550) {
+                    ratio = (w - 550) / w;
+                    h = Math.round(h - (h * ratio));
+                    w = 550;
+                } else {
+                    $this.attr('align', 'center');
+                }
+
+                $this.attr('width', w);
+                $this.attr('height', h);
+            })
+        }, 800)
+        
+    }
+
 })
 
 Cmint.createComponentHook('rgbtohex', 'Global', {
@@ -252,36 +315,37 @@ Cmint.createComponentHook('rgbtohex', 'Global', {
 // A component hook can therefore be global (runs on every component) or local (only
 // runs if you define it in config). They can also be separate for the 'editing'
 // experience and the 'cleanup' phase of the content.
-Cmint.createComponentHook('vertical-space', 'Global', {
+Cmint.createComponentHook('vertical-space', 'Local', {
     editing: function(element) {
         $(element).css({
             'margin-bottom': '16px'
-        })
+        }).attr('data-spacing', 'true')
     },
     cleanup: function(element) {
-        $(element).css({'margin-bottom': ''})
+        $(element).css({'margin-bottom': ''}).removeAttr('data-spacing');
         $('<br>').insertAfter(element)
-        $(element).find('.Component').each(function() {
+        $(element).find('[data-spacing]').each(function() {
             $(this).css({'margin-bottom': ''})
             $('<br>').insertAfter(this)
-        })
+        }).removeAttr('data-spacing');
         
     }
 })
 Cmint.createComponent({
     template: '\
-        <comp v-if="config.fields.output.link" :tag="config.tags.link" :config="config" :href="config.fields.output.link" target="_blank" style="display:block">\
-            <img :src="config.fields.output.source" :style="config.css" />\
-        </comp>\
-        <comp v-else :tag="config.tags.image" :config="config" :src="config.fields.output.source" :style="config.css"></comp>',
+        <comp :config="config">\
+            <a v-if="config.fields.output.link" :href="config.fields.output.link" target="_blank" style="display:block">\
+                <img :src="config.fields.output.source" :style="config.css" />\
+            </a>\
+            <img v-else :src="config.fields.output.source" :style="config.css" />\
+            <br><br>\
+        </comp>',
     config: {
         name: 'banner-image',
         display: 'Banner Image',
         category: 'Images',
         css: {
-            'width':'100%',
-            'display': 'block',
-            'margin':'0 auto'
+            'display': 'block'
         },
         tags: {
             image: 'img',
@@ -293,7 +357,7 @@ Cmint.createComponent({
         ],
         fields: {
             output: {
-                source: 'http://placehold.it/800x300',
+                source: 'http://placehold.it/550x200',
                 link: ''
             },
             list: [
@@ -306,7 +370,10 @@ Cmint.createComponent({
     }
 })
 Cmint.createComponent({
-    template: '<comp :config="config" data-edit="copy" :style="config.css"></comp>',
+    template: '\
+        <comp :config="config">\
+            <div data-edit="copy" :style="config.css"></div><br>\
+        </comp>',
     config: {
         name: 'body-copy',
         display: 'Body Copy',
@@ -318,43 +385,50 @@ Cmint.createComponent({
             'font-family': 'sans-serif',
         },
         content: {
-            copy: '<div>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</div>'
+            copy: '<p>This is some default text and I could have used Lorem, but I decided to use this instead. And what is this? It is a rambling, a muse, an attempt to fool you into thinking there is legitimate copy here when there actually isn\'t. And honestly, what is legitimate copy, anyways?</p>'
         }
     }
 })
 Cmint.createComponent({
     template: '\
-        <comp :config="config" cellpadding="0" cellspacing="0" align="center" style="background:#cb4f29">\
-            <tr>\
-              <td width="20" height="5"></td>\
-              <td>&nbsp;</td>\
-              <td width="20" height="5"></td>\
-            </tr>\
-            <tr>\
-              <td width="20" height="5"></td>\
-              <td>\
-                  <div style="font-family:Arial, sans-serif; font-size:14px; font-style:italic; font-weight:bold; text-align:center; line-height:14px;">\
-                    <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;" v-text="config.fields.output.linktext"></a>\
-                  </div>\
-                </td>\
-              <td width="20" height="5"></td>\
-            </tr>\
-            <tr>\
-              <td width="20" height="5"></td>\
-              <td>&nbsp;</td>\
-              <td width="20" height="5"></td>\
-            </tr>\
+        <comp :config="config">\
+            <table cellpadding="0" cellspacing="0" :align="config.fields.output.alignment" style="background:#cb4f29">\
+                <tr>\
+                  <td width="20" height="3"></td>\
+                  <td>&nbsp;</td>\
+                  <td width="20" height="3"></td>\
+                </tr>\
+                <tr>\
+                  <td width="20" height="3"></td>\
+                  <td>\
+                      <div style="font-family:Arial, sans-serif; font-size:14px; font-style:italic; font-weight:bold; text-align:center; line-height:14px;">\
+                        <a :href="config.fields.output.href" style="color:#ffffff; text-decoration:none;" v-text="config.fields.output.linktext"></a>\
+                      </div>\
+                    </td>\
+                  <td width="20" height="3"></td>\
+                </tr>\
+                <tr>\
+                  <td width="20" height="3"></td>\
+                  <td>&nbsp;</td>\
+                  <td width="20" height="3"></td>\
+                </tr>\
+            </table>\
+            <br>\
         </comp>',
     config: {
         name: 'button-cta',
         display: 'Button',
         category: 'Buttons',
-        tags: { root: 'table' },
         fields: {
-            output: { href: '#', linktext: 'Button Link Text' },
+            output: {
+                href: '#',
+                linktext: 'Button Link Text',
+                alignment: 'center'
+            },
             list: [
                 { name: 'link-choice', result: 'href' },
-                { name: 'plaintext', result: 'linktext' }
+                { name: 'plaintext', result: 'linktext' },
+                { name: 'align-attr', result: 'alignment' }
             ]
         }
     }
@@ -375,6 +449,7 @@ Cmint.createComponent({
         contexts: {
             container: []
         },
+        hooks: ['vertical-space'],
         fields: {
             output: { padding: '', centerblock:'', maxwidth: '' },
             list: [
@@ -388,12 +463,12 @@ Cmint.createComponent({
 Cmint.createComponent({
     template: '\
         <comp :config="config">\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="platform"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="date"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="time"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="90" data-edit="platform"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="60" data-edit="date"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="110" data-edit="time"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="70" data-edit="code"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="180" data-edit="name"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="90">\
                 <a :href="config.fields.output.register" style="color: rgb(11, 75, 135);">Click Here</a>\
             </td>\
         </comp>',
@@ -434,34 +509,36 @@ Cmint.createComponent({
 })
 Cmint.createComponent({
     template: '\
-        <comp :config="config" cellspacing="3" cellpadding="3" align="center" width="100%">\
-            <tbody>\
-                <tr>\
-                    <td width="90" :style="config.css.header">Platform</td>\
-                    <td width="60" :style="config.css.header">Date</td>\
-                    <td width="110" :style="config.css.header">Time (Eastern)</td>\
-                    <td width="70" :style="config.css.header">Session Code</td>\
-                    <td width="180" :style="config.css.header">Session Name</td>\
-                    <td width="90" :style="config.css.header">Enroll Now</td>\
-                </tr>\
-            </tbody>\
-            <context\
-                :contexts="config.contexts.rows"\
-                :tag="config.tags.rows"\
-                :insert="config.tags.insert"\
-                data-context="rows">\
-            </context>\
-            <tbody>\
-                <tr>\
-                    <td colspan="6" :style="config.css.header">Central Time &ndash; Subtract 1 hour; Mountain &ndash; Subtract 2 Hours; Pacific &ndash; Subtract 3 Hours</td>\
-                </tr>\
-            </tbody>\
+        <comp :config="config">\
+            <table cellspacing="3" cellpadding="3" align="center" width="100%">\
+                <tbody>\
+                    <tr>\
+                        <td width="90" :style="config.css.header">Platform</td>\
+                        <td width="60" :style="config.css.header">Date</td>\
+                        <td width="110" :style="config.css.header">Time (Eastern)</td>\
+                        <td width="70" :style="config.css.header">Session Code</td>\
+                        <td width="180" :style="config.css.header">Session Name</td>\
+                        <td width="90" :style="config.css.header">Enroll Now</td>\
+                    </tr>\
+                </tbody>\
+                <context\
+                    :contexts="config.contexts.rows"\
+                    :tag="config.tags.rows"\
+                    :insert="config.tags.insert"\
+                    data-context="rows">\
+                </context>\
+                <tbody>\
+                    <tr>\
+                        <td colspan="6" :style="config.css.header">Central Time &ndash; Subtract 1 hour; Mountain &ndash; Subtract 2 Hours; Pacific &ndash; Subtract 3 Hours</td>\
+                    </tr>\
+                </tbody>\
+            </table>\
+            <br>\
         </comp>',
     config: {
         name: 'course-table',
         display: 'Course Table',
-        tags: { 
-            root: 'table',
+        tags: {
             rows: 'tbody',
             insert: 'tr'
         },
@@ -515,15 +592,17 @@ Cmint.createComponent({
 })
 Cmint.createComponent({
     template: '\
-        <comp :config="config" :style="{\
-            background: config.fields.output.bg,\
-            padding: config.fields.output.padding,\
-            color:config.fields.output.color,\
-            \'font-family\': config.css.fontfam,\
-            \'font-size\': config.css.fontsize,\
-            \'font-weight\': config.css.fontweight,\
-            \'line-height\': config.css.lineheight}"\
-            data-edit="text">\
+        <comp :config="config">\
+            <div :style="{\
+                background: config.fields.output.bg,\
+                padding: config.fields.output.padding,\
+                color:config.fields.output.color,\
+                \'font-family\': config.css.fontfam,\
+                \'font-size\': config.css.fontsize,\
+                \'font-weight\': config.css.fontweight,\
+                \'line-height\': config.css.lineheight}"\
+                data-edit="text"></div>\
+            <br>\
         </comp>',
     config: {
         name: 'heading',
@@ -548,4 +627,15 @@ Cmint.createComponent({
             ]
         }
     }
+})
+Cmint.createComponent({
+    
+    template: '<comp :config="config"><hr /><br /></comp>',
+
+    config: {
+        name: 'linebreak',
+        display: 'Line Break',
+        category: 'Dividers',
+    }
+
 })

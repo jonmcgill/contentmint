@@ -1,14 +1,16 @@
 Cmint.createComponent({
     template: '\
-        <comp :config="config" :style="{\
-            background: config.fields.output.bg,\
-            padding: config.fields.output.padding,\
-            color:config.fields.output.color,\
-            \'font-family\': config.css.fontfam,\
-            \'font-size\': config.css.fontsize,\
-            \'font-weight\': config.css.fontweight,\
-            \'line-height\': config.css.lineheight}"\
-            data-edit="text">\
+        <comp :config="config">\
+            <div :style="{\
+                background: config.fields.output.bg,\
+                padding: config.fields.output.padding,\
+                color:config.fields.output.color,\
+                \'font-family\': config.css.fontfam,\
+                \'font-size\': config.css.fontsize,\
+                \'font-weight\': config.css.fontweight,\
+                \'line-height\': config.css.lineheight}"\
+                data-edit="text"></div>\
+            <br>\
         </comp>',
     config: {
         name: 'heading',

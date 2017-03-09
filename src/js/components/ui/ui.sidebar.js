@@ -71,6 +71,10 @@ Vue.component('sidebar', {
             }
         })
 
+        Cmint.Bus.$on('openSidebar', function() {
+            _this.isActive = true;
+        })
+
         this.updateThumbnails();
 
     },

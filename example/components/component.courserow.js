@@ -1,12 +1,12 @@
 Cmint.createComponent({
     template: '\
         <comp :config="config">\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="platform"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="date"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="time"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
-            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="90" data-edit="platform"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="60" data-edit="date"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="110" data-edit="time"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="70" data-edit="code"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="180" data-edit="name"></td>\
+            <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" width="90">\
                 <a :href="config.fields.output.register" style="color: rgb(11, 75, 135);">Click Here</a>\
             </td>\
         </comp>',

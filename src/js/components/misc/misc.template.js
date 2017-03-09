@@ -55,6 +55,10 @@ Vue.component('content-template', {
         Cmint.Bus.$on('toggleOverlay', function(show) {
             _this.scale = show;
         })
+        Cmint.Bus.$on('moveTemplateLeft', function() {
+            _this.sidebarOpen = true;
+            _this.toolbarOpen = true;
+        })
     }
 
 })

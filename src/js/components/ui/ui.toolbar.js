@@ -71,6 +71,10 @@ Vue.component('toolbar', {
             this.$bus.$emit('toggleToolbar', true);
         })
 
+        _this.$bus.$on('closeToolbar', function() {
+            _this.toggle();
+        })
+
         _this.$bus.$on('toggleSidebar', function(sidebarState) {
             if (sidebarState) {
                 _this.isActive = true;

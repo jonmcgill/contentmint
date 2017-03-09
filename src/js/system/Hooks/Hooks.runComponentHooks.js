@@ -11,11 +11,11 @@ Cmint.Hooks.runComponentHooks = function(event, thing, data) {
     }
 
     if (data.hooks) {
-        data.hooks.forEach(function(hookName) {
-            if (Local.hasOwnProperty(hookName)) {
+        data.hooks.forEach(function(hook) {
+            if (Local.hasOwnProperty(hook)) {
                 if (Local[hook][event]) {
-                    Local[hookName][event](thing, data);
-                    Cmint.Util.debug('ran local component hook "'+hook+'" on event "'+event+'"')
+                    Local[hook][event](thing, data);
+                    Cmint.Util.debug('ran local component hook "'+hook+'" on event "'+event+'" for ' + data.name)
                 }
             }
         })

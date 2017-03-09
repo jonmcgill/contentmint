@@ -14,6 +14,7 @@ Cmint.createComponent({
         contexts: {
             container: []
         },
+        hooks: ['vertical-space'],
         fields: {
             output: { padding: '', centerblock:'', maxwidth: '' },
             list: [

@@ -13,3 +13,12 @@ Cmint.createEditorPostProcess(function(e) {
         this.setAttribute('target', '_blank');
     })
 })
+
+
+Cmint.createEditorPostProcess(function(e) {
+    $(e.target.bodyElement).find('p').each(function() {
+        var markup = $(this).html();
+        var div = $('<div></div>').append(markup);
+        $(this).replaceWith(div);
+    })
+})

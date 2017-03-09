@@ -5,19 +5,19 @@
 // A component hook can therefore be global (runs on every component) or local (only
 // runs if you define it in config). They can also be separate for the 'editing'
 // experience and the 'cleanup' phase of the content.
-Cmint.createComponentHook('vertical-space', 'Global', {
+Cmint.createComponentHook('vertical-space', 'Local', {
     editing: function(element) {
         $(element).css({
             'margin-bottom': '16px'
-        })
+        }).attr('data-spacing', 'true')
     },
     cleanup: function(element) {
-        $(element).css({'margin-bottom': ''})
+        $(element).css({'margin-bottom': ''}).removeAttr('data-spacing');
         $('<br>').insertAfter(element)
-        $(element).find('.Component').each(function() {
+        $(element).find('[data-spacing]').each(function() {
             $(this).css({'margin-bottom': ''})
             $('<br>').insertAfter(this)
-        })
+        }).removeAttr('data-spacing');
         
     }
 })

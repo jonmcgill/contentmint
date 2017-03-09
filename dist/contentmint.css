@@ -228,10 +228,6 @@ body {
   width: 200%;
   overflow: hidden; }
 
-.gu-mirror .thumbnail-scale-wrap {
-  transform: scale(1);
-  width: 100%; }
-
 .cmint.fields-container {
   position: fixed;
   top: 40px;
