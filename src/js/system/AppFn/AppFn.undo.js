@@ -9,6 +9,7 @@ Cmint.AppFn.undo = function() {
             this.previous = null;
         }
         Cmint.Util.debug('state reverted (current changes: ' + this.changes + ')');
+        Cmint.App.save();
     }
 
     Cmint.Bus.$emit('toolbarDisabler', !this.changes);

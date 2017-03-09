@@ -24,6 +24,7 @@ Cmint.Init = function() {
                 username: Cmint.Instance.Data.username,
                 contentName: Cmint.Instance.Data.contentName,
                 customComponents: Cmint.Instance.Data.customComponents,
+                markup: '',
                 
                 // Contexts
                 stage: Cmint.Instance.Data.saved,

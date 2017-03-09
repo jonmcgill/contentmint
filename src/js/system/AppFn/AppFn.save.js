@@ -1,19 +1,27 @@
 Cmint.AppFn.save = function() {
     
-    Cmint.Bus.$emit('updateEditorData');
+    var _this = this;
 
-    this.saved = Cmint.Util.copyObject(this.stage);
+    setTimeout(function() {
+        Cmint.Bus.$emit('updateEditorData');
 
-    Cmint.Hooks.onSaveHook({
-        template: Cmint.App.template,
-        contentName: Cmint.App.contentName,
-        username: Cmint.App.username,
-        saved: Cmint.App.saved,
-        customComponents: Cmint.App.customComponents
-    })
+        _this.saved = Cmint.Util.copyObject(_this.stage);
+        _this.markup = Cmint.getMarkup();
 
-    Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
+        Cmint.Hooks.onSaveHook({
+            template: Cmint.App.template,
+            contentName: Cmint.App.contentName,
+            username: Cmint.App.username,
+            saved: Cmint.App.saved,
+            customComponents: Cmint.App.customComponents,
+            markup: Cmint.App.markup
+        })
 
-    Cmint.Util.debug('content saved');
+        Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
+
+        Cmint.Util.debug('content saved');
+    }, 300);
+
+    
 
 }

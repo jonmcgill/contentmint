@@ -9,10 +9,15 @@ Cmint.createComponentHook('vertical-space', 'Global', {
     editing: function(element) {
         $(element).css({
             'margin-bottom': '16px'
-        });
+        })
     },
     cleanup: function(element) {
-        $(element).css({'margin-bottom': null});
-        $(element).insertAfter('<br><br>');
+        $(element).css({'margin-bottom': ''})
+        $('<br>').insertAfter(element)
+        $(element).find('.Component').each(function() {
+            $(this).css({'margin-bottom': ''})
+            $('<br>').insertAfter(this)
+        })
+        
     }
 })

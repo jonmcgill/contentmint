@@ -6,11 +6,35 @@ Cmint.createToolbarButton({
     btnClasses: { 'toolbar-code':true, 'toolbar-btn-fancy': true },
     iconClasses: { 'fa': true, 'fa-code': true },
     callback: function() {
-        Cmint.Util.debug('get content code');
+        if ($('#CodeModal').length === 0) {
+            var $codeModal = $('<div id="CodeModal"></div>');
+            $codeModal.css({
+                'position': 'fixed',
+                'top': '40px',
+                'bottom': '0',
+                'width': '100%',
+                'z-index':'8000'
+            })
+            $codeModal.append('\
+                <textarea style="margin:1em;\
+                    width:42em;height:22em;\
+                    display:block;padding:2em;\
+                    border:1px solid #888;\
+                    font-family:Consolas;"></textarea>')
+            Cmint.Bus.$emit('toggleOverlay', true)
+            $('body').append($codeModal);
+            $('#CodeModal textarea').text(Cmint.App.markup)
+            $('#CodeModal textarea').focus().select();
+        } else {
+            Cmint.Bus.$emit('toggleOverlay', false)
+            $('#CodeModal').remove();
+        }
+        
     }
 })
 Cmint.createOnSaveHook(function(data) {
     Cmint.Util.debug('ran onSave hook: send data to back end script');
+    console.log(data);
 })
 // Templates are just some html with a token that stands in place for the main staging
 // area. In the place where you want to add components write in {{ stage }}. The path
@@ -198,6 +222,29 @@ Cmint.createFieldProcess('mailto', function(inputs, component) {
     function encode(val) { return encodeURIComponent(val); }
     return output;
 })
+
+Cmint.createComponentHook('rgbtohex', 'Global', {
+
+    markup: function(markup, config) {
+        var rgbs = markup.match(/rgb\(\d+,\s*\d+,\s*\d+\)/g);
+        if (rgbs) {
+            rgbs.forEach(function(color) {
+                var exp = new RegExp(color.replace(/\(/g,'\\(').replace(/\)/g, '\\)'), 'g');
+                var hex = color.replace(/rgb\(/,'').replace(/\)/,'');
+                hex = hex.split(', ');
+                hex = hex.map(function(val) {
+                    val = val * 1;
+                    val = val.toString(16);
+                    if (val.length === 1) val = '0' + val;
+                    return val;
+                }).join('');
+                markup = markup.replace(exp, '#' + hex)
+            })
+        }
+        config.markup = markup;
+    }
+
+})
 // You may have situations where you'd like to manipulate a component after it has
 // mounted or updated. You may also not want that thing to be the same in the editor
 // versus the result. Additionally, you may want a thing to happen across the board for
@@ -209,11 +256,16 @@ Cmint.createComponentHook('vertical-space', 'Global', {
     editing: function(element) {
         $(element).css({
             'margin-bottom': '16px'
-        });
+        })
     },
     cleanup: function(element) {
-        $(element).css({'margin-bottom': null});
-        $(element).insertAfter('<br><br>');
+        $(element).css({'margin-bottom': ''})
+        $('<br>').insertAfter(element)
+        $(element).find('.Component').each(function() {
+            $(this).css({'margin-bottom': ''})
+            $('<br>').insertAfter(this)
+        })
+        
     }
 })
 Cmint.createComponent({
@@ -342,7 +394,7 @@ Cmint.createComponent({
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
-                <a :href="config.fields.output.register" style="color:#0b4b37">Click Here</a>\
+                <a :href="config.fields.output.register" style="color: rgb(11, 75, 135);">Click Here</a>\
             </td>\
         </comp>',
     config: {

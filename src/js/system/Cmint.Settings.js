@@ -13,6 +13,7 @@ Cmint.Settings = {
         dataContext: 'data-context',
         dataDisable: 'data-disable',
         dataEdit: 'data-edit',
+        dataTemp: 'data-temp',
         placeholder: 'cmint-placeholder'
     },
 
@@ -36,7 +37,8 @@ Cmint.Settings = {
         dataContext: '[data-context]',
         dataHook: '[data-hook]',
         dataDisable: '[data-disable]',
-        dataEdit: '[data-edit]'
+        dataEdit: '[data-edit]',
+        dataTemp: '[data-temp]'
     }
 
 }

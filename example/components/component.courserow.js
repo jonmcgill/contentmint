@@ -7,7 +7,7 @@ Cmint.createComponent({
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="code"></td>\
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor" data-edit="name"></td>\
             <td :style="config.css.row" :bgcolor="config.fields.output.bgcolor">\
-                <a :href="config.fields.output.register" style="color:#0b4b37">Click Here</a>\
+                <a :href="config.fields.output.register" style="color: rgb(11, 75, 135);">Click Here</a>\
             </td>\
         </comp>',
     config: {

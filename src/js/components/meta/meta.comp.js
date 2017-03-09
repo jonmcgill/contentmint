@@ -36,18 +36,18 @@ Vue.component('comp', {
             var $el = $(_this.$el);
 
             // Is the component staged, or in the component sidebar?
-            this.environment = $el.closest(Cmint.Settings.id.components).length
+            _this.environment = $el.closest(Cmint.Settings.id.components).length
                 ? 'components'
                 : 'stage';
 
             // Get the component's position in data from its position in DOM
-            this.config.index = Cmint.Sync.getStagePosition(this.$el);
+            _this.config.index = Cmint.Sync.getStagePosition(_this.$el);
 
             // Assign field uid if component utilizes fields system
-            if (this.config.fields) Cmint.Fields.assignUid(this);
+            if (_this.config.fields) Cmint.Fields.assignUid(_this);
 
             // Adding custom, originalDisplay, originalCategory
-            Cmint.AppFn.compSetup(this.config);
+            Cmint.AppFn.compSetup(_this.config);
 
             // Watch for updates to the same custom component type and splice accordingly
             // Cmint.AppFn.updateStageCustomComponents(this);
@@ -60,15 +60,21 @@ Vue.component('comp', {
             })
             
             // Run component hooks
-            Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
+            Cmint.Hooks.runComponentHooks('editing', _this.$el, _this.config);
 
             // Run editor initiation
-            Cmint.Editor.init(this);
+            Cmint.Editor.init(_this);
 
             // Run actionbar handler
-            Cmint.Ui.actionbarHandler(this);
+            Cmint.Ui.actionbarHandler(_this);
 
-            Cmint.Util.debug(action + ' <comp> "' + this.config.name + '"');
+            // Get markup after setTimeout to give tinymce some time to
+            // update the DOM if needed
+            setTimeout(function() {
+                Cmint.AppFn.getComponentMarkup(_this);
+            }, 100);
+            
+            Cmint.Util.debug(action + ' <comp> "' + _this.config.name + '"');
         }
 
     },

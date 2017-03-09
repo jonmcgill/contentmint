@@ -90,6 +90,7 @@ Cmint.Settings = {
         dataContext: 'data-context',
         dataDisable: 'data-disable',
         dataEdit: 'data-edit',
+        dataTemp: 'data-temp',
         placeholder: 'cmint-placeholder'
     },
 
@@ -113,7 +114,8 @@ Cmint.Settings = {
         dataContext: '[data-context]',
         dataHook: '[data-hook]',
         dataDisable: '[data-disable]',
-        dataEdit: '[data-edit]'
+        dataEdit: '[data-edit]',
+        dataTemp: '[data-temp]'
     }
 
 }
@@ -633,6 +635,15 @@ Cmint.createToolbarButton({
         Cmint.App.undo();
     }
 })
+Cmint.getMarkup = function() {
+
+    var markup = Cmint.App.stage.map(function(comp) {
+        return comp.markup;
+    }).join('\n');
+
+    return markup;
+
+}
 
 // components.
 Vue.component('comp', {
@@ -671,18 +682,18 @@ Vue.component('comp', {
             var $el = $(_this.$el);
 
             // Is the component staged, or in the component sidebar?
-            this.environment = $el.closest(Cmint.Settings.id.components).length
+            _this.environment = $el.closest(Cmint.Settings.id.components).length
                 ? 'components'
                 : 'stage';
 
             // Get the component's position in data from its position in DOM
-            this.config.index = Cmint.Sync.getStagePosition(this.$el);
+            _this.config.index = Cmint.Sync.getStagePosition(_this.$el);
 
             // Assign field uid if component utilizes fields system
-            if (this.config.fields) Cmint.Fields.assignUid(this);
+            if (_this.config.fields) Cmint.Fields.assignUid(_this);
 
             // Adding custom, originalDisplay, originalCategory
-            Cmint.AppFn.compSetup(this.config);
+            Cmint.AppFn.compSetup(_this.config);
 
             // Watch for updates to the same custom component type and splice accordingly
             // Cmint.AppFn.updateStageCustomComponents(this);
@@ -695,15 +706,21 @@ Vue.component('comp', {
             })
             
             // Run component hooks
-            Cmint.Hooks.runComponentHooks('editing', this.$el, this.config);
+            Cmint.Hooks.runComponentHooks('editing', _this.$el, _this.config);
 
             // Run editor initiation
-            Cmint.Editor.init(this);
+            Cmint.Editor.init(_this);
 
             // Run actionbar handler
-            Cmint.Ui.actionbarHandler(this);
+            Cmint.Ui.actionbarHandler(_this);
 
-            Cmint.Util.debug(action + ' <comp> "' + this.config.name + '"');
+            // Get markup after setTimeout to give tinymce some time to
+            // update the DOM if needed
+            setTimeout(function() {
+                Cmint.AppFn.getComponentMarkup(_this);
+            }, 100);
+            
+            Cmint.Util.debug(action + ' <comp> "' + _this.config.name + '"');
         }
 
     },
@@ -1697,32 +1714,24 @@ Cmint.Fields.watchOutputUpdates = function(fieldComponent) {
         }
     })
 }
-Cmint.Hooks.runComponentHooks = function(event, element, data) {
+Cmint.Hooks.runComponentHooks = function(event, thing, data) {
 
     var Local = Cmint.Instance.Hooks.Local;
     var Global = Cmint.Instance.Hooks.Global;
 
     for (var hook in Global) {
-        if (event === 'editing') {
-            Global[hook].editing(element, data);
-            Cmint.Util.debug('ran global component hook "'+hook+'" during editing')
-        }
-        if (event === 'cleanup') {
-            Global[hook].cleanup(element, data);
-            Cmint.Util.debug('ran global component hook "'+hook+'" during cleanup')
+        if (Global[hook][event]) {
+            Global[hook][event](thing, data);
+            Cmint.Util.debug('ran global component hook "'+hook+'" on event "'+event+'"')
         }
     }
 
     if (data.hooks) {
         data.hooks.forEach(function(hookName) {
             if (Local.hasOwnProperty(hookName)) {
-                if (event === 'editing') {
-                    Local[hookName].editing(element, data);
-                    Cmint.Util.debug('ran local component hook "'+hook+'" during editing')
-                }
-                if (event === 'cleanup') {
-                    Local[hookName].cleanup(element, data);
-                    Cmint.Util.debug('ran local component hook "'+hook+'" during cleanup')
+                if (Local[hook][event]) {
+                    Local[hookName][event](thing, data);
+                    Cmint.Util.debug('ran local component hook "'+hook+'" on event "'+event+'"')
                 }
             }
         })
@@ -2307,6 +2316,7 @@ Cmint.AppFn.compSetup = function(config) {
     config.custom = config.custom || false;
     config.originalDisplay = config.originalDisplay || config.display;
     config.originalCategory = config.originalCategory || config.category;
+    config.markup = config.markup || '';
 
 }
 Cmint.AppFn.createCustomComponent = function(customModal) {
@@ -2380,6 +2390,38 @@ Cmint.AppFn.deleteCustomComponent = function(customModal) {
     customModal.closeCustom();
 
 }
+Cmint.AppFn.getComponentMarkup = function(component) {
+
+    var $el = $(component.$el);
+    var $clone = $el.clone();
+    var $wrap = $('<div></div>');
+    $clone.appendTo($wrap);
+
+    // Run component cleanup hooks now
+    Cmint.Hooks.runComponentHooks('cleanup', $clone[0], component.config);
+
+    // Run Contentmint system cleanup
+    $wrap.find(Cmint.Settings.attr.dataEdit).removeAttr(Cmint.Settings.name.dataEdit)
+    $wrap.find(Cmint.Settings.attr.dataTemp).removeAttr(Cmint.Settings.name.dataTemp)
+    $wrap.find('[contenteditable]').removeAttr('contenteditable')
+    $wrap.find('[spellcheck]').removeAttr('spellcheck')
+    $wrap.find(Cmint.Settings.class.component).removeClass(Cmint.Settings.name.component + ' ' + 'active')
+    $wrap.find('.mce-content-body').removeClass('mce-content-body');
+    $wrap.find('[id]').each(function() {
+        if ($(this).attr('id').match(/^mce_\d+/)) $(this).removeAttr('id');
+    })
+    $wrap.find('[class]').each(function() {
+        if ($(this).attr('class') === '') $(this).removeAttr('class');
+    })
+
+    var markup = $wrap.html();
+
+    // Run markup hooks now
+    Cmint.Hooks.runComponentHooks('markup', markup, component.config);
+
+    Cmint.Util.debug('got markup for component "'+component.config.name+'"');
+
+}
 Cmint.AppFn.getTemplateComponents = function(name) {
 
     var components = [];
@@ -2440,21 +2482,29 @@ Cmint.AppFn.replaceIndexIf = function(list, data, fn, remove) {
 }
 Cmint.AppFn.save = function() {
     
-    Cmint.Bus.$emit('updateEditorData');
+    var _this = this;
 
-    this.saved = Cmint.Util.copyObject(this.stage);
+    setTimeout(function() {
+        Cmint.Bus.$emit('updateEditorData');
 
-    Cmint.Hooks.onSaveHook({
-        template: Cmint.App.template,
-        contentName: Cmint.App.contentName,
-        username: Cmint.App.username,
-        saved: Cmint.App.saved,
-        customComponents: Cmint.App.customComponents
-    })
+        _this.saved = Cmint.Util.copyObject(_this.stage);
+        _this.markup = Cmint.getMarkup();
 
-    Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
+        Cmint.Hooks.onSaveHook({
+            template: Cmint.App.template,
+            contentName: Cmint.App.contentName,
+            username: Cmint.App.username,
+            saved: Cmint.App.saved,
+            customComponents: Cmint.App.customComponents,
+            markup: Cmint.App.markup
+        })
 
-    Cmint.Util.debug('content saved');
+        Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
+
+        Cmint.Util.debug('content saved');
+    }, 300);
+
+    
 
 }
 // Keeps track of changes made within in the editor as a whole. Note, this does
@@ -2497,6 +2547,7 @@ Cmint.AppFn.undo = function() {
             this.previous = null;
         }
         Cmint.Util.debug('state reverted (current changes: ' + this.changes + ')');
+        Cmint.App.save();
     }
 
     Cmint.Bus.$emit('toolbarDisabler', !this.changes);
@@ -2582,6 +2633,7 @@ Cmint.Init = function() {
                 username: Cmint.Instance.Data.username,
                 contentName: Cmint.Instance.Data.contentName,
                 customComponents: Cmint.Instance.Data.customComponents,
+                markup: '',
                 
                 // Contexts
                 stage: Cmint.Instance.Data.saved,
