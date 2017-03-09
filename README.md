@@ -1,11 +1,13 @@
 # Contentmint
 
-A decoupled drag-and-drop content editor.
+A decoupled drag-and-drop content editor with a simple API.
 
-__Try it Out__
+## Take a look
 ```
-git clone https://github.com/jonmcgill/content-editor contentmint
-cd contentmint
 npm install
 npm run dev
 ```
+
+![editor](./editor.png)
+
+__More to come...__
