@@ -16,11 +16,11 @@ Cmint.createToolbarButton({
                 <div id="CodeModal">\
                     <i class="fa fa-close"></i>\
                     <div class="code-full">\
-                        <p>Full Code (For Litmus tests)</p>\
+                        <p>Full Code</p>\
                         <textarea class="code-full-area" spellcheck="false"></textarea>\
                     </div>\
                     <div class="code-content">\
-                        <p>Content Code (For IMN)</p>\
+                        <p>Stage Code</p>\
                         <textarea class="code-content-area" spellcheck="false"></textarea>\
                     </div>\
                     <span>CTRL + C to copy</span>\
