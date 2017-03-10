@@ -42,7 +42,8 @@ Cmint.Init = function() {
                 contextualize: false,
                 changes: 0,
                 previous: null,
-                saved: []
+                saved: [],
+                initialState: Cmint.Util.copyObject(Cmint.Instance.Data.saved)
             
             },
 
@@ -69,6 +70,13 @@ Cmint.Init = function() {
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
                 Cmint.Util.debug('mounted application');
+
+                if (this.initialState.length) {
+                    this.previous = {
+                        snapshot: this.initialState
+                    }
+                }
+
             }
 
         })

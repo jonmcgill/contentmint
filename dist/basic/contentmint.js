@@ -2560,8 +2560,10 @@ Cmint.AppFn.undo = function() {
         this.changes--;
         this.stage = this.previous.prior.snapshot;
         Vue.nextTick(Cmint.Drag.updateContainers);
-        this.previous = this.previous.prior;
-        if (!this.previous.prior) {
+        
+        if (this.previous.prior) {
+            this.previous = Cmint.Util.copyObject(this.previous.prior);
+        } else {
             this.previous = null;
         }
         Cmint.Util.debug('state reverted (current changes: ' + this.changes + ')');
@@ -2669,7 +2671,8 @@ Cmint.Init = function() {
                 contextualize: false,
                 changes: 0,
                 previous: null,
-                saved: []
+                saved: [],
+                initialState: Cmint.Util.copyObject(Cmint.Instance.Data.saved)
             
             },
 
@@ -2696,6 +2699,13 @@ Cmint.Init = function() {
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
                 Cmint.Util.debug('mounted application');
+
+                if (this.initialState.length) {
+                    this.previous = {
+                        snapshot: this.initialState
+                    }
+                }
+
             }
 
         })

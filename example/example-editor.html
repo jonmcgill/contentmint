@@ -42,16 +42,21 @@ TODO
     is not saved in the data.
 -->
 <textarea style="display: none" id="Data">
- {
-    "template": "email",
-    "machineName": "example-email",
-    "contentName": "Example Email",
-    "username": "mcgilljo",
-    "saved": [],
-    "customComponents": [],
-    "markup": ""
- }
+ 
 </textarea>
+<script type="text/javascript">
+    var dummy = '{\
+    "template": "email",\
+    "machineName": "example-email",\
+    "contentName": "Example Email",\
+    "username": "mcgilljo",\
+    "saved": [{"name":"heading","display":"Heading","category":"Content","css":{"fontfam":"Arial, sans-serif","fontsize":"24px","fontweight":"bold","lineheight":"normal"},"tokens":[{"text":"text"},{"bg":"bg"}],"content":{"text":"<div>Lorem Ipsum Headingum<\\/div>"},"fields":{"output":{"color":"","bg":"","padding":""},"list":[{"name":"color","result":"color"},{"name":"bg-color","result":"bg"},{"name":"padding","result":"padding"}],"uid":"ID-6I1S9U7S7S4T"},"index":["stage","0"],"custom":"false","originalDisplay":"Heading","originalCategory":"Content","markup":"<div><div style=\\"font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; line-height: normal; position: relative;\\"><div>Lorem Ipsum Headingum<\\/div><\\/div> <br><\\/div>"}],\
+    "customComponents": [],\
+    "markup": ""\
+ }';
+ document.getElementById('Data').innerText = dummy;
+ console.log(JSON.parse(document.getElementById('Data').innerText));
+</script>
 <div id="App" v-cloak>
     <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
     <sidebar :components="components" class="cmint"></sidebar>
