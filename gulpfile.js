@@ -88,18 +88,22 @@ gulp.task('build', ['build-example'], function() {
     gulp.src(js_files)
         .pipe(concat('contentmint.js'))
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
         .pipe(uglify())
         .pipe(rename('contentmint.min.js'))
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
 })
 
 gulp.task('build-vendor', function() {
     gulp.src(js_vendor)
         .pipe(concat('contentmint.vendor.js'))
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
         .pipe(uglify())
         .pipe(rename('contentmint.vendor.min.js'))
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
 })
 
 gulp.task('bundle', ['build'], function() {
@@ -108,6 +112,7 @@ gulp.task('bundle', ['build'], function() {
         .pipe(uglify())
         .pipe(rename('contentmint.bundle.min.js'))
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
 })
 
 gulp.task('sass', function() {
@@ -115,6 +120,7 @@ gulp.task('sass', function() {
         .pipe(plumber())
         .pipe(sass())
         .pipe(gulp.dest('dist/'))
+        .pipe(gulp.dest('dist/basic'))
 })
 
 gulp.task('dev', ['bundle'], function() {

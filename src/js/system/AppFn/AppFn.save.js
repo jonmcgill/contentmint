@@ -10,6 +10,7 @@ Cmint.AppFn.save = function() {
 
         Cmint.Hooks.onSaveHook({
             template: Cmint.App.template,
+            machineName: Cmint.App.machineName,
             contentName: Cmint.App.contentName,
             username: Cmint.App.username,
             saved: Cmint.App.saved,

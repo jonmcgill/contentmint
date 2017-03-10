@@ -19,9 +19,10 @@ Cmint.Init = function() {
 
                 templateMarkup: markup, // Does not get pushed on save
                 template: Cmint.Instance.Data.template,
-                
                 templateName: Cmint.Instance.Data.template,
+
                 username: Cmint.Instance.Data.username,
+                machineName: Cmint.Instance.Data.machineName,
                 contentName: Cmint.Instance.Data.contentName,
                 customComponents: Cmint.Instance.Data.customComponents,
                 markup: '',
