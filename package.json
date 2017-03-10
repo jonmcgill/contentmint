@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "gulp dev",
-    "build": "gulp build"
+    "build": "gulp build",
+    "bundle": "gulp bundle"
   },
   "keywords": [
     "WYSIWYG",

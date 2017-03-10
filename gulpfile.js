@@ -121,9 +121,9 @@ gulp.task('dev', ['bundle'], function() {
     server.start({
         host: 'localhost',
         port: 3000,
-        watch: ['dist/**/*', 'index.html', 'example/**/*']
+        watch: ['dist/contentmint.min.js', 'index.html', 'example/**/*']
     })
-    gulp.watch('src/js/**/*.js', ['bundle'])
+    gulp.watch('src/js/**/*.js', ['build'])
     gulp.watch('src/scss/**/*.scss', ['sass'])
-    gulp.watch('example/**/*', ['bundle'])
+    gulp.watch('example/**/*', ['build-example'])
 })
