@@ -1,16 +1,16 @@
 {
-  "name": "content-editor",
+  "name": "contentmint",
   "version": "1.0.0",
-  "description": "WYSIWYG HTML Content Editing",
+  "description": "Decoupled drag-and-drop content builder on Vue.js",
   "main": "app.js",
   "scripts": {
     "dev": "gulp dev",
-    "build": "gulp build",
-    "build-ref": "gulp build-ref",
-    "dev-ref": "gulp dev-ref"
+    "build": "gulp build"
   },
   "keywords": [
     "WYSIWYG",
+    "content builder",
+    "content management",
     "editing",
     "editor",
     "HTML",
@@ -23,7 +23,9 @@
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^2.1.0",
     "live-server": "^1.2.0",
     "nodemon": "^1.11.0"
   }

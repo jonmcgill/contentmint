@@ -2,6 +2,8 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     sass = require('gulp-sass'),
     plumber = require('gulp-plumber'),
+    uglify = require('gulp-uglify'),
+    rename = require('gulp-rename'),
     server = require('live-server');
 
 function p(path) {
@@ -67,33 +69,6 @@ var js_vendor = [
     './vendor/dragula/dragula.min.js', './vendor/vue/vue.js',
 ]
 
-gulp.task('build', function() {
-    gulp.src(js_files)
-        .pipe(concat('contentmint.js'))
-        .pipe(gulp.dest('dist/'));
-})
-
-gulp.task('dev', ['build', 'build-example'], function() {
-    server.start({
-        host: 'localhost',
-        port: 3000,
-        watch: ['dist/**/*', 'index.html', 'example/**/*']
-    })
-    gulp.watch('src/js/**/*.js', function() {
-        return gulp.src(js_files)
-            .pipe(concat('contentmint.js'))
-            .pipe(gulp.dest('dist/'));
-    })
-    gulp.watch('src/scss/**/*.scss', function() {
-        return gulp.src('src/scss/**/*.scss')
-            .pipe(plumber())
-            .pipe(sass())
-            .pipe(gulp.dest('dist/'))
-    })
-    gulp.watch('example/**/*', ['build-example']);
-})
-
-
 gulp.task('build-example', function() {
     return gulp
         .src([
@@ -107,4 +82,48 @@ gulp.task('build-example', function() {
         ])
         .pipe(concat('example-app.js'))
         .pipe(gulp.dest('example/build/'));
+})
+
+gulp.task('build', ['build-example'], function() {
+    gulp.src(js_files)
+        .pipe(concat('contentmint.js'))
+        .pipe(gulp.dest('dist/'))
+        .pipe(uglify())
+        .pipe(rename('contentmint.min.js'))
+        .pipe(gulp.dest('dist/'))
+})
+
+gulp.task('build-vendor', function() {
+    gulp.src(js_vendor)
+        .pipe(concat('contentmint.vendor.js'))
+        .pipe(gulp.dest('dist/'))
+        .pipe(uglify())
+        .pipe(rename('contentmint.vendor.min.js'))
+        .pipe(gulp.dest('dist/'))
+})
+
+gulp.task('bundle', ['build'], function() {
+    gulp.src(['dist/contentmint.vendor.js', 'dist/contentmint.js'])
+        .pipe(concat('contentmint.bundle.js'))
+        .pipe(uglify())
+        .pipe(rename('contentmint.bundle.min.js'))
+        .pipe(gulp.dest('dist/'))
+})
+
+gulp.task('sass', function() {
+    return gulp.src('src/scss/**/*.scss')
+        .pipe(plumber())
+        .pipe(sass())
+        .pipe(gulp.dest('dist/'))
+})
+
+gulp.task('dev', ['bundle'], function() {
+    server.start({
+        host: 'localhost',
+        port: 3000,
+        watch: ['dist/**/*', 'index.html', 'example/**/*']
+    })
+    gulp.watch('src/js/**/*.js', ['bundle'])
+    gulp.watch('src/scss/**/*.scss', ['sass'])
+    gulp.watch('example/**/*', ['bundle'])
 })
