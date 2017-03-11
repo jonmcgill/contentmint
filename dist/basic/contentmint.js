@@ -1578,7 +1578,7 @@ Cmint.Ui.refreshComponentList = function() {
             $(this).parent().height(h)
         })
         $(Cmint.Settings.id.components).animate({opacity: 1}, 400);
-    }, 300);
+    }, 600);
 
 }
 
@@ -2694,21 +2694,24 @@ Cmint.Init = function() {
                 Cmint.Bus.$on('callComponentFields', function() {
                     _this.fieldsComponent = _this.activeComponent.config;
                 })
+                this.initialState.forEach(function(comp) {
+                    _this.stage.push(comp);
+                })
                 Cmint.Ui.documentHandler();
                 Cmint.Ui.contextualize();
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
                 Cmint.Util.debug('mounted application');
 
-                this.initialState.forEach(function(comp) {
-                    _this.stage.push(comp);
-                })
-
                 if (this.initialState.length) {
                     this.previous = {
                         snapshot: this.initialState
                     }
                 }
+
+                setTimeout(function() {
+                    Cmint.Drag.fn.updateContainers();
+                }, 1000)
 
             }
 

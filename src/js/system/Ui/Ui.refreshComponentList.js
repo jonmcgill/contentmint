@@ -10,6 +10,6 @@ Cmint.Ui.refreshComponentList = function() {
             $(this).parent().height(h)
         })
         $(Cmint.Settings.id.components).animate({opacity: 1}, 400);
-    }, 300);
+    }, 600);
 
 }
