@@ -28,7 +28,7 @@ Cmint.Init = function() {
                 markup: '',
                 
                 // Contexts
-                stage: Cmint.Instance.Data.saved,
+                stage: [],
                 components: Cmint.AppFn.getTemplateComponents(template),
 
                 // Global items used by other components
@@ -70,6 +70,10 @@ Cmint.Init = function() {
                 Cmint.Bus.setSelectedCategory(this);
                 Cmint.Drag.init();
                 Cmint.Util.debug('mounted application');
+
+                this.initialState.forEach(function(comp) {
+                    _this.stage.push(comp);
+                })
 
                 if (this.initialState.length) {
                     this.previous = {
