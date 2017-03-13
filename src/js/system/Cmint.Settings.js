@@ -2,7 +2,9 @@ Cmint.Settings = {
 
     config: {
         debug: true,
-        tests: true
+        tests: true,
+        username: true,
+        username_link: ''
     },
 
     name: {

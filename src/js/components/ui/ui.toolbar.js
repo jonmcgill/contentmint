@@ -13,7 +13,7 @@ Vue.component('toolbar', {
             </div>\
             <div id="EditorToolbar"></div>\
             <div class="right">\
-                <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
+                <span>{{ name }}</span><span v-if="user">|</span><a v-if="user" :href="usernameLink">{{ user }}</a>\
             </div>\
             <div class="cmint-toolbar-handle" @click="toggle">\
                 <i :class="handleClasses"></i>\
@@ -23,7 +23,8 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-        isActive: true
+        isActive: true,
+        usernameLink: ''
 
     }},
 
@@ -53,6 +54,10 @@ Vue.component('toolbar', {
             } else {
                 disablers.removeAttr('disabled');
             }
+        },
+
+        renderUserLink: function(link) {
+            return link.replace(/\{\{\s*username\s*\}\}/, Cmint.App)
         }
 
     },
@@ -78,6 +83,14 @@ Vue.component('toolbar', {
         _this.$bus.$on('toggleSidebar', function(sidebarState) {
             if (sidebarState) {
                 _this.isActive = true;
+            }
+        })
+
+        _this.$bus.$on('renderUsernameLink', function(username) {
+            if (Cmint.Settings.config.username && Cmint.Settings.config.username_link) {
+                _this.usernameLink = Cmint.Settings.config.username_link.replace(/\{\{\s*username\s*\}\}/g, username);
+            } else {
+                _this.usernameLink = '/' + username;
             }
         })
 

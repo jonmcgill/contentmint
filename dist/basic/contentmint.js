@@ -79,7 +79,9 @@ Cmint.Settings = {
 
     config: {
         debug: true,
-        tests: true
+        tests: true,
+        username: true,
+        username_link: ''
     },
 
     name: {
@@ -802,7 +804,7 @@ Vue.component('toolbar', {
             </div>\
             <div id="EditorToolbar"></div>\
             <div class="right">\
-                <span>{{ name }}</span><a :href="\'/\' + user">{{ user }}</a>\
+                <span>{{ name }}</span><span v-if="user">|</span><a v-if="user" :href="usernameLink">{{ user }}</a>\
             </div>\
             <div class="cmint-toolbar-handle" @click="toggle">\
                 <i :class="handleClasses"></i>\
@@ -812,7 +814,8 @@ Vue.component('toolbar', {
     data: function(){return{
 
         toolbarButtons: Cmint.Ui.Toolbar,
-        isActive: true
+        isActive: true,
+        usernameLink: ''
 
     }},
 
@@ -842,6 +845,10 @@ Vue.component('toolbar', {
             } else {
                 disablers.removeAttr('disabled');
             }
+        },
+
+        renderUserLink: function(link) {
+            return link.replace(/\{\{\s*username\s*\}\}/, Cmint.App)
         }
 
     },
@@ -867,6 +874,14 @@ Vue.component('toolbar', {
         _this.$bus.$on('toggleSidebar', function(sidebarState) {
             if (sidebarState) {
                 _this.isActive = true;
+            }
+        })
+
+        _this.$bus.$on('renderUsernameLink', function(username) {
+            if (Cmint.Settings.config.username && Cmint.Settings.config.username_link) {
+                _this.usernameLink = Cmint.Settings.config.username_link.replace(/\{\{\s*username\s*\}\}/g, username);
+            } else {
+                _this.usernameLink = '/' + username;
             }
         })
 
@@ -2650,7 +2665,7 @@ Cmint.Init = function() {
                 template: Cmint.Instance.Data.template,
                 templateName: Cmint.Instance.Data.template,
 
-                username: Cmint.Instance.Data.username,
+                username: Cmint.Settings.config.username ? Cmint.Instance.Data.username : '',
                 machineName: Cmint.Instance.Data.machineName,
                 contentName: Cmint.Instance.Data.contentName,
                 customComponents: Cmint.Instance.Data.customComponents,
@@ -2708,6 +2723,8 @@ Cmint.Init = function() {
                         snapshot: this.initialState
                     }
                 }
+
+                Cmint.Bus.$emit('renderUsernameLink', this.username);
 
                 setTimeout(function() {
                     Cmint.Drag.fn.updateContainers();

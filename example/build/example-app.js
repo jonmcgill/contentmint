@@ -52,6 +52,8 @@ Cmint.createToolbarButton({
 Cmint.createOnSaveHook(function(data) {
     Cmint.Util.debug('ran onSave hook: send data to back end script');
 })
+Cmint.Settings.config.username_link = 'dashboard/{{username}}';
+// Cmint.Settings.config.username = false;
 // Templates are just some html with a token that stands in place for the main staging
 // area. In the place where you want to add components write in {{ stage }}. The path
 // is used on page load to run an ajax request for the markup. The components array is

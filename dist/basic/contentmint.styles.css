@@ -751,9 +751,6 @@ body {
         text-decoration: underline; }
     #Toolbar .right span {
       margin-right: 1em; }
-      #Toolbar .right span:after {
-        content: '|';
-        margin-left: 1em; }
   #Toolbar .cmint-btn-toolbar > button,
   #Toolbar > button {
     cursor: pointer;

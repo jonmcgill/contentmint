@@ -21,7 +21,7 @@ Cmint.Init = function() {
                 template: Cmint.Instance.Data.template,
                 templateName: Cmint.Instance.Data.template,
 
-                username: Cmint.Instance.Data.username,
+                username: Cmint.Settings.config.username ? Cmint.Instance.Data.username : '',
                 machineName: Cmint.Instance.Data.machineName,
                 contentName: Cmint.Instance.Data.contentName,
                 customComponents: Cmint.Instance.Data.customComponents,
@@ -79,6 +79,8 @@ Cmint.Init = function() {
                         snapshot: this.initialState
                     }
                 }
+
+                Cmint.Bus.$emit('renderUsernameLink', this.username);
 
                 setTimeout(function() {
                     Cmint.Drag.fn.updateContainers();
