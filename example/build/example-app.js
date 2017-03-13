@@ -29,7 +29,7 @@ Cmint.createToolbarButton({
             Cmint.Bus.$emit('toggleOverlay', true)
             $('body').append($modal);
             $('#CodeModal .code-full-area').text(Cmint.getFullMarkup())
-            $('#CodeModal .code-content-area').text(Cmint.App.markup)
+            $('#CodeModal .code-content-area').text(Cmint.getMarkup())
             $('#CodeModal i').click(function() {
                 Cmint.Bus.$emit('toggleOverlay', false)
                 $('#CodeModal').remove();

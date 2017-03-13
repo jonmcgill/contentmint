@@ -642,9 +642,11 @@ Cmint.getFullMarkup = function() {
     return Cmint.App.templateMarkup.replace(/\{\{\s*stage\s*\}\}/, Cmint.App.markup)
 
 }
-Cmint.getMarkup = function() {
+Cmint.getMarkup = function(context) {
 
-    var markup = Cmint.App.stage.map(function(comp) {
+    var region = context || Cmint.App.stage;
+
+    var markup = region.map(function(comp) {
         return comp.markup;
     }).join('\n');
 
@@ -2704,6 +2706,7 @@ Cmint.Init = function() {
                 Cmint.AppFn.mergeCustomComponents(this);
             },
 
+            // This stuff probably needs to be cleaned up a little bit
             mounted: function() {
                 var _this = this;
                 Cmint.Bus.$on('callComponentFields', function() {
@@ -2723,6 +2726,8 @@ Cmint.Init = function() {
                         snapshot: this.initialState
                     }
                 }
+
+                this.markup = Cmint.getMarkup(this.stage);
 
                 Cmint.Bus.$emit('renderUsernameLink', this.username);
 

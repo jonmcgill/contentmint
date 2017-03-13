@@ -1,6 +1,8 @@
-Cmint.getMarkup = function() {
+Cmint.getMarkup = function(context) {
 
-    var markup = Cmint.App.stage.map(function(comp) {
+    var region = context || Cmint.App.stage;
+
+    var markup = region.map(function(comp) {
         return comp.markup;
     }).join('\n');
 

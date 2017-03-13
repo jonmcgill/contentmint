@@ -60,6 +60,7 @@ Cmint.Init = function() {
                 Cmint.AppFn.mergeCustomComponents(this);
             },
 
+            // This stuff probably needs to be cleaned up a little bit
             mounted: function() {
                 var _this = this;
                 Cmint.Bus.$on('callComponentFields', function() {
@@ -79,6 +80,8 @@ Cmint.Init = function() {
                         snapshot: this.initialState
                     }
                 }
+
+                this.markup = Cmint.getMarkup(this.stage);
 
                 Cmint.Bus.$emit('renderUsernameLink', this.username);
 
