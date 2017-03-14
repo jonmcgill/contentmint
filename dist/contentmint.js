@@ -53,7 +53,8 @@ var Cmint = Cmint || (function() {
             },
             Menus: {},
             Templates: {},
-            Toolbar: []
+            Toolbar: [],
+            Options: {}
         },
 
         // API that manages interaction between DOM and Vue instance data.
@@ -2531,7 +2532,8 @@ Cmint.AppFn.save = function() {
             username: Cmint.App.username,
             saved: Cmint.App.saved,
             customComponents: Cmint.App.customComponents,
-            markup: Cmint.App.markup
+            markup: Cmint.App.markup,
+            options: Cmint.Instance.Options
         })
 
         Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');
@@ -2730,6 +2732,7 @@ Cmint.Init = function() {
                 this.markup = Cmint.getMarkup(this.stage);
 
                 Cmint.Bus.$emit('renderUsernameLink', this.username);
+                Cmint.Instance.Options = Cmint.Instance.Data.options;
 
                 setTimeout(function() {
                     Cmint.Drag.fn.updateContainers();

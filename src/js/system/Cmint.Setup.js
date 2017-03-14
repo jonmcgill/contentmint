@@ -53,7 +53,8 @@ var Cmint = Cmint || (function() {
             },
             Menus: {},
             Templates: {},
-            Toolbar: []
+            Toolbar: [],
+            Options: {}
         },
 
         // API that manages interaction between DOM and Vue instance data.

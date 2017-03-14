@@ -15,7 +15,8 @@ Cmint.AppFn.save = function() {
             username: Cmint.App.username,
             saved: Cmint.App.saved,
             customComponents: Cmint.App.customComponents,
-            markup: Cmint.App.markup
+            markup: Cmint.App.markup,
+            options: Cmint.Instance.Options
         })
 
         Cmint.AppFn.notify('Saved "'+Cmint.App.contentName+'"');

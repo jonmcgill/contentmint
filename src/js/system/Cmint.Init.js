@@ -84,6 +84,7 @@ Cmint.Init = function() {
                 this.markup = Cmint.getMarkup(this.stage);
 
                 Cmint.Bus.$emit('renderUsernameLink', this.username);
+                Cmint.Instance.Options = Cmint.Instance.Data.options;
 
                 setTimeout(function() {
                     Cmint.Drag.fn.updateContainers();
