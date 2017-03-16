@@ -11,7 +11,7 @@ function p(path) {
 }
 
 var js_files = [
-    
+
     p('system/Cmint.Setup'),
     p('system/Cmint.Settings'),
     p('system/Bus/Bus.setup'),
@@ -25,7 +25,7 @@ var js_files = [
     p('system/Sync/Sync.insertVmContextData'),
     p('system/Sync/Sync.rearrangeVmContextData'),
     p('system/Sync/Sync.removeVmContextData'),
-    
+
     p('system/Api/*'),
 
     p('components/meta/meta.comp'),
@@ -45,7 +45,7 @@ var js_files = [
     p('system/Ui/*'),
     p('system/Fields/*'),
     p('system/Hooks/*'),
-    
+
     p('components/fields/fields.text'),
     p('components/fields/fields.dropdown'),
     p('components/fields/fields.group'),
@@ -58,7 +58,7 @@ var js_files = [
     p('system/Drag/Drag.onDrop'),
     p('system/Drag/Drag.onRemove'),
     p('system/Drag/Drag.init'),
-    
+
     p('system/AppFn/*'),
     p('system/Cmint.Init')
 
@@ -88,22 +88,22 @@ gulp.task('build', ['build-example'], function() {
     gulp.src(js_files)
         .pipe(concat('contentmint.js'))
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
         .pipe(uglify())
         .pipe(rename('contentmint.min.js'))
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
 })
 
 gulp.task('build-vendor', function() {
     gulp.src(js_vendor)
         .pipe(concat('contentmint.vendor.js'))
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
         .pipe(uglify())
         .pipe(rename('contentmint.vendor.min.js'))
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
 })
 
 gulp.task('bundle', ['build'], function() {
@@ -112,7 +112,7 @@ gulp.task('bundle', ['build'], function() {
         .pipe(uglify())
         .pipe(rename('contentmint.bundle.min.js'))
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
 })
 
 gulp.task('sass', function() {
@@ -120,7 +120,7 @@ gulp.task('sass', function() {
         .pipe(plumber())
         .pipe(sass())
         .pipe(gulp.dest('dist/'))
-        .pipe(gulp.dest('dist/basic'))
+        .pipe(gulp.dest('dist/basic/contentmint/core/'))
 })
 
 gulp.task('dev', ['bundle'], function() {

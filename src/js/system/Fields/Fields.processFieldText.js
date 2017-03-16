@@ -19,7 +19,7 @@ Cmint.Fields.processFieldText = function(instance) {
     // run user-defined field processes
     if (instance.field.processes) {
         instance.field.processes.forEach(function(fn) {
-            input = Cmint.Instance.Fields.Processes[fn](input);
+            input = Cmint.Instance.Fields.Processes[fn](input, component, instance.field);
             Cmint.Util.debug('ran "'+fn+'" field process')
         })
     }

@@ -2,8 +2,8 @@
 <html>
 <head>
 <title>Example Editor</title>
-<link rel="stylesheet" type="text/css" href="/dist/basic/contentmint.styles.css">
-<link rel="stylesheet" type="text/css" href="/dist/basic/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="/dist/basic/contentmint/core/contentmint.styles.css">
+<link rel="stylesheet" type="text/css" href="/dist/basic/contentmint/core/font-awesome/css/font-awesome.min.css">
 <link rel="stylesheet" type="text/css" href="/example/example-editor.css">
 </head>
 <body>
@@ -14,7 +14,7 @@ TODO
       kinds of components. Some components you don't want the user to add bulleted lists, etc.
 
     * App saves every time the fields 'done' button is clicked regardless of whether or not
-      anything has changed. 
+      anything has changed.
 
     - Users don't know when a dragged component can be dropped into stage (i.e. they don't
       know to wait for the mirror image to pop up). There may need to be some prompt added in.
@@ -30,11 +30,11 @@ TODO
  -->
 
 
- <!-- 
+ <!--
     This is the data populated by whatever backend processes you choose. The
     path for the template markup should be defined in Cmint.createTemplate. Also,
     customComponents here should only be custom components created for this
-    particular template. That is something that will need to be managed on the 
+    particular template. That is something that will need to be managed on the
     back end. When the saved data is sent up to the server there will need to be
     some mechanism that stores that array in association with that template. This
     is because we don't want to load the custom components saved for every possible
@@ -42,7 +42,7 @@ TODO
     is not saved in the data.
 -->
 <textarea style="display: none" id="Data">
- 
+
 </textarea>
 <script type="text/javascript">
     var dummy = '{\
@@ -65,16 +65,16 @@ TODO
     <actionbar></actionbar>
     <custom></custom>
     <div class="cmint-notification"></div>
-    <content-template 
-        :fields-component="fieldsComponent" 
+    <content-template
+        :fields-component="fieldsComponent"
         :template="templateMarkup"
         :stage="stage"></content-template>
 </div>
 
 <!-- Contentmint Dependencies -->
-<script src="/dist/basic/contentmint.tinymce.min.js"></script>
-<script src="/dist/basic/contentmint.vendor.min.js"></script>
-<script src="/dist/basic/contentmint.min.js"></script>
+<script src="/dist/basic/contentmint/core/contentmint.tinymce.min.js"></script>
+<script src="/dist/basic/contentmint/core/contentmint.vendor.min.js"></script>
+<script src="/dist/basic/contentmint/core/contentmint.min.js"></script>
 
 <!-- Implementation code -->
 <script src="/example/build/example-app.js"></script>

@@ -1673,7 +1673,7 @@ Cmint.Fields.processFieldText = function(instance) {
     // run user-defined field processes
     if (instance.field.processes) {
         instance.field.processes.forEach(function(fn) {
-            input = Cmint.Instance.Fields.Processes[fn](input);
+            input = Cmint.Instance.Fields.Processes[fn](input, component, instance.field);
             Cmint.Util.debug('ran "'+fn+'" field process')
         })
     }
@@ -1912,7 +1912,7 @@ Vue.component('field-group', {
                 _processes = Cmint.Instance.Fields.Processes;
             if (_this.field.processes) {
                 _this.field.processes.forEach(function(fn) {
-                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config);
+                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config, this.field);
                 })
             } else {
                 console.error('Field groups must have associated processes');

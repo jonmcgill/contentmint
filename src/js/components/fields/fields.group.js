@@ -32,7 +32,7 @@ Vue.component('field-group', {
                 _processes = Cmint.Instance.Fields.Processes;
             if (_this.field.processes) {
                 _this.field.processes.forEach(function(fn) {
-                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config);
+                    output = _processes[fn](_this.field.inputs, Cmint.Fields.UIDS[compUid].config, this.field);
                 })
             } else {
                 console.error('Field groups must have associated processes');

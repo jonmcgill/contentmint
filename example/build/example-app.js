@@ -196,6 +196,18 @@ Cmint.createField({
         help: 'Any valid CSS color value'
     }
 })
+// type, display, label, input, help*, check*, processes*
+Cmint.createField({
+    name: 'img-proportions',
+    config: {
+        type: 'field-text',
+        display: 'Image Width',
+        label: 'Image Width',
+        input: 'imgwidth',
+        help: 'Number of pixels (full width = 550)',
+        processes: ['img-proportions']
+    }
+})
 Cmint.createField({
     name: 'max-width',
     config: {
@@ -252,6 +264,27 @@ Cmint.createEditorPostProcess(function(e) {
     })
 })
 // field-group takes all inputs and the component instance
+Cmint.createFieldProcess('img-proportions', function(input, component, field) {
+    setTimeout(function() {
+        $(component.$el).find('img').each(function() {
+            var $this = $(this);
+            var w = this.naturalWidth;
+            var h = this.naturalHeight;
+            var ratio;
+
+            ratio = (w - input) / w;
+            h = Math.round(h - (h * ratio));
+            w = input;
+
+            component.config.fields.output.width = w;
+            component.config.fields.output.height = h;
+
+        })
+    }, 800)
+
+    return input;
+})
+// field-group takes all inputs and the component instance
 Cmint.createFieldProcess('mailto', function(inputs, component) {
     var output = 'mailto:';
     output += Cmint.Fields.tokenize(inputs.to.value, component) + '?';
@@ -260,7 +293,7 @@ Cmint.createFieldProcess('mailto', function(inputs, component) {
     function encode(val) { return encodeURIComponent(val); }
     return output;
 })
-Cmint.createComponentHook('img-size', 'Global', {
+Cmint.createComponentHook('img-size', 'Local', {
     
     editing: function(element, config) {
 
@@ -335,11 +368,21 @@ Cmint.createComponentHook('vertical-space', 'Local', {
 })
 Cmint.createComponent({
     template: '\
-        <comp :config="config">\
-            <a v-if="config.fields.output.link" :href="config.fields.output.link" target="_blank" style="display:block">\
-                <img :src="config.fields.output.source" :style="config.css" />\
+        <comp :config="config" style="text-align:center;">\
+            <a v-if="config.fields.output.link"\
+               :href="config.fields.output.link"\
+               target="_blank"\
+               style="display:block">\
+                <img :src="config.fields.output.source"\
+                     :style="config.css"\
+                     :width="config.fields.output.width"\
+                     :height="config.fields.output.height" />\
             </a>\
-            <img v-else :src="config.fields.output.source" :style="config.css" />\
+            <img v-else\
+                 :src="config.fields.output.source"\
+                 :style="config.css"\
+                 :width="config.fields.output.width"\
+                 :height="config.fields.output.height" />\
             <br><br>\
         </comp>',
     config: {
@@ -347,26 +390,23 @@ Cmint.createComponent({
         display: 'Banner Image',
         category: 'Images',
         css: {
-            'display': 'block'
+            'display': 'inline-block'
         },
-        tags: {
-            image: 'img',
-            link: 'a'
-        },
-        tokens: [
-            { 'url': 'link' },
-            { 'source': 'source' }
-        ],
         fields: {
             output: {
                 source: 'http://placehold.it/550x200',
-                link: ''
+                link: '',
+                dud: '100%',
+                width: '100%',
+                height: 'auto'
             },
             list: [
                 {   name: 'link-choice',
                     result: 'link'      },
                 {   name: 'image-presets',
-                    result: 'source'    }
+                    result: 'source'    },
+                {   name: 'img-proportions',
+                    result: 'dud'     }
             ]
         }
     }

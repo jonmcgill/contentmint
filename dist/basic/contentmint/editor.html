@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Example Editor</title>
+<!-- This file is meant to explain the basic structure of the editor, how it takes
+     in data, how it is populated with templates and components, and how it sends
+     data back up the wire. You can use this file to create your own editor instance.
+-->
+<link rel="stylesheet" type="text/css" href="/contentmint/core/contentmint.styles.css">
+<link rel="stylesheet" type="text/css" href="/contentmint/core/font-awesome/css/font-awesome.min.css">
+</head>
+<body>
+<!--
+    This textarea is your data's point of entry. Contentmint takes in a json object with the
+    structure you see below. To send new data back up the wire when the editor saves, you'll
+    use Cmint.createOnSaveHook which takes a function with the data as its only parameter.
+    See the example implementation scripts below.
+-->
+<textarea style="display: none" id="Data">
+    {
+        "template": "example-template",
+        "machineName": "example-template",
+        "contentName": "Example Content",
+        "username": "foouser",
+        "saved": [],
+        "customComponents": [],
+        "markup": "",
+        "options": {}
+    }
+</textarea>
+<div id="App" v-cloak>
+    <toolbar :changes="changes" :user="username" :name="contentName"></toolbar>
+    <sidebar :components="components" class="cmint"></sidebar>
+    <overlay></overlay>
+    <fields v-if="fieldsComponent" :component="fieldsComponent" :mountonly="fieldsMountOnly"></fields>
+    <actionbar></actionbar>
+    <custom></custom>
+    <div class="cmint-notification"></div>
+    <content-template
+        :fields-component="fieldsComponent"
+        :template="templateMarkup"
+        :stage="stage"></content-template>
+</div>
+
+<!-- Contentmint Core bundled -->
+<script src="/contentmint/core/contentmint.tinymce.min.js"></script>
+<script src="/contentmint/core/contentmint.bundle.min.js"></script>
+
+<!-- You can call the individual files if you'd like
+<script src="/contentmint/core/contentmint.vendor.min.js"></script>
+<script src="/contentmint/core/contentmint.min.js"></script> -->
+
+<!-- Implementation code -->
+<!-- <script src="/path/to/your-code.js"></script>
+    The below is just an example. You'll want to separate your code into smaller modules
+    like you see in the example/ folder.
+-->
+<script>
+
+    // This function registers a template with Contentmint. The first parameter is the name
+    // of the template which maps to your incoming data's 'template' option.
+    // The config object takes path (string path to your template markup) and components
+    // (an array of component names to use in that template)
+    Cmint.createTemplate('example-template', {
+        path: '/contentmint/templates/example-template.html',
+        components: ['main-heading']
+    })
+
+    // Cmint.createComponent registers a component with Contentmint. You will need to know
+    // the basics of Vue templating to create components but certainly not every feature. The first
+    // and most important thing to know is that every component you create must be wrapped with
+    // <comp :config="config"  ...  </comp>. The <comp> component is a meta component which handles
+    // all component logic and editor features. You can attach as many attributes as you want to <comp>
+    // but it must, at the very least, bind the config object to the config prop.
+    //
+    // <comp> defaults to a <div> tag but you can overwrite this by using the tags.root option in
+    // the config (see below)
+    //
+    // In this example, you'll also see we've attached the data attribute data-edit="text" to the
+    // component. This attribute tells <comp> that the content of the tag will be editable with
+    // TinyMCE. The value of the attribute maps to the config.content option.
+    //
+    // There are more options you can pass to config, but the required options are
+    // name, display, and category. The name must be unique among the components.
+    Cmint.createComponent({
+        template: '<comp :config="config" data-edit="text"></comp>',
+        config: {
+            name: 'main-heading',
+            display: 'Main Heading',
+            category: 'Content',
+            tags: { root: 'h1' },
+            content: {
+                text: '<div>Lorem Ipsum Heading</div>'
+            }
+        }
+    })
+
+    // Contentmint will run Cmint.App.save after each editor update. An editor update is any update
+    // that triggers a snapshot of the current data and can be undone with the 'undo' button. This
+    // essentially means any modification to the stage or the components in the stage. TinyMCE changes
+    // will only trigger an update when you blur out of the editor instance. For content changes in
+    // tinymce editors your users should just use tinymce's undo feature (Ctrl+z).
+    //
+    // The way you hook into Cmint.App.save is by adding an on-save hook using Cmint.createOnSaveHook.
+    // This method takes a function which takes the data snapshot as its only parameter. In this example,
+    // we're just logging the data object to the console.
+    Cmint.createOnSaveHook(function(data) {
+        console.log(data);
+    })
+
+</script>
+
+<!-- Contentmint init -->
+<script type="text/javascript">
+// All of your instance configuration should be run prior to running Cmint.Init(). This function
+// will grab the data in the #Data textarea, parse it, use an ajax call to grab the template markup,
+// and initiate the main Vue app component.
+Cmint.Init();
+</script>

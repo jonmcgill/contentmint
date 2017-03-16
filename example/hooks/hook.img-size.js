@@ -1,4 +1,4 @@
-Cmint.createComponentHook('img-size', 'Global', {
+Cmint.createComponentHook('img-size', 'Local', {
     
     editing: function(element, config) {
 
