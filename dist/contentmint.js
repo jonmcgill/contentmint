@@ -1371,7 +1371,7 @@ Cmint.Editor.init = function(component) {
             stash = editor.getContent();
             editor.on('PostProcess', function(e) {
                 Cmint.Instance.Editor.PostProcesses.forEach(function(fn) {
-                    fn(e);
+                    fn(e, component);
                 })
             })
         }
