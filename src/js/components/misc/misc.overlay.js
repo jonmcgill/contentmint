@@ -7,6 +7,9 @@ Vue.component('overlay', {
     mounted: function() {
         var _this = this;
         var $el = $(this.$el);
+        $el.click(function() {
+            Cmint.Bus.$emit('overlayClick')
+        })
         Cmint.Bus.$on('toggleOverlay', function(show) {
             if (show) {
                 $el.addClass('active');

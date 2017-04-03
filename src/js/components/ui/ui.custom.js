@@ -78,6 +78,10 @@ Vue.component('custom', {
             _this.category = '';
         })
 
+        Cmint.Bus.$on('overlayClick', function() {
+            _this.closeCustom();
+        })
+
     }
 
 })

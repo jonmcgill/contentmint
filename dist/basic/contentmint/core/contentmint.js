@@ -1138,6 +1138,10 @@ Vue.component('custom', {
             _this.category = '';
         })
 
+        Cmint.Bus.$on('overlayClick', function() {
+            _this.closeCustom();
+        })
+
     }
 
 })
@@ -1318,6 +1322,9 @@ Vue.component('overlay', {
     mounted: function() {
         var _this = this;
         var $el = $(this.$el);
+        $el.click(function() {
+            Cmint.Bus.$emit('overlayClick')
+        })
         Cmint.Bus.$on('toggleOverlay', function(show) {
             if (show) {
                 $el.addClass('active');
@@ -2116,20 +2123,24 @@ Vue.component('fields', {
             setTimeout(function() {
                 _this.isActive = false;
                 // Cmint.Bus.$emit('closeFieldWidget');
-                Cmint.Bus.$emit('toggleOverlay', false);
+                Cmint.Bus.$emit('toggleOverlay', false)
                 setTimeout(function() {
                     Cmint.App.fieldsComponent = null;
-                    Vue.nextTick(Cmint.App.snapshot);
+                    Vue.nextTick(Cmint.App.snapshot)
                     Cmint.App.save();
                 },200)
-                Cmint.Util.debug('closed field wiget');
+                Cmint.Util.debug('closed field wiget')
             },50);
             
         }
     },
     mounted: function() {
+        var _this = this;
         if (!this.mountonly) {
             this.open();
+            Cmint.Bus.$on('overlayClick', function() {
+                _this.close();
+            })
             Cmint.Util.debug('opened fields for "' + this.component.name + '"');
         } else {
             Cmint.Util.debug('only mounting field component "'+this.component.name+'"')
