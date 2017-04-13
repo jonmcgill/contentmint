@@ -346,9 +346,66 @@ Cmint.createField({
 __field-choice__  
 Let's say you have an image wrapped in an anchor tag and you want the user to be able to set the `href` attribute. However, the user could make that a normal URL (field-text) or a more complicated email link (field-group). This is when you'd want to use a field-choice field. This is simply a dropdown which toggles between different field options.
 
+To create a field-choice, simply create a normal field and then add the `choices` property with a list of fields you have already created.
+```javascript
+Cmint.createField({
+    name: 'link-choice',
+    config: {
+        type: 'field-choice',
+        display: 'Link Type',
+        label: 'Link Type',
+        choices: [
+            { name: 'link-url' },
+            { name: 'link-mailto' }
+        ]
+    }
+})
+```
+
 ### Field Processes
 
+You've already seen field processes being assigned to field groups, but in reality field processes can be assigned to any field. The field system takes every input from the user and passes it through a series of processes before the transformed value is stored in the component's data structure. You can tie into that by creating a field process of your own and assigning it a component with the `processes` property.
+```javascript
+// Creating a field process
+Cmint.createFieldProcess('example-field-process', function(input, component, field) {
+    return $(component.$el)
+        .find(input)
+        .text()
+        .replace('foo', field.name);
+})
+```
+The `input` is whatever value the user typed or selected in the field. The `component` is the Vue virtual model of that component. You can take a look at [Vue-specific instance properties](https://vuejs.org/v2/api/#Instance-Properties) or console log the component data to see them in the browser. Finally, `field` is the data for that particular field instance.
+
 ### Adding Tokens
+
+Contentmint's field system also supports the use of tokens. If you want a field's input to dynamically include content from a different area in the component, you can create component-specific tokens like this:
+```javascript
+Cmint.createComponent({
+    template: '\
+        <comp :config="config" title="config.fields.output.title">\
+            <h2 data-edit="heading"></h2>\
+        </comp>',
+    config: {
+        name: 'example-tokens',
+        display: 'Example Tokens',
+        category: 'Examples',
+        content: {
+            heading: 'Default Heading Text'
+        },
+        fields: {
+            output: { title: '' },
+            list: [{ name: 'plain-text', result: 'title' }]
+        },
+        tokens: [
+            { 'title': 'heading' }
+        ]
+    }
+})
+```
+
+The first token in the `tokens` array is 'title' which references `config.content.heading`. Note, the token system will run a series of checks to find the corrent value to input. First it checks through `content` properties. If no matches are found it moves on to `fields.output` and finally to the individual `input` properties of each field (defined during field creation, not on the component).
+
+When the gear icon is clicked in the component action bar, the field modal will display a list of defined tokens. The user can then call that token by writing `{{ token-name }}` in the field they wish to pull data into. In the example above, the user would link the `title` attribute to the content of the heading by writing `{{ title }}` into the plain-text field input.
 
 ### Custom Toolbar Buttons
 
